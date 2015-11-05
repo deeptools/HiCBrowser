@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>Drosophila melanogaster chorogenome</title>
+        <meta charset="utf-8">
+        <link rel="icon" type="image/png" href="/static/img/logo.png" />
+        <meta name="description" content="">
+        <link rel="stylesheet" href="/static/css/screen.css">
+        <link rel="stylesheet" href="/static/css/owl.carousel.min.css">
+        <link rel="stylesheet" href="/static/css/owl.theme.default.min.css">
+
+    </head>
+<body class="theme-dark">
+    <script type=text/javascript src="/static/js/jquery-1.11.3.min.js"></script>
+    <script type=text/javascript src="/static/js/owl.carousel.js"></script>
+    <form method="get" action="" style="float:left">
+        <div id="container">
+            <div id="sidebar">
+
+                <h1 id="logo">
+                    <div style="text-align:center"><img src="/static/img/logo.png"></div>
+                    The Chorogenome of <i>Drosophila melanogaster</i>
+                </h1>
+
+                <p class="instructions text-center">
+                    <small>Select the region that you want to see</small>
+                </p>
+
+                <!--div id="cleanup-mode" class="clearfix">
+                    <div class="btn-group">
+                        <button class="btn btn-default" type="button" data-mode="html">HTML</button>
+                        <button class="btn btn-primary" type="button" data-mode="css">CSS</button>
+                        <button class="btn btn-primary" type="button" data-mode="css">CSS</button>
+                        <button class="btn btn-default" type="button" data-mode="javascript">JS</button>
+                    </div>
+                </div-->
+                <div>
+                    <label class="control-label" for="chromosome">Chromosome</label><br/>
+                    <input type="text" name="chromosome" value="{{chromosome}}"/>
+                </div>
+                <div>
+                    <label class="control-label" for="start">Start</label><br/>
+                    <input type="text" name="start" value="{{start}}"/>
+                </div>
+                <div>
+                    <label class="control-label" for="end">End</label><br/>
+                    <input type="text" name="end" value="{{end}}"/>
+                </div>
+
+
+                <div class="form-group" id="clean">
+                    <button class="btn btn-lg btn-block btn-primary" type="submit">View</button>
+                </div>
+
+                <div><h4><a href="?chromosome=chr2L&start=3000000&end=4000000">Example</a></h4></div>
+
+            </div>
+
+            <!-- MAIN PANEL -->
+            <div id="browser">
+
+    <div class="owl-carousel owl-theme">
+        <div class="item" style="width:100%"><img src="{{figure_path}}" width="1500px"></div>
+    </div>
+    <div class="">
+        <a href class="add">Add item</a>
+
+    </div>
+            </div>
+            <div id="footer">
+                <div id="sponsor">
+                    <a href="http://www.ie-freiburg.mpg.de" target="_blank">
+                        <img src="/static/img/minerva.png" alt="Max Planck Society" width="20">
+                    </a>
+                    <br />
+                    <a href="http://mpg.de/" target="_blank">
+                        <img src="/static/img/ie_logo.png" alt="Max Planck Institute for Immunobiology and Epigenetics"></a>
+                </div>
+                Made by <a href="" target="_blank">Fidel Ramírez</a>
+            </div>
+            <div id="spinner"></div>
+        </div>
+    </form>
+    <script>
+    function getUrlVars()
+    {
+        var vars = [], hash;
+        var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+        for(var i = 0; i < hashes.length; i++)
+        {
+            hash = hashes[i].split('=');
+            vars.push(hash[0]);
+            vars[hash[0]] = hash[1];
+        }
+        return vars;
+    }
+    $(document).ready(function() {
+
+      var owl = $(".owl-carousel"),
+          i = 0,
+          textholder,
+          booleanValue = false;
+
+      //init carousel
+      owl.owlCarousel({
+      items:2,
+      center:true,
+      startPosition: 'URLHash',
+      loop:false,
+      URLhashListener:true,
+      autoWidth:false,
+      animateIn:true,
+      });
+
+        $('.add').on("click", function(e){
+        e.preventDefault();
+        i += 1;
+        var chrom = getUrlVars()["chromosome"]
+        var start = parseInt(getUrlVars()["start"])
+        var end = parseInt(getUrlVars()["end"])
+        var new_end = end + end - start
+        start = end
+        var content = "<div class=\"item\"><img src=\"get_image?chromosome="+chrom+"&start="+start+"&end="+new_end+"\" width=\"1500px\"></div>";
+        var newUrl = location.href.replace("start="+start, "end="+new_end);
+        history.pushState('data', '', newUrl);
+        owl.trigger('add.owl.carousel', content);
+        owl.trigger('next.owl.carousel');
+      });
+
+    })
+    </script>
+
+</body></html>
