@@ -65,7 +65,7 @@ setup(
     author='Fidel Ramirez',
     author_email='ramirez@ie-freiburg.mpg.de',
     packages=['hicbrowser'],
-    scripts=['bin/runserver.py']
+    scripts=['bin/runserver.py'],
     include_package_data=True,
     license='LICENSE',
     description='Simple web browser to visualize Hi-C and other genomid data.',
