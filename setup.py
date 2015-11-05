@@ -74,5 +74,5 @@ setup(
         "Flask==0.10.1",
         "HiCExplorer"
     ],
-    cmdclass={'sdist': sdist, 'install': install}
+    cmdclass={'sdist': sdist}
 )
