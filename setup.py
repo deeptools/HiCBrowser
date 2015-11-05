@@ -26,22 +26,22 @@ def update_version_py():
                               "--tags", "--always"],
                              stdout=subprocess.PIPE)
     except EnvironmentError:
-        print "unable to run git, leaving hicexplorer/_version.py alone"
+        print "unable to run git, leaving hicbrowser/_version.py alone"
         return
     stdout = p.communicate()[0]
     if p.returncode != 0:
-        print "unable to run git, leaving hicexplorer/_version.py alone"
+        print "unable to run git, leaving hicbrowser/_version.py alone"
         return
     ver = stdout.strip()
-    f = open("hicexplorer/_version.py", "w")
+    f = open("hicbrowser/_version.py", "w")
     f.write(VERSION_PY % ver)
     f.close()
-    print "set hicexplorer/_version.py to '%s'" % ver
+    print "set hicbrowser/_version.py to '%s'" % ver
 
 
 def get_version():
     try:
-        f = open("hicexplorer/_version.py")
+        f = open("hicbrowser/_version.py")
     except EnvironmentError:
         return None
     for line in f.readlines():
@@ -69,10 +69,10 @@ setup(
     include_package_data=True,
     license='LICENSE',
     description='Simple web browser to visualize Hi-C and other genomid data.',
-    #long_description=open('README.rst').read(),
+    long_description=open('README.md').read(),
     install_requires=[
         "Flask==0.10.1",
-        "HiCExplorer"
+        "hicbrowser"
     ],
     cmdclass={'sdist': sdist}
 )
