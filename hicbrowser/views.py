@@ -3,9 +3,13 @@ from flask import render_template, request, send_file
 
 from os.path import basename, exists
 
-import hicexplorer.hicPlotTADs
+import hicexplorer.trackPlot
+track_file = "/data/manke/group/ramirez/tools/HiCBrowser/tracks.ini"
 
-img_root = "/data/manke/group/ramirez/tools/HiCBrowser/HiCBrowser/static/tmp"
+trp = hicexplorer.trackPlot.PlotTracks(track_file, fig_width=60, dpi=70)
+
+img_root = "/data/manke/group/ramirez/tools/HiCBrowser/hicbrowser/static/tmp"
+
 @app.route('/', methods=['GET'])
 def index():
     try:
@@ -20,11 +24,7 @@ def index():
                                            start,
                                            end)
         if not exists(outfile):
-            cmd_args = "--tracks /data/manke/group/ramirez/tools/HiCBrowser/tracks.ini " \
-                       "--region {}:{}-{} -o {}".format(chromosome, start, end, outfile)
-
-            print cmd_args
-            hicexplorer.hicPlotTADs.main(args=cmd_args.split(" "))
+            trp.plot(outfile, chromosome, start, end, title="{}:{}-{}".format(chromosome, start, end))
 
         figure_path = "/static/tmp/{}".format(basename(outfile))
         print figure_path
@@ -51,11 +51,7 @@ def get_image():
                                        start,
                                        end)
     if not exists(outfile):
-        cmd_args = "--tracks /data/manke/group/ramirez/tools/HiCBrowser/tracks.ini " \
-                   "--region {}:{}-{} -o {}".format(chromosome, start, end, outfile)
-
-        print cmd_args
-        hicexplorer.hicPlotTADs.main(args=cmd_args.split(" "))
+        trp.plot(outfile, chromosome, start, end)
 
     return send_file(outfile, mimetype='image/png')
 
