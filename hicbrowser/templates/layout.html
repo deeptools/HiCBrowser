@@ -35,7 +35,12 @@
                         <button class="btn btn-default" type="button" data-mode="javascript">JS</button>
                     </div>
                 </div-->
-                <div>
+               <div>
+                    <label class="control-label" for="region">region to plot</label><br/>
+                    <input type="text" name="region" value="{{region}}" size="30"/>
+                </div>
+
+                <!--div>
                     <label class="control-label" for="chromosome">Chromosome</label><br/>
                     <input type="text" name="chromosome" value="{{chromosome}}"/>
                 </div>
@@ -51,9 +56,9 @@
 
                 <div class="form-group" id="clean">
                     <button class="btn btn-lg btn-block btn-primary" type="submit">View</button>
-                </div>
+                </div-->
 
-                <div><h4><a href="?chromosome=chr2L&start=3000000&end=4000000">Example</a></h4></div>
+                <div><h4><a href="?region=chr2L:3000000-4000000">Example</a></h4></div>
 
             </div>
 
