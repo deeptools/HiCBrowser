@@ -5792,7 +5792,7 @@ hr {
   color: #333333
 }
 #sidebar {
-  position: fixed;
+  position: absolute;
   top: 0;
   bottom: 0;
   left: 0;
@@ -5810,14 +5810,14 @@ hr {
 #  float: left;
 }
 #browser {
-  position: fixed;
+  position: absolute;
   top: 0;
   bottom: 0;
   left: 330px;
   #width: 300px;
   overflow: scroll;
-  width: 100%;
-#  float: left
+  width: 80%;
+  float: left
 }
 #container {
     width: 100%;

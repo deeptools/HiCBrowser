@@ -1,8 +1,8 @@
 
-from hicbrowser import app
+from hicbrowser import views
 import sys
 if len(sys.argv) > 1:
-    port = sys.argv[2]
+    port = int(sys.argv[2])
 else:
     port = None
-app.run(host='0.0.0.0', debug=False, port=port)
+views.app.run(host='0.0.0.0', debug=True, port=port, processes=3)
