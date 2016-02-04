@@ -70,7 +70,6 @@ with open(genes, 'r') as fh:
         gene2pos[name.lower()] = (chrom, start, end)
 
 
-
 def get_TAD_for_gene(gene_name):
     """
     Returs the TAD position of a given gene name
@@ -87,6 +86,7 @@ def get_TAD_for_gene(gene_name):
         return chrom, tad_pos.start, tad_pos.end
     else:
         return None
+
 
 def get_region(region_string):
     """
@@ -116,6 +116,7 @@ def get_region(region_string):
                  "Values given:\nstart: {}\nend: {}\n".format(region_start, region_end))
 
         return chrom, region_start, region_end
+
 
 def snap_to_resolution(start, end):
     """
@@ -149,6 +150,7 @@ def snap_to_resolution(start, end):
 
     return start, end, current_resolution
 
+
 @app.route('/', methods=['GET'])
 def index():
     gene_name = request.args.get('search', None)
@@ -171,6 +173,7 @@ def index():
 
     return render_template("index.html")
 
+
 @app.route('/browser', methods=['GET'])
 def browser():
     html_div = '<div class="item">{}</div>'
@@ -190,7 +193,7 @@ def browser():
                 start -= 50000
                 end += 50000
 
-        start, end, resolution  = snap_to_resolution(start, end)
+        start, end, resolution = snap_to_resolution(start, end)
 
         # split the interval into three parts
         split_range_length = (end - start) / 3
@@ -247,7 +250,6 @@ def browser():
                            step=step, content=content, start=start, end=end)
 
 
-
 @app.route('/get_image', methods=['GET'])
 def get_image():
     query = request.args.get('region', None)
@@ -268,7 +270,6 @@ def get_image():
                                               id)
         if not exists(outfile):
             trp_list[id].plot(outfile, chromosome, start, end)
-
 
         return send_file(os.getcwd() + "/" + outfile, mimetype='image/png')
 

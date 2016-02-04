@@ -3,6 +3,7 @@ import tempfile
 from collections import OrderedDict
 import re
 
+
 class MultiDict(OrderedDict):
     """
     Class to allow identically named
@@ -19,6 +20,7 @@ class MultiDict(OrderedDict):
             key = "{}. [{}]".format(str(self._unique), key)
         OrderedDict.__setitem__(self, key, val)
 
+
 def parse_tracks(tracks_file):
     """
     Parses a configuration file and writes each section into its own
@@ -32,7 +34,7 @@ def parse_tracks(tracks_file):
     parser.readfp(open(tracks_file, 'r'))
     p = re.compile('\[.+\]')
 
-    vlines  = None
+    vlines = None
     # check for vlines:
     for section_name in parser.sections():
         for name, value in parser.items(section_name):
@@ -46,7 +48,7 @@ def parse_tracks(tracks_file):
     tracks_names = []
     for section_name in parser.sections():
         _temp = tempfile.NamedTemporaryFile(delete=False, prefix='conf_', suffix=".ini")
-        s_name =  p.findall(section_name)[0]
+        s_name = p.findall(section_name)[0]
         _temp.write("{}\n".format(s_name))
         for name, value in parser.items(section_name):
             _temp.write("{}={}\n".format(name, value))
