@@ -60,14 +60,14 @@ with open(genes, 'r') as fh:
     for line in fh.readlines():
         if line.startswith('browser') or line.startswith('track') or line.startswith('#'):
             continue
-        chrom, start, end, name = line.strip().split("\t")[0:4]
+        gene_chrom, gene_start, gene_end, gene_name = line.strip().split("\t")[0:4]
         try:
-            start = int(start)
-            end = int(end)
+            gene_start = int(gene_start)
+            gene_end = int(gene_end)
         except ValueError:
             sys.stderr.write("Problem with line {}".format(line))
             pass
-        gene2pos[name.lower()] = (chrom, start, end)
+        gene2pos[gene_name.lower()] = (gene_chrom, gene_start, gene_end)
 
 
 def get_TAD_for_gene(gene_name):
@@ -80,10 +80,10 @@ def get_TAD_for_gene(gene_name):
     gene_name = gene_name.strip().lower()
     if gene_name in gene2pos:
         # get gene position
-        chrom, start, end = gene2pos[gene_name]
-        tad_pos = tads_intval_tree[chrom].find(start, end)[0]
+        chrom_, start_, end_ = gene2pos[gene_name]
+        tad_pos = tads_intval_tree[chrom_].find(start_, end_)[0]
 
-        return chrom, tad_pos.start, tad_pos.end
+        return chrom_, tad_pos.start, tad_pos.end
     else:
         return None
 
@@ -129,7 +129,7 @@ def snap_to_resolution(start, end):
 
     assert end > start, "end smaller or equal to start"
 
-    resolutions = np.array([10000, 50000, 100000, 500000, 1000000 ])
+    resolutions = np.array([10000, 50000, 100000, 500000, 1000000])
 
     # find the minimun absolute distance to 1/20 of the range (end-start) to
     # the resolution vector. argmin returns the index of the minimun value
@@ -219,8 +219,8 @@ def browser():
         content = content.replace('"', '\\"')
         content = content.replace('|', '"')
         view_range = end - start
-        prev = "?region={}:{}-{}".format(chromosome, start - view_range, end - view_range )
-        next = "?region={}:{}-{}".format(chromosome, start + view_range, end + view_range )
+        prev_query_str = "?region={}:{}-{}".format(chromosome, start - view_range, end - view_range)
+        next_query_str = "?region={}:{}-{}".format(chromosome, start + view_range, end + view_range)
         half_rage = view_range / 2
         center = start + half_rage
         zoom_out = "?region={}:{}-{}".format(chromosome, center - half_rage * 3, center + half_rage * 3)
@@ -237,25 +237,25 @@ def browser():
         region = "{}:{}-{}".format(chromosome, start, end)
     else:
         region = ''
-        prev = None
-        next = None
+        prev_query_str = None
+        next_query_str = None
         zoom_out = None
         content = None
         tracks = html_div.format(html_img.format(figure_path))
         step = None
-        start=start
-        end=end
+        start = start
+        end = end
 
-    return render_template("layout.html", region=region, tracks=tracks, next=next, previous=prev, out=zoom_out,
+    return render_template("layout.html", region=region, tracks=tracks, next=next_query_str, previous=prev_query_str, out=zoom_out,
                            step=step, content=content, start=start, end=end)
 
 
 @app.route('/get_image', methods=['GET'])
 def get_image():
     query = request.args.get('region', None)
-    id = request.args.get('id', None)
+    img_id = request.args.get('id', None)
     try:
-        id = int(id)
+        img_id = int(img_id)
     except ValueError:
         sys.stderr.write('track id not a number')
         return None
@@ -267,9 +267,9 @@ def get_image():
                                               chromosome,
                                               start,
                                               end,
-                                              id)
+                                              img_id)
         if not exists(outfile):
-            trp_list[id].plot(outfile, chromosome, start, end)
+            trp_list[img_id].plot(outfile, chromosome, start, end)
 
         return send_file(os.getcwd() + "/" + outfile, mimetype='image/png')
 
