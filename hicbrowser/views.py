@@ -13,6 +13,9 @@ import hicbrowser.utilities
 from ConfigParser import SafeConfigParser
 
 
+hicexplorer.trackPlot.DEFAULT_WIDTH_RATIOS = (1, 0.00)
+hicexplorer.trackPlot.DEFAULT_MARGINS = {'left': 0, 'right': 1, 'bottom': 0, 'top': 1}
+
 config = SafeConfigParser()
 config.readfp(open(sys.argv[1], 'r'))
 
@@ -24,7 +27,6 @@ else:
 
 if 'debug' in config._sections and config.get('general', 'debug') == 'yes':
     app.debug = True
-
 
 track_file = config.get("browser", "tracks")
 print track_file
@@ -39,6 +41,8 @@ for track in track_file.split(" "):
 img_root = config.get('browser', 'images folder')
 
 # initialize TAD interval tree
+# using the 'TAD intervals' file in the config file
+
 tads_file = config.get('general', 'TAD intervals')
 global tads_intval_tree
 tads_intval_tree, __, __ = hicexplorer.trackPlot.file_to_intervaltree(tads_file)
@@ -81,6 +85,11 @@ def get_TAD_for_gene(gene_name):
     if gene_name in gene2pos:
         # get gene position
         chrom_, start_, end_ = gene2pos[gene_name]
+        if chrom_ not in tads_intval_tree.keys():
+            if chrom_.startswith('chr'):
+                chrom_ = chrom_[3:]
+            else:
+                chrom_ = 'chr' + chrom_
         tad_pos = tads_intval_tree[chrom_].find(start_, end_)[0]
 
         return chrom_, tad_pos.start, tad_pos.end
@@ -188,10 +197,10 @@ def browser():
             end += 50000
         else:
             chromosome, start, end = get_region(query.strip())
-            if end - start < 100000:
+            if end - start < 10000:
                 sys.stderr.write("region to small ({}bp), enlarging it.".format(end-start))
-                start -= 50000
-                end += 50000
+                start -= 5000
+                end += 5000
 
         start, end, resolution = snap_to_resolution(start, end)
 
