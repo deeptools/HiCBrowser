@@ -1,0 +1,35 @@
+{
+  "name": "hicbrowser-web-client",
+  "version": "1.0.0",
+  "description": "A web client for HiCBrowser",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jmvillaveces/HiCBrowser-web-client.git"
+  },
+  "keywords": [
+    "hic",
+    "browser"
+  ],
+  "author": "jose villaveces",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jmvillaveces/HiCBrowser-web-client/issues"
+  },
+  "homepage": "https://github.com/jmvillaveces/HiCBrowser-web-client#readme",
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-browserify": "^5.0.0",
+    "grunt-contrib-jshint": "^1.0.0",
+    "grunt-contrib-stylus": "^1.2.0"
+  },
+  "dependencies": {
+    "bootstrap": "^3.3.6",
+    "grunt-contrib-watch": "^1.0.0",
+    "grunt-processhtml": "^0.3.13",
+    "jquery": "^2.2.2"
+  }
+}
