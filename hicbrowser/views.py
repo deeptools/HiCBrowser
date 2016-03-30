@@ -159,28 +159,36 @@ def snap_to_resolution(start, end):
 
     return start, end, current_resolution
 
-
 @app.route('/', methods=['GET'])
 def index():
-    gene_name = request.args.get('search', None)
-    if gene_name:
-        # see if the gene is known
-        tad_pos = get_TAD_for_gene(gene_name)
-        if tad_pos:
-            chromosome, start, end = tad_pos
-            start -= 50000
-            end += 50000
-            # plot
-            outfile = "{}/{}_{}_{}.png".format(tad_img_root,
+    return render_template("index.html")
+    
+@app.route('/tad', methods = ['GET'])
+def get_tad():
+	res = "{ error: 'Unknown gene' }"
+	gene_name = request.args.get('gene', None)
+	
+	if gene_name:
+		
+		# see if the gene is known
+		tad_pos = get_TAD_for_gene(gene_name)
+		
+		if tad_pos:
+			chromosome, start, end = tad_pos
+			start -= 50000
+			end += 50000
+			
+			# plot
+			outfile = "{}/{}_{}_{}.png".format(tad_img_root,
                                                chromosome,
                                                start,
                                                end)
-            if not exists(outfile):
-                tads.plot(outfile, chromosome, start, end)
-            browser_url = "/browser?region={}:{}-{}".format(chromosome, start, end)
-            return render_template("left-sidebar.html", image=outfile, browser_url=browser_url)
-
-    return render_template("index.html")
+			if not exists(outfile):
+				tads.plot(outfile, chromosome, start, end)
+			
+			res = "{ \"gene\":\"" + gene_name + "\", \"img\":\"" + outfile + "\", \"chromosome\":\"" + chromosome + "\", \"start\":" + str(start) + ", \"end\":" + str(end) + "}"
+			
+	return res
 
 
 @app.route('/browser', methods=['GET'])
