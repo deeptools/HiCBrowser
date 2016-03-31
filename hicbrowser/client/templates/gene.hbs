@@ -1,0 +1,25 @@
+<div class="col-lg-12">
+    
+    {{#if name}}
+        <h1 class="page-header">
+            {{name}}
+            <small> 
+                 chromosome {{chromosome}} (start: {{start}}, end: {{end}})
+            </small>
+        </h1>
+        <a href="/browser?region={{chromosome}}:{{start}}-{{end}}">
+            <img class="img-responsive" src="{{img}}" alt="">
+        </a>
+    {{/if}}
+    
+    {{#if error}}
+        <div style="height:55%">
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                {{error}}
+            </div>
+        </div>
+    {{/if}}
+    <hr>
+</div>
