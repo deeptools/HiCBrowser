@@ -163,10 +163,9 @@ def snap_to_resolution(start, end):
 def index():
     return render_template("index.html")
     
-@app.route('/tad', methods = ['GET'])
-def get_tad():
-	res = "{ error: 'Unknown gene' }"
-	gene_name = request.args.get('gene', None)
+@app.route('/gene/<gene_name>', methods = ['GET'])
+def get_tad(gene_name):
+	res = "unknown gene"
 	
 	if gene_name:
 		
@@ -186,7 +185,7 @@ def get_tad():
 			if not exists(outfile):
 				tads.plot(outfile, chromosome, start, end)
 			
-			res = "{ \"gene\":\"" + gene_name + "\", \"img\":\"" + outfile + "\", \"chromosome\":\"" + chromosome + "\", \"start\":" + str(start) + ", \"end\":" + str(end) + "}"
+			res = "{ \"name\":\"" + gene_name + "\", \"img\":\"" + outfile + "\", \"chromosome\":\"" + chromosome + "\", \"start\":" + str(start) + ", \"end\":" + str(end) + "}"
 			
 	return res
 
