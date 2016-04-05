@@ -85,10 +85,6 @@ var AppRouter = Backbone.Router.extend({
 // Instantiate the router
 var app_router = new AppRouter();
 
-app_router.bind('something', function(){
-    console.log('sdfsdf');
-});
-
 app_router.on('route:getGene', function(){
     search.showGeneView();
     setIndex();
@@ -113,7 +109,7 @@ app_router.on('route:getGeneId', function (id) {
             var error = { error : text};
             
             search.showGeneView(id);
-            geneView.render(error);
+            //geneView.render(error);
         }
     });
 });
@@ -268,7 +264,7 @@ var _ = require('underscore');
 
 var templates = require('../templates');
 
-var $div;
+var _browser = {}, $div;
 
 function _getParameterByName(name, url) {
     if (!url) url = window.location.href;
@@ -324,6 +320,10 @@ module.exports = Backbone.View.extend({
     
     render: function(render){
         
+        if(render.region === _browser.region){
+            return;
+        }
+        
         render.tracks = _.sortBy(_.flatten(render.tracks), function(url){
             return + _getParameterByName('id', url);
         });
@@ -342,12 +342,7 @@ module.exports = Backbone.View.extend({
         $(this.el).append($div);
         
         _load_images(document.getElementsByTagName('img'), 6);
-        
-        this.rendered = true;
     },
-    
-    // Returns true if the view element is in the DOM
-    rendered: false,
     
     setVisible: function(){
         $div.show().siblings().hide();
@@ -357,7 +352,7 @@ module.exports = Backbone.View.extend({
 },{"../templates":5,"underscore":72}],7:[function(require,module,exports){
 var templates = require('../templates');
 
-var $div;
+var _gene = {}, $div;
 
 module.exports = Backbone.View.extend({
     
@@ -367,8 +362,11 @@ module.exports = Backbone.View.extend({
     
     render: function(render){
         
-        this.trigger('something');
         render = _.isUndefined(render) ? {} : render;
+        
+        if(render.id === _gene.id){
+            return;
+        }
         
         $(this.el).css({opacity: 0.0, visibility: 'hidden'});
         
@@ -385,11 +383,7 @@ module.exports = Backbone.View.extend({
         
         // Select all elements with data-toggle="tooltips" in the document
         $('[data-toggle="tooltip"]').tooltip(); 
-        this.rendered = true;
     },
-    
-    // Returns true if the view element is in the DOM
-    rendered: false,
     
     setVisible: function(){
         $div.show().siblings().hide();
