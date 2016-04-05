@@ -6,6 +6,8 @@ from flask import Flask, render_template, request, send_file
 import os
 from os.path import basename, exists
 
+import json
+
 
 import hicexplorer.trackPlot
 import hicbrowser.utilities
@@ -185,16 +187,20 @@ def get_tad(gene_name):
 			if not exists(outfile):
 				tads.plot(outfile, chromosome, start, end)
 			
-			res = "{ \"name\":\"" + gene_name + "\", \"img\":\"" + outfile + "\", \"chromosome\":\"" + chromosome + "\", \"start\":" + str(start) + ", \"end\":" + str(end) + "}"
-			
+			data = {}
+			data['name'] = gene_name
+			data['img'] = outfile
+			data['chromosome'] = chromosome
+			data['start'] = start
+			data['end'] = end
+			res = json.dumps(data)
+
 	return res
 
 
-@app.route('/browser', methods=['GET'])
-def browser():
-    html_div = '<div class="item">{}</div>'
-    html_img = '<img src="{}" />'
-    query = request.args.get('region', None)
+@app.route('/browser/<query>', methods=['GET'])
+def browser(query):
+    
     if query:
         gene_name = query.strip().lower()
         # check if the query is a valid gene name
@@ -221,25 +227,24 @@ def browser():
             img_content = []
             for trp_idx in range(len(trp_list)):
                 figure_path = "/get_image?region={}:{}-{}&id={}".format(chromosome, _range[0], _range[1], trp_idx)
-                img_code.append(html_img.format(figure_path))
+                img_code.append(figure_path)
 
                 figure_content_path = "/get_image?region={}:|+start+|-|+end+|&id={}".format(chromosome, trp_idx)
-                img_content.append(html_img.format(figure_content_path))
+                img_content.append(figure_content_path)
 
-            tracks.append(html_div.format("\n".join(img_code)))
+            tracks.append(img_code)
             if len(content) == 0:
-                content.append(html_div.format(" ".join(img_content)))
+                content.append(" ".join(img_content))
 
-        tracks = "\n".join(tracks)
         content = " ".join(content)
         content = content.replace('"', '\\"')
         content = content.replace('|', '"')
         view_range = end - start
-        prev_query_str = "?region={}:{}-{}".format(chromosome, start - view_range, end - view_range)
-        next_query_str = "?region={}:{}-{}".format(chromosome, start + view_range, end + view_range)
+        prev_query_str = "{}:{}-{}".format(chromosome, start - view_range, end - view_range)
+        next_query_str = "{}:{}-{}".format(chromosome, start + view_range, end + view_range)
         half_rage = view_range / 2
         center = start + half_rage
-        zoom_out = "?region={}:{}-{}".format(chromosome, center - half_rage * 3, center + half_rage * 3)
+        zoom_out = "{}:{}-{}".format(chromosome, center - half_rage * 3, center + half_rage * 3)
         step = ranges[0][1] - ranges[0][0]
         end = ranges[-1][1]
         start = ranges[0][0]
@@ -257,14 +262,24 @@ def browser():
         next_query_str = None
         zoom_out = None
         content = None
-        tracks = html_div.format(html_img.format(figure_path))
+        tracks = figure_path
         step = None
         start = start
         end = end
-
-    return render_template("layout.html", region=region, tracks=tracks, next=next_query_str, previous=prev_query_str, out=zoom_out,
-                           step=step, content=content, start=start, end=end)
-
+    
+    data = {}
+    data['region'] = region
+    data['tracks'] = tracks
+    data['next'] = next_query_str
+    data['previous'] = prev_query_str
+    data['out'] = zoom_out
+    data['step'] = step
+    data['content'] = content
+    data['start'] = start
+    data['end'] = end
+    json_data = json.dumps(data)
+	
+    return json_data
 
 @app.route('/get_image', methods=['GET'])
 def get_image():
