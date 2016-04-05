@@ -26,6 +26,9 @@ App.init = function(){
     
     // Render loading
     loading.render();
+    
+    // Select all elements with data-toggle="tooltips" in the document
+    $('[data-toggle="tooltip"]').tooltip(); 
 };
 
 App.init();
