@@ -28,29 +28,47 @@ App.init = function(){
     
     // Render loading
     loading.render();
+    
+    // Select all elements with data-toggle="tooltips" in the document
+    $('[data-toggle="tooltip"]').tooltip(); 
 };
 
 App.init();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./js/router":3,"./js/views/loading":7,"backbone":9,"bootstrap":11,"jquery":66,"underscore":69}],2:[function(require,module,exports){
+},{"./js/router":4,"./js/views/loading":9,"backbone":12,"bootstrap":14,"jquery":69,"underscore":72}],2:[function(require,module,exports){
+module.exports = Backbone.Model.extend({
+    urlRoot: '/browser'
+});
+},{}],3:[function(require,module,exports){
 module.exports = Backbone.Model.extend({
     urlRoot: '/gene'
 });
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 // Views
+var Search = require('./views/search');
+var search = new Search({el:'#search'});
+search.render();
+
 var Index = require('./views/index');
 var index = new Index({el:'body'});
 
 var GeneView = require('./views/gene');
 var geneView = new GeneView({el:'#content'});
 
+
+var BrowserView = require('./views/browser');
+var browserView = new BrowserView({el:'#content'});
+
 // Models
 var Gene = require('./models/gene');
+var Browser = require('./models/browser');
+
 
 
 var AppRouter = Backbone.Router.extend({
     routes: {
         "gene/:id": 'getGene',
+        "browser/:id" : 'getBrowser',
         "*actions": "defaultRoute"
         // Backbone will try to match the route above first
     }
@@ -67,8 +85,7 @@ app_router.on('route:getGene', function (id) {
             
             gene = gene.toJSON();
             
-            index.setId(gene.name);
-            index.slideUp();
+            search.showGeneView(id);
             geneView.render(gene);
         },
         error: function(gene, res){
@@ -77,9 +94,33 @@ app_router.on('route:getGene', function (id) {
             
             var error = { error : text};
             
+            search.showGeneView(id);
+            geneView.render(error);
+        }
+    });
+});
+
+app_router.on('route:getBrowser', function (id) {
+    var browser = new Browser({id:id});
+    
+    browser.fetch({
+        success: function(browser){
+            
+            browser = browser.toJSON();
+            
+            
+            search.showBrowserView(id, browser);
+            browserView.render(browser);
+        },
+        error: function(browser, res){
+            
+            /*var text = ( res.responseText === 'unknown gene' ) ? 'No results for ' + id : res.responseText;
+            
+            var error = { error : text};
+            
             index.setId(gene.name);
             index.slideUp();
-            geneView.render(error);
+            geneView.render(error);*/
         }
     });
 });
@@ -92,13 +133,29 @@ app_router.on('route:defaultRoute', function (actions) {
 Backbone.history.start();
 
 module.exports = app_router;
-},{"./models/gene":2,"./views/gene":5,"./views/index":6}],4:[function(require,module,exports){
+},{"./models/browser":2,"./models/gene":3,"./views/browser":6,"./views/gene":7,"./views/index":8,"./views/search":10}],5:[function(require,module,exports){
 (function (global){
 var glob = ('undefined' === typeof window) ? global : window,
 
 Handlebars = glob.Handlebars || require('handlebars');
 
 this["Templates"] = this["Templates"] || {};
+
+this["Templates"]["browser"] = Handlebars.template({"1":function(container,depth0,helpers,partials,data) {
+    var alias1=container.lambda, alias2=container.escapeExpression;
+
+  return "            <div class=\"col-xs-4 img_wrapper\">\n                <img class=\"lazy\" data-original=\""
+    + alias2(alias1(depth0, depth0))
+    + "\">\n                <!--<img src=\""
+    + alias2(alias1(depth0, depth0))
+    + "\" onload=\"imgLoaded(this)\">-->\n            </div>\n";
+},"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
+    var stack1;
+
+  return "<div class=\"container-fixed\">\n    <div class=\"row\">\n"
+    + ((stack1 = helpers.each.call(depth0 != null ? depth0 : {},(depth0 != null ? depth0.tracks : depth0),{"name":"each","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
+    + "    </div>\n</div>";
+},"useData":true});
 
 this["Templates"]["gene"] = Handlebars.template({"1":function(container,depth0,helpers,partials,data) {
     var helper, alias1=depth0 != null ? depth0 : {}, alias2=helpers.helperMissing, alias3="function", alias4=container.escapeExpression;
@@ -111,7 +168,7 @@ this["Templates"]["gene"] = Handlebars.template({"1":function(container,depth0,h
     + alias4(((helper = (helper = helpers.start || (depth0 != null ? depth0.start : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"start","hash":{},"data":data}) : helper)))
     + ", end: "
     + alias4(((helper = (helper = helpers.end || (depth0 != null ? depth0.end : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"end","hash":{},"data":data}) : helper)))
-    + ")\n            </small>\n        </h1>\n        <a href=\"/browser?region="
+    + ")\n            </small>\n        </h1>\n        <a href=\"/#/browser/"
     + alias4(((helper = (helper = helpers.chromosome || (depth0 != null ? depth0.chromosome : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"chromosome","hash":{},"data":data}) : helper)))
     + ":"
     + alias4(((helper = (helper = helpers.start || (depth0 != null ? depth0.start : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"start","hash":{},"data":data}) : helper)))
@@ -119,7 +176,7 @@ this["Templates"]["gene"] = Handlebars.template({"1":function(container,depth0,h
     + alias4(((helper = (helper = helpers.end || (depth0 != null ? depth0.end : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"end","hash":{},"data":data}) : helper)))
     + "\">\n            <img class=\"img-responsive\" src=\""
     + alias4(((helper = (helper = helpers.img || (depth0 != null ? depth0.img : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"img","hash":{},"data":data}) : helper)))
-    + "\" alt=\"\">\n        </a>\n";
+    + "\" alt=\"\" data-toggle=\"tooltip\" title=\"Click image to explore region in browser\">\n        </a>\n";
 },"3":function(container,depth0,helpers,partials,data) {
     var helper;
 
@@ -133,7 +190,7 @@ this["Templates"]["gene"] = Handlebars.template({"1":function(container,depth0,h
     + ((stack1 = helpers["if"].call(alias1,(depth0 != null ? depth0.name : depth0),{"name":"if","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
     + "    \n"
     + ((stack1 = helpers["if"].call(alias1,(depth0 != null ? depth0.error : depth0),{"name":"if","hash":{},"fn":container.program(3, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
-    + "    \n    <hr>\n</div>";
+    + "    <hr>\n</div>";
 },"useData":true});
 
 this["Templates"]["index"] = Handlebars.template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
@@ -148,9 +205,112 @@ this["Templates"]["loading"] = Handlebars.template({"compiler":[7,">= 4.0.0"],"m
     + "\" class=\"modal fade bs-example-modal-sm\" style=\"color: #fff\" tabindex=\"-1\" role=\"dialog\">\n    <div class=\"modal-dialog modal-sm\">\n        <div class=\"modal-content\">\n            <div class=\"search-box\" style=\"width:100%\">\n                <!-- build:src /static/img/loading.gif -->\n                    <img src=\"../static/img/loading.gif\">\n                <!-- /build -->\n                <h1>Loading ...</h1>\n            </div>\n        </div>\n    </div>\n</div>";
 },"useData":true});
 
+this["Templates"]["search"] = Handlebars.template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
+    var helper, alias1=depth0 != null ? depth0 : {}, alias2=helpers.helperMissing, alias3="function", alias4=container.escapeExpression;
+
+  return "<ul class=\"nav nav-pills\">\n    <li id=\""
+    + alias4(((helper = (helper = helpers.gene_btn || (depth0 != null ? depth0.gene_btn : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"gene_btn","hash":{},"data":data}) : helper)))
+    + "\" data-id=\""
+    + alias4(((helper = (helper = helpers.gene_btn || (depth0 != null ? depth0.gene_btn : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"gene_btn","hash":{},"data":data}) : helper)))
+    + "\" role=\"presentation\" class=\"active\"><a href=\"#\">Search Gene</a></li>\n    <li id=\""
+    + alias4(((helper = (helper = helpers.browser_btn || (depth0 != null ? depth0.browser_btn : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"browser_btn","hash":{},"data":data}) : helper)))
+    + "\" data-id=\""
+    + alias4(((helper = (helper = helpers.browser_btn || (depth0 != null ? depth0.browser_btn : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"browser_btn","hash":{},"data":data}) : helper)))
+    + "\" role=\"presentation\"><a href=\"#\">Browse Region</a></li>\n</ul>\n\n<br>\n\n<div class=\"jumbotron\">\n    \n    <div>\n        <div class=\"input-group input-group-lg\">\n            <input id=\""
+    + alias4(((helper = (helper = helpers.gene_search_input || (depth0 != null ? depth0.gene_search_input : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"gene_search_input","hash":{},"data":data}) : helper)))
+    + "\" type=\"text\" class=\"  search-query form-control\" placeholder=\"Type a gene name here ...\" />\n            <span class=\"input-group-btn\">\n                <button id=\"search\" class=\"btn btn-primary\" type=\"button\" data-toggle=\"tooltip\" placement=\"bottom\" title=\"Search!\">\n                    <span class=\"glyphicon glyphicon-search\"></span>\n                </button>\n            </span>\n        </div>\n    </div>\n    \n    <div style=\"display:none\">\n        <div class=\"input-group input-group-lg\">\n            <input id=\""
+    + alias4(((helper = (helper = helpers.browser_search_input || (depth0 != null ? depth0.browser_search_input : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"browser_search_input","hash":{},"data":data}) : helper)))
+    + "\" type=\"text\" class=\"  search-query form-control\" placeholder=\"Type the region that you want to see ...\" />\n            <span class=\"input-group-btn\">\n                <button id=\"search\" class=\"btn btn-primary\" type=\"button\" data-toggle=\"tooltip\" placement=\"bottom\" title=\"Search!\">\n                    <span class=\"glyphicon glyphicon-search\"></span>\n                </button>\n            </span>\n        </div>\n\n        <br>\n\n        <div class=\"row\">\n            <div class=\"col-md-2 col-md-offset-5\">\n\n                <div id=\"control-buttons\"  class=\"btn-group\" role=\"group\" aria-label=\"...\">\n                    <a id=\""
+    + alias4(((helper = (helper = helpers.prev_id || (depth0 != null ? depth0.prev_id : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"prev_id","hash":{},"data":data}) : helper)))
+    + "\" href=\""
+    + alias4(((helper = (helper = helpers.previous || (depth0 != null ? depth0.previous : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"previous","hash":{},"data":data}) : helper)))
+    + "\" role=\"button\" class=\"btn btn-primary\" data-toggle=\"tooltip\" placement=\"bottom\" title=\"Previous\">\n                        <span class=\"glyphicon glyphicon-backward\"></span>\n                    </a>\n                    <a id=\""
+    + alias4(((helper = (helper = helpers.next_id || (depth0 != null ? depth0.next_id : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"next_id","hash":{},"data":data}) : helper)))
+    + "\" href=\""
+    + alias4(((helper = (helper = helpers.next || (depth0 != null ? depth0.next : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"next","hash":{},"data":data}) : helper)))
+    + "\" role=\"button\" class=\"btn btn-primary\">\n                        <span class=\"glyphicon glyphicon-forward\" data-toggle=\"tooltip\" placement=\"bottom\" title=\"Next\"></span>\n                    </a>\n                    <a id=\""
+    + alias4(((helper = (helper = helpers.zoomout_id || (depth0 != null ? depth0.zoomout_id : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"zoomout_id","hash":{},"data":data}) : helper)))
+    + "\" href=\""
+    + alias4(((helper = (helper = helpers.out || (depth0 != null ? depth0.out : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"out","hash":{},"data":data}) : helper)))
+    + "\" role=\"button\" class=\"btn btn-primary\">\n                        <span class=\"glyphicon glyphicon-zoom-out\" data-toggle=\"tooltip\" placement=\"bottom\" title=\"Zoom-out\"></span>\n                    </a>\n                </div>\n\n            </div>\n        </div>\n    </div>\n    \n</div>";
+},"useData":true});
+
 if (typeof exports === 'object' && exports) {module.exports = this["Templates"];}
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"handlebars":54}],5:[function(require,module,exports){
+},{"handlebars":57}],6:[function(require,module,exports){
+var _ = require('underscore');
+
+var templates = require('../templates');
+
+function _getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)", "i"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+
+function _onload(e){
+    
+    var img = e.target;
+    
+    var imgWrapper = img.parentNode;
+    imgWrapper.className += imgWrapper.className ? ' loaded' : 'loaded';
+}
+
+function _onerror(e){
+    var img = e.target;
+    img.src = '/static/img/not_found.png';
+    
+    var imgWrapper = img.parentNode;
+    imgWrapper.className += imgWrapper.className ? ' loaded' : 'loaded';
+}
+
+function _load_images(imgDefer, n, index){
+    
+    var i = index || 0, j = 0;
+    while( i < imgDefer.length && j < n){
+        if(imgDefer[i].getAttribute('data-original')) {
+            
+            imgDefer[i].onload = _onload;
+            imgDefer[i].onerror = _onerror;
+            imgDefer[i].setAttribute('src', imgDefer[i].getAttribute('data-original'));
+            j ++;
+        }
+        i++;
+    }
+    
+    if(i < imgDefer.length -1 ){
+        setTimeout(_load_images, 600, imgDefer, n, i);
+    }
+}
+
+
+module.exports = Backbone.View.extend({
+    
+    initialize: function(options){
+        this.options = options;
+    },
+    
+    render: function(render){
+        
+        render.tracks = _.sortBy(_.flatten(render.tracks), function(url){
+            return + _getParameterByName('id', url);
+        });
+        
+        $(this.options.el).css({opacity: 0.0, visibility: 'hidden'});
+        
+        var tpl = templates.browser(render);
+        $(this.options.el).html(tpl);
+        
+        _load_images(document.getElementsByTagName('img'), 6);
+        
+        $(this.options.el).css({opacity: 0.0, visibility: 'visible'}).animate({opacity: 1.0}, 800);
+    },
+});
+},{"../templates":5,"underscore":72}],7:[function(require,module,exports){
 var templates = require('../templates');
 
 module.exports = Backbone.View.extend({
@@ -169,17 +329,19 @@ module.exports = Backbone.View.extend({
         $(this.options.el).html(tpl);
         
         $(this.options.el).css({opacity: 0.0, visibility: 'visible'}).animate({opacity: 1.0}, 800);
+        
+        // Select all elements with data-toggle="tooltips" in the document
+        $('[data-toggle="tooltip"]').tooltip(); 
     },
 });
-},{"../templates":4}],6:[function(require,module,exports){
+},{"../templates":5}],8:[function(require,module,exports){
+var _ = require('underscore');
+
 var templates = require('../templates');
 
+var _data = {};
+
 module.exports = Backbone.View.extend({
-    
-    events: {
-        'click #search' : 'search',
-        'keydown #search_input' : 'keyAction'
-    },
     
     initialize: function(options){
         this.options = options;
@@ -197,29 +359,9 @@ module.exports = Backbone.View.extend({
         $('#content').html(tpl);
         
         $('#content').css({opacity: 0.0, visibility: 'visible'}).animate({opacity: 1.0}, 800);
-    },
-    
-    slideUp: function(){
-        $('.site-heading').addClass('header_small');
-    },
-    
-    setId: function(id){
-        $('#search_input').val(id);
-    },
-    
-    search: function(){
-        var gene_name = $('#search_input').val();
-        
-        if( gene_name.length === 0 ) return;
-        
-        App.router.navigate('/gene/' + gene_name, {trigger: true}); 
-    },
-    
-    keyAction: function(e){
-        if(e.which === 13) this.search();
     }
 });
-},{"../templates":4}],7:[function(require,module,exports){
+},{"../templates":5,"underscore":72}],9:[function(require,module,exports){
 var templates = require('../templates');
 
 var _id = _.uniqueId('loading_');
@@ -246,7 +388,120 @@ module.exports = Backbone.View.extend({
         $('#' + _id).modal('hide');
     }
 });
-},{"../templates":4}],8:[function(require,module,exports){
+},{"../templates":5}],10:[function(require,module,exports){
+var _ = require('underscore');
+var templates = require('../templates');
+
+
+var prev_id = _.uniqueId('prev_id_'), next_id = _.uniqueId('next_id_') ,  zoomout_id = _.uniqueId('zoomout_id_'), browser_search_input = _.uniqueId('search_input_'), gene_search_input = _.uniqueId('search_input_'), search_btn = _.uniqueId('search_btn_'), gene_btn = _.uniqueId('gene_btn_'), browser_btn = _.uniqueId('browser_btn_');
+
+var _show_gene = true;
+
+function _redirect(url){
+    App.router.navigate(url, {trigger: true});
+}
+
+module.exports = Backbone.View.extend({
+    
+    initialize: function(options){
+        this.options = options;
+    },
+    
+    events: {
+        'click li' : 'onLiClick',
+        'click button' : 'search',
+        'keydown input' : 'keyAction'
+    },
+    
+    render: function(render){
+        
+        render = _.isUndefined(render) ? {} : render;
+        
+        render.prev_id = prev_id;
+        render.next_id = next_id;
+        render.zoomout_id = zoomout_id;
+        render.gene_search_input = gene_search_input;
+        render.browser_search_input = browser_search_input;
+        render.gene_btn = gene_btn;
+        render.browser_btn = browser_btn;
+        
+        
+        var tpl = templates.search(render);
+        $(this.options.el).html(tpl);
+    },
+    
+    update : function(obj){
+        
+        if(_.isUndefined(obj.name)){
+            onGeneButton();
+        }else{
+            onBrowserButton();
+            updateButtons(obj);
+        }
+    },
+    
+    updateButtons : function(obj){
+        document.getElementById(prev_id).href = '/#/browser/' + obj.previous;
+        document.getElementById(next_id).href = '/#/browser/' + obj.next;
+        document.getElementById(zoomout_id).href = '/#/browser/' + obj.out;
+    },
+    
+    search: function(){
+        var val = (_show_gene) ? $( '#' + gene_search_input).val() : $( '#' + browser_search_input).val();
+        
+        if(val.length > 0){
+            var url = (_show_gene) ? '/gene/' + val : '/browser/' + val;
+            App.router.navigate(url, {trigger: true});
+        }
+    },
+    
+    onLiClick : function(e){
+        e.preventDefault();
+        
+        var id = $(e.currentTarget).data('id');
+        
+        if(id === gene_btn){
+            _show_gene = true;
+            this.showGeneView();
+        }else if(id === browser_btn) {
+            _show_gene = false;
+            this.showBrowserView();
+        }
+        
+    },
+    
+    keyAction: function(e){
+        if(e.which === 13) this.search();
+    },
+    
+    showGeneView : function(id){
+        
+        if(!_.isUndefined(id)) $( '#' + gene_search_input ).val(id);
+        
+        $( '#' + browser_btn).removeClass('active');
+        $( '#' + gene_btn).addClass('active');
+        
+        $( '#' + browser_search_input ).parent().parent().css({opacity: 0.0, display: 'none'});
+        $( '#' + gene_search_input ).parent().parent().css({opacity: 0.0, display: 'block'}).animate({opacity: 1.0}, 800);
+    }, 
+    
+    showBrowserView : function(id, links){
+        
+        if(!_.isUndefined(id)) $( '#' + browser_search_input ).val(id);
+        
+        links = _.isUndefined(links) ? {previous: '', next: '', out: ''} : links;
+        this.updateButtons(links);
+        
+        if(!_.isUndefined(links)) $( '#' + browser_search_input ).val(id);
+        
+        $( '#' + gene_btn).removeClass('active');
+        $( '#' + browser_btn).addClass('active');
+        
+        $( '#' + gene_search_input ).parent().parent().css({opacity: 0.0, display: 'none'});
+        $( '#' + browser_search_input ).parent().parent().css({opacity: 0.0, display: 'block'}).animate({opacity: 1.0}, 800);
+    }
+});
+},{"../templates":5,"underscore":72}],11:[function(require,module,exports){
 (function (process,__filename){
 /** vim: et:ts=4:sw=4:sts=4
  * @license amdefine 1.0.0 Copyright (c) 2011-2015, The Dojo Foundation All Rights Reserved.
@@ -551,7 +806,7 @@ function amdefine(module, requireFn) {
 module.exports = amdefine;
 
 }).call(this,require('_process'),"/node_modules/amdefine/amdefine.js")
-},{"_process":68,"path":67}],9:[function(require,module,exports){
+},{"_process":71,"path":70}],12:[function(require,module,exports){
 (function (global){
 //     Backbone.js 1.3.2
 
@@ -2475,7 +2730,7 @@ module.exports = amdefine;
 });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"jquery":66,"underscore":10}],10:[function(require,module,exports){
+},{"jquery":69,"underscore":13}],13:[function(require,module,exports){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
 //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -4025,7 +4280,7 @@ module.exports = amdefine;
   }
 }.call(this));
 
-},{}],11:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 // This file is autogenerated via the `commonjs` Grunt task. You can require() this file in a CommonJS environment.
 require('../../js/transition.js')
 require('../../js/alert.js')
@@ -4039,7 +4294,7 @@ require('../../js/popover.js')
 require('../../js/scrollspy.js')
 require('../../js/tab.js')
 require('../../js/affix.js')
-},{"../../js/affix.js":12,"../../js/alert.js":13,"../../js/button.js":14,"../../js/carousel.js":15,"../../js/collapse.js":16,"../../js/dropdown.js":17,"../../js/modal.js":18,"../../js/popover.js":19,"../../js/scrollspy.js":20,"../../js/tab.js":21,"../../js/tooltip.js":22,"../../js/transition.js":23}],12:[function(require,module,exports){
+},{"../../js/affix.js":15,"../../js/alert.js":16,"../../js/button.js":17,"../../js/carousel.js":18,"../../js/collapse.js":19,"../../js/dropdown.js":20,"../../js/modal.js":21,"../../js/popover.js":22,"../../js/scrollspy.js":23,"../../js/tab.js":24,"../../js/tooltip.js":25,"../../js/transition.js":26}],15:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: affix.js v3.3.6
  * http://getbootstrap.com/javascript/#affix
@@ -4203,7 +4458,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],13:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: alert.js v3.3.6
  * http://getbootstrap.com/javascript/#alerts
@@ -4299,7 +4554,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],14:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: button.js v3.3.6
  * http://getbootstrap.com/javascript/#buttons
@@ -4421,7 +4676,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],15:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: carousel.js v3.3.6
  * http://getbootstrap.com/javascript/#carousel
@@ -4660,7 +4915,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],16:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: collapse.js v3.3.6
  * http://getbootstrap.com/javascript/#collapse
@@ -4873,7 +5128,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],17:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: dropdown.js v3.3.6
  * http://getbootstrap.com/javascript/#dropdowns
@@ -5040,7 +5295,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],18:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: modal.js v3.3.6
  * http://getbootstrap.com/javascript/#modals
@@ -5379,7 +5634,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],19:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: popover.js v3.3.6
  * http://getbootstrap.com/javascript/#popovers
@@ -5489,7 +5744,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],20:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: scrollspy.js v3.3.6
  * http://getbootstrap.com/javascript/#scrollspy
@@ -5663,7 +5918,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],21:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: tab.js v3.3.6
  * http://getbootstrap.com/javascript/#tabs
@@ -5820,7 +6075,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],22:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: tooltip.js v3.3.6
  * http://getbootstrap.com/javascript/#tooltip
@@ -6336,7 +6591,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],23:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: transition.js v3.3.6
  * http://getbootstrap.com/javascript/#transitions
@@ -6397,9 +6652,9 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],24:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 
-},{}],25:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -6466,7 +6721,7 @@ exports['default'] = inst;
 module.exports = exports['default'];
 
 
-},{"./handlebars.runtime":26,"./handlebars/compiler/ast":28,"./handlebars/compiler/base":29,"./handlebars/compiler/compiler":31,"./handlebars/compiler/javascript-compiler":33,"./handlebars/compiler/visitor":36,"./handlebars/no-conflict":50}],26:[function(require,module,exports){
+},{"./handlebars.runtime":29,"./handlebars/compiler/ast":31,"./handlebars/compiler/base":32,"./handlebars/compiler/compiler":34,"./handlebars/compiler/javascript-compiler":36,"./handlebars/compiler/visitor":39,"./handlebars/no-conflict":53}],29:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -6534,7 +6789,7 @@ exports['default'] = inst;
 module.exports = exports['default'];
 
 
-},{"./handlebars/base":27,"./handlebars/exception":40,"./handlebars/no-conflict":50,"./handlebars/runtime":51,"./handlebars/safe-string":52,"./handlebars/utils":53}],27:[function(require,module,exports){
+},{"./handlebars/base":30,"./handlebars/exception":43,"./handlebars/no-conflict":53,"./handlebars/runtime":54,"./handlebars/safe-string":55,"./handlebars/utils":56}],30:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -6640,7 +6895,7 @@ exports.createFrame = _utils.createFrame;
 exports.logger = _logger2['default'];
 
 
-},{"./decorators":38,"./exception":40,"./helpers":41,"./logger":49,"./utils":53}],28:[function(require,module,exports){
+},{"./decorators":41,"./exception":43,"./helpers":44,"./logger":52,"./utils":56}],31:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -6673,7 +6928,7 @@ exports['default'] = AST;
 module.exports = exports['default'];
 
 
-},{}],29:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -6723,7 +6978,7 @@ function parse(input, options) {
 }
 
 
-},{"../utils":53,"./helpers":32,"./parser":34,"./whitespace-control":37}],30:[function(require,module,exports){
+},{"../utils":56,"./helpers":35,"./parser":37,"./whitespace-control":40}],33:[function(require,module,exports){
 /* global define */
 'use strict';
 
@@ -6891,7 +7146,7 @@ exports['default'] = CodeGen;
 module.exports = exports['default'];
 
 
-},{"../utils":53,"source-map":55}],31:[function(require,module,exports){
+},{"../utils":56,"source-map":58}],34:[function(require,module,exports){
 /* eslint-disable new-cap */
 
 'use strict';
@@ -7465,7 +7720,7 @@ function transformLiteralToPath(sexpr) {
 }
 
 
-},{"../exception":40,"../utils":53,"./ast":28}],32:[function(require,module,exports){
+},{"../exception":43,"../utils":56,"./ast":31}],35:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -7697,7 +7952,7 @@ function preparePartialBlock(open, program, close, locInfo) {
 }
 
 
-},{"../exception":40}],33:[function(require,module,exports){
+},{"../exception":43}],36:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -8825,7 +9080,7 @@ exports['default'] = JavaScriptCompiler;
 module.exports = exports['default'];
 
 
-},{"../base":27,"../exception":40,"../utils":53,"./code-gen":30}],34:[function(require,module,exports){
+},{"../base":30,"../exception":43,"../utils":56,"./code-gen":33}],37:[function(require,module,exports){
 /* istanbul ignore next */
 /* Jison generated parser */
 "use strict";
@@ -9565,7 +9820,7 @@ var handlebars = (function () {
 exports['default'] = handlebars;
 
 
-},{}],35:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 /* eslint-disable new-cap */
 'use strict';
 
@@ -9753,7 +10008,7 @@ PrintVisitor.prototype.HashPair = function (pair) {
 /* eslint-enable new-cap */
 
 
-},{"./visitor":36}],36:[function(require,module,exports){
+},{"./visitor":39}],39:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -9895,7 +10150,7 @@ exports['default'] = Visitor;
 module.exports = exports['default'];
 
 
-},{"../exception":40}],37:[function(require,module,exports){
+},{"../exception":43}],40:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -10118,7 +10373,7 @@ exports['default'] = WhitespaceControl;
 module.exports = exports['default'];
 
 
-},{"./visitor":36}],38:[function(require,module,exports){
+},{"./visitor":39}],41:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -10136,7 +10391,7 @@ function registerDefaultDecorators(instance) {
 }
 
 
-},{"./decorators/inline":39}],39:[function(require,module,exports){
+},{"./decorators/inline":42}],42:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -10167,7 +10422,7 @@ exports['default'] = function (instance) {
 module.exports = exports['default'];
 
 
-},{"../utils":53}],40:[function(require,module,exports){
+},{"../utils":56}],43:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -10209,7 +10464,7 @@ exports['default'] = Exception;
 module.exports = exports['default'];
 
 
-},{}],41:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -10257,7 +10512,7 @@ function registerDefaultHelpers(instance) {
 }
 
 
-},{"./helpers/block-helper-missing":42,"./helpers/each":43,"./helpers/helper-missing":44,"./helpers/if":45,"./helpers/log":46,"./helpers/lookup":47,"./helpers/with":48}],42:[function(require,module,exports){
+},{"./helpers/block-helper-missing":45,"./helpers/each":46,"./helpers/helper-missing":47,"./helpers/if":48,"./helpers/log":49,"./helpers/lookup":50,"./helpers/with":51}],45:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -10298,7 +10553,7 @@ exports['default'] = function (instance) {
 module.exports = exports['default'];
 
 
-},{"../utils":53}],43:[function(require,module,exports){
+},{"../utils":56}],46:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -10394,7 +10649,7 @@ exports['default'] = function (instance) {
 module.exports = exports['default'];
 
 
-},{"../exception":40,"../utils":53}],44:[function(require,module,exports){
+},{"../exception":43,"../utils":56}],47:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -10421,7 +10676,7 @@ exports['default'] = function (instance) {
 module.exports = exports['default'];
 
 
-},{"../exception":40}],45:[function(require,module,exports){
+},{"../exception":43}],48:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -10452,7 +10707,7 @@ exports['default'] = function (instance) {
 module.exports = exports['default'];
 
 
-},{"../utils":53}],46:[function(require,module,exports){
+},{"../utils":56}],49:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -10480,7 +10735,7 @@ exports['default'] = function (instance) {
 module.exports = exports['default'];
 
 
-},{}],47:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -10494,7 +10749,7 @@ exports['default'] = function (instance) {
 module.exports = exports['default'];
 
 
-},{}],48:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -10529,7 +10784,7 @@ exports['default'] = function (instance) {
 module.exports = exports['default'];
 
 
-},{"../utils":53}],49:[function(require,module,exports){
+},{"../utils":56}],52:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -10578,7 +10833,7 @@ exports['default'] = logger;
 module.exports = exports['default'];
 
 
-},{"./utils":53}],50:[function(require,module,exports){
+},{"./utils":56}],53:[function(require,module,exports){
 (function (global){
 /* global window */
 'use strict';
@@ -10602,7 +10857,7 @@ module.exports = exports['default'];
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],51:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -10896,7 +11151,7 @@ function executeDecorators(fn, prog, container, depths, data, blockParams) {
 }
 
 
-},{"./base":27,"./exception":40,"./utils":53}],52:[function(require,module,exports){
+},{"./base":30,"./exception":43,"./utils":56}],55:[function(require,module,exports){
 // Build out our basic SafeString type
 'use strict';
 
@@ -10913,7 +11168,7 @@ exports['default'] = SafeString;
 module.exports = exports['default'];
 
 
-},{}],53:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -11039,7 +11294,7 @@ function appendContextPath(contextPath, id) {
 }
 
 
-},{}],54:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 // USAGE:
 // var handlebars = require('handlebars');
 /* eslint-disable no-var */
@@ -11066,7 +11321,7 @@ if (typeof require !== 'undefined' && require.extensions) {
   require.extensions['.hbs'] = extension;
 }
 
-},{"../dist/cjs/handlebars":25,"../dist/cjs/handlebars/compiler/printer":35,"fs":24}],55:[function(require,module,exports){
+},{"../dist/cjs/handlebars":28,"../dist/cjs/handlebars/compiler/printer":38,"fs":27}],58:[function(require,module,exports){
 /*
  * Copyright 2009-2011 Mozilla Foundation and contributors
  * Licensed under the New BSD license. See LICENSE.txt or:
@@ -11076,7 +11331,7 @@ exports.SourceMapGenerator = require('./source-map/source-map-generator').Source
 exports.SourceMapConsumer = require('./source-map/source-map-consumer').SourceMapConsumer;
 exports.SourceNode = require('./source-map/source-node').SourceNode;
 
-},{"./source-map/source-map-consumer":62,"./source-map/source-map-generator":63,"./source-map/source-node":64}],56:[function(require,module,exports){
+},{"./source-map/source-map-consumer":65,"./source-map/source-map-generator":66,"./source-map/source-node":67}],59:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -11185,7 +11440,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./util":65,"amdefine":8}],57:[function(require,module,exports){
+},{"./util":68,"amdefine":11}],60:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -11333,7 +11588,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./base64":58,"amdefine":8}],58:[function(require,module,exports){
+},{"./base64":61,"amdefine":11}],61:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -11408,7 +11663,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"amdefine":8}],59:[function(require,module,exports){
+},{"amdefine":11}],62:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -11527,7 +11782,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"amdefine":8}],60:[function(require,module,exports){
+},{"amdefine":11}],63:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2014 Mozilla Foundation and contributors
@@ -11615,7 +11870,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./util":65,"amdefine":8}],61:[function(require,module,exports){
+},{"./util":68,"amdefine":11}],64:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -11737,7 +11992,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"amdefine":8}],62:[function(require,module,exports){
+},{"amdefine":11}],65:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -12816,7 +13071,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./array-set":56,"./base64-vlq":57,"./binary-search":59,"./quick-sort":61,"./util":65,"amdefine":8}],63:[function(require,module,exports){
+},{"./array-set":59,"./base64-vlq":60,"./binary-search":62,"./quick-sort":64,"./util":68,"amdefine":11}],66:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -13217,7 +13472,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./array-set":56,"./base64-vlq":57,"./mapping-list":60,"./util":65,"amdefine":8}],64:[function(require,module,exports){
+},{"./array-set":59,"./base64-vlq":60,"./mapping-list":63,"./util":68,"amdefine":11}],67:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -13633,7 +13888,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./source-map-generator":63,"./util":65,"amdefine":8}],65:[function(require,module,exports){
+},{"./source-map-generator":66,"./util":68,"amdefine":11}],68:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -14005,7 +14260,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"amdefine":8}],66:[function(require,module,exports){
+},{"amdefine":11}],69:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.2.2
  * http://jquery.com/
@@ -23849,7 +24104,7 @@ if ( !noGlobal ) {
 return jQuery;
 }));
 
-},{}],67:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -24077,7 +24332,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require('_process'))
-},{"_process":68}],68:[function(require,module,exports){
+},{"_process":71}],71:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -24170,6 +24425,6 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],69:[function(require,module,exports){
-arguments[4][10][0].apply(exports,arguments)
-},{"dup":10}]},{},[1]);
+},{}],72:[function(require,module,exports){
+arguments[4][13][0].apply(exports,arguments)
+},{"dup":13}]},{},[1]);
