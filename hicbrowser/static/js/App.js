@@ -50,7 +50,7 @@ var search = new Search({el:'#search'});
 search.render();
 
 var Index = require('./views/index');
-var index = new Index({el:'body'});
+var index = new Index({el:'#content'});
 
 var GeneView = require('./views/gene');
 var geneView = new GeneView({el:'#content'});
@@ -63,12 +63,20 @@ var browserView = new BrowserView({el:'#content'});
 var Gene = require('./models/gene');
 var Browser = require('./models/browser');
 
-
+function setIndex(){
+    if(!index.rendered) index.render();
+    index.setVisible();
+}
 
 var AppRouter = Backbone.Router.extend({
     routes: {
-        "gene/:id": 'getGene',
-        "browser/:id" : 'getBrowser',
+        
+        "gene": 'getGene',
+        "gene/:id": 'getGeneId',
+        
+        "browser" : 'getBrowser',
+        "browser/:id" : 'getBrowserId',
+        
         "*actions": "defaultRoute"
         // Backbone will try to match the route above first
     }
@@ -77,7 +85,16 @@ var AppRouter = Backbone.Router.extend({
 // Instantiate the router
 var app_router = new AppRouter();
 
-app_router.on('route:getGene', function (id) {
+app_router.bind('something', function(){
+    console.log('sdfsdf');
+});
+
+app_router.on('route:getGene', function(){
+    search.showGeneView();
+    setIndex();
+});
+
+app_router.on('route:getGeneId', function (id) {
     var gene = new Gene({id:id});
     
     gene.fetch({
@@ -87,6 +104,7 @@ app_router.on('route:getGene', function (id) {
             
             search.showGeneView(id);
             geneView.render(gene);
+            geneView.setVisible();
         },
         error: function(gene, res){
             
@@ -100,7 +118,12 @@ app_router.on('route:getGene', function (id) {
     });
 });
 
-app_router.on('route:getBrowser', function (id) {
+app_router.on('route:getBrowser', function(){
+    search.showBrowserView();
+    setIndex();
+});
+
+app_router.on('route:getBrowserId', function (id) {
     var browser = new Browser({id:id});
     
     browser.fetch({
@@ -111,6 +134,7 @@ app_router.on('route:getBrowser', function (id) {
             
             search.showBrowserView(id, browser);
             browserView.render(browser);
+            browserView.setVisible();
         },
         error: function(browser, res){
             
@@ -125,9 +149,7 @@ app_router.on('route:getBrowser', function (id) {
     });
 });
 
-app_router.on('route:defaultRoute', function (actions) {
-    index.render();
-});
+app_router.on('route:defaultRoute', setIndex);
 
 // Start Backbone history a necessary step for bookmarkable URL's
 Backbone.history.start();
@@ -218,21 +240,25 @@ this["Templates"]["search"] = Handlebars.template({"compiler":[7,">= 4.0.0"],"ma
     + alias4(((helper = (helper = helpers.browser_btn || (depth0 != null ? depth0.browser_btn : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"browser_btn","hash":{},"data":data}) : helper)))
     + "\" role=\"presentation\"><a href=\"#\">Browse Region</a></li>\n</ul>\n\n<br>\n\n<div class=\"jumbotron\">\n    \n    <div>\n        <div class=\"input-group input-group-lg\">\n            <input id=\""
     + alias4(((helper = (helper = helpers.gene_search_input || (depth0 != null ? depth0.gene_search_input : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"gene_search_input","hash":{},"data":data}) : helper)))
-    + "\" type=\"text\" class=\"  search-query form-control\" placeholder=\"Type a gene name here ...\" />\n            <span class=\"input-group-btn\">\n                <button id=\"search\" class=\"btn btn-primary\" type=\"button\" data-toggle=\"tooltip\" placement=\"bottom\" title=\"Search!\">\n                    <span class=\"glyphicon glyphicon-search\"></span>\n                </button>\n            </span>\n        </div>\n    </div>\n    \n    <div style=\"display:none\">\n        <div class=\"input-group input-group-lg\">\n            <input id=\""
+    + "\" type=\"text\" class=\"  search-query form-control\" placeholder=\"Type a gene name here ...\" />\n            <span class=\"input-group-btn\">\n                <button id=\"search\" class=\"btn btn-primary\" type=\"button\" data-toggle=\"tooltip\" placement=\"bottom\" title=\"Search!\">\n                    <span class=\"glyphicon glyphicon-search\"></span>\n                </button>\n            </span>\n        </div>\n        <small><a data-id=\""
+    + alias4(((helper = (helper = helpers.gene_example || (depth0 != null ? depth0.gene_example : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"gene_example","hash":{},"data":data}) : helper)))
+    + "\" href=\"#\"> <span class=\"glyphicon glyphicon-star\" aria-hidden=\"true\"></span> example</a></small>\n    </div>\n    \n    <div style=\"display:none\">\n        <div class=\"input-group input-group-lg\">\n            <input id=\""
     + alias4(((helper = (helper = helpers.browser_search_input || (depth0 != null ? depth0.browser_search_input : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"browser_search_input","hash":{},"data":data}) : helper)))
-    + "\" type=\"text\" class=\"  search-query form-control\" placeholder=\"Type the region that you want to see ...\" />\n            <span class=\"input-group-btn\">\n                <button id=\"search\" class=\"btn btn-primary\" type=\"button\" data-toggle=\"tooltip\" placement=\"bottom\" title=\"Search!\">\n                    <span class=\"glyphicon glyphicon-search\"></span>\n                </button>\n            </span>\n        </div>\n\n        <br>\n\n        <div class=\"row\">\n            <div class=\"col-md-2 col-md-offset-5\">\n\n                <div id=\"control-buttons\"  class=\"btn-group\" role=\"group\" aria-label=\"...\">\n                    <a id=\""
+    + "\" type=\"text\" class=\"  search-query form-control\" placeholder=\"Type the region that you want to see ...\" />\n            <span class=\"input-group-btn\">\n                <button id=\"search\" class=\"btn btn-primary\" type=\"button\" data-toggle=\"tooltip\" placement=\"bottom\" title=\"Search!\">\n                    <span class=\"glyphicon glyphicon-search\"></span>\n                </button>\n            </span>\n        </div>\n\n        <small><a data-id=\""
+    + alias4(((helper = (helper = helpers.browser_example || (depth0 != null ? depth0.browser_example : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"browser_example","hash":{},"data":data}) : helper)))
+    + "\" href=\"#\"> <span class=\"glyphicon glyphicon-star\" aria-hidden=\"true\"></span> example</a></small>\n        <br>\n\n        <div class=\"row\">\n            <div class=\"col-md-2 col-md-offset-5\">\n\n                <div id=\"control-buttons\"  class=\"btn-group\" role=\"group\" aria-label=\"...\">\n                    <a data-id=\""
     + alias4(((helper = (helper = helpers.prev_id || (depth0 != null ? depth0.prev_id : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"prev_id","hash":{},"data":data}) : helper)))
     + "\" href=\""
     + alias4(((helper = (helper = helpers.previous || (depth0 != null ? depth0.previous : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"previous","hash":{},"data":data}) : helper)))
-    + "\" role=\"button\" class=\"btn btn-primary\" data-toggle=\"tooltip\" placement=\"bottom\" title=\"Previous\">\n                        <span class=\"glyphicon glyphicon-backward\"></span>\n                    </a>\n                    <a id=\""
+    + "\" role=\"button\" class=\"btn btn-primary\" data-toggle=\"tooltip\" placement=\"bottom\" title=\"Previous\">\n                        <span class=\"glyphicon glyphicon-backward\"></span>\n                    </a>\n                    <a data-id=\""
     + alias4(((helper = (helper = helpers.next_id || (depth0 != null ? depth0.next_id : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"next_id","hash":{},"data":data}) : helper)))
     + "\" href=\""
     + alias4(((helper = (helper = helpers.next || (depth0 != null ? depth0.next : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"next","hash":{},"data":data}) : helper)))
-    + "\" role=\"button\" class=\"btn btn-primary\">\n                        <span class=\"glyphicon glyphicon-forward\" data-toggle=\"tooltip\" placement=\"bottom\" title=\"Next\"></span>\n                    </a>\n                    <a id=\""
+    + "\" role=\"button\" class=\"btn btn-primary\">\n                        <span class=\"glyphicon glyphicon-forward\" data-toggle=\"tooltip\" placement=\"bottom\" title=\"Next\"></span>\n                    </a>\n                    <a data-id=\""
     + alias4(((helper = (helper = helpers.zoomout_id || (depth0 != null ? depth0.zoomout_id : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"zoomout_id","hash":{},"data":data}) : helper)))
     + "\" href=\""
     + alias4(((helper = (helper = helpers.out || (depth0 != null ? depth0.out : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"out","hash":{},"data":data}) : helper)))
-    + "\" role=\"button\" class=\"btn btn-primary\">\n                        <span class=\"glyphicon glyphicon-zoom-out\" data-toggle=\"tooltip\" placement=\"bottom\" title=\"Zoom-out\"></span>\n                    </a>\n                </div>\n\n            </div>\n        </div>\n    </div>\n    \n</div>";
+    + "\" role=\"button\" class=\"btn btn-primary\">\n                        <span class=\"glyphicon glyphicon-zoom-out\" data-toggle=\"tooltip\" placement=\"bottom\" title=\"Zoom-out\"></span>\n                    </a>\n                </div>\n            \n            </div>\n        </div>\n    </div>\n    \n</div>";
 },"useData":true});
 
 if (typeof exports === 'object' && exports) {module.exports = this["Templates"];}
@@ -241,6 +267,8 @@ if (typeof exports === 'object' && exports) {module.exports = this["Templates"];
 var _ = require('underscore');
 
 var templates = require('../templates');
+
+var $div;
 
 function _getParameterByName(name, url) {
     if (!url) url = window.location.href;
@@ -302,16 +330,34 @@ module.exports = Backbone.View.extend({
         
         $(this.options.el).css({opacity: 0.0, visibility: 'hidden'});
         
+        
         var tpl = templates.browser(render);
-        $(this.options.el).html(tpl);
+        
+        if( ! _.isUndefined($div) ) $div.remove();
+        
+        $div = $('<div></div>')
+            .hide()
+            .append(tpl);
+        
+        $(this.el).append($div);
         
         _load_images(document.getElementsByTagName('img'), 6);
         
-        $(this.options.el).css({opacity: 0.0, visibility: 'visible'}).animate({opacity: 1.0}, 800);
+        this.rendered = true;
     },
+    
+    // Returns true if the view element is in the DOM
+    rendered: false,
+    
+    setVisible: function(){
+        $div.show().siblings().hide();
+        $(this.el).css({opacity: 0.0, visibility: 'visible'}).animate({opacity: 1.0}, 800);
+    }
 });
 },{"../templates":5,"underscore":72}],7:[function(require,module,exports){
 var templates = require('../templates');
+
+var $div;
 
 module.exports = Backbone.View.extend({
     
@@ -321,25 +367,41 @@ module.exports = Backbone.View.extend({
     
     render: function(render){
         
+        this.trigger('something');
         render = _.isUndefined(render) ? {} : render;
         
-        $(this.options.el).css({opacity: 0.0, visibility: 'hidden'});
+        $(this.el).css({opacity: 0.0, visibility: 'hidden'});
         
         var tpl = templates.gene(render);
-        $(this.options.el).html(tpl);
         
-        $(this.options.el).css({opacity: 0.0, visibility: 'visible'}).animate({opacity: 1.0}, 800);
+        if( ! _.isUndefined($div) ) $div.remove();  
+        
+        
+        $div = $('<div></div>')
+            .hide()
+            .append(tpl);
+        
+        $(this.el).append($div);
         
         // Select all elements with data-toggle="tooltips" in the document
         $('[data-toggle="tooltip"]').tooltip(); 
+        this.rendered = true;
     },
+    
+    // Returns true if the view element is in the DOM
+    rendered: false,
+    
+    setVisible: function(){
+        $div.show().siblings().hide();
+        $(this.el).css({opacity: 0.0, visibility: 'visible'}).animate({opacity: 1.0}, 800);
+    }
 });
 },{"../templates":5}],8:[function(require,module,exports){
 var _ = require('underscore');
 
 var templates = require('../templates');
 
-var _data = {};
+var _data = {}, $div;
 
 module.exports = Backbone.View.extend({
     
@@ -349,17 +411,29 @@ module.exports = Backbone.View.extend({
     
     render: function(render){
         
-        $('.site-heading').removeClass('header_small');
-        
         render = _.isUndefined(render) ? {} : render;
         
-        $('#content').css({opacity: 0.0, visibility: 'hidden'});
+        $(this.el).css({opacity: 0.0, visibility: 'hidden'});
         
-        var tpl = templates.index(render);    
-        $('#content').html(tpl);
+        var tpl = templates.index(render);
         
-        $('#content').css({opacity: 0.0, visibility: 'visible'}).animate({opacity: 1.0}, 800);
+        $div = $('<div></div>')
+            .hide()
+            .append(tpl);
+        
+        $(this.el).append($div);
+        
+        this.rendered = true;
+    },
+    
+    // Returns true if the view element is in the DOM
+    rendered: false,
+    
+    setVisible: function(){
+        $div.show().siblings().hide();
+        $(this.el).css({opacity: 0.0, visibility: 'visible'}).animate({opacity: 1.0}, 800);
     }
+    
 });
 },{"../templates":5,"underscore":72}],9:[function(require,module,exports){
 var templates = require('../templates');
@@ -393,9 +467,9 @@ var _ = require('underscore');
 var templates = require('../templates');
 
 
-var prev_id = _.uniqueId('prev_id_'), next_id = _.uniqueId('next_id_') ,  zoomout_id = _.uniqueId('zoomout_id_'), browser_search_input = _.uniqueId('search_input_'), gene_search_input = _.uniqueId('search_input_'), search_btn = _.uniqueId('search_btn_'), gene_btn = _.uniqueId('gene_btn_'), browser_btn = _.uniqueId('browser_btn_');
+var prev_id = _.uniqueId('prev_id_'), next_id = _.uniqueId('next_id_') ,  zoomout_id = _.uniqueId('zoomout_id_'), browser_search_input = _.uniqueId('search_input_'), gene_search_input = _.uniqueId('search_input_'), search_btn = _.uniqueId('search_btn_'), gene_btn = _.uniqueId('gene_btn_'), browser_btn = _.uniqueId('browser_btn_'), gene_example = _.uniqueId('gene_example_'), browser_example = _.uniqueId('browser_example_');
 
-var _show_gene = true;
+var _show_gene = true, _links;
 
 function _redirect(url){
     App.router.navigate(url, {trigger: true});
@@ -410,7 +484,8 @@ module.exports = Backbone.View.extend({
     events: {
         'click li' : 'onLiClick',
         'click button' : 'search',
-        'keydown input' : 'keyAction'
+        'keydown input' : 'keyAction',
+        'click a' : 'linkClick'
     },
     
     render: function(render){
@@ -424,6 +499,8 @@ module.exports = Backbone.View.extend({
         render.browser_search_input = browser_search_input;
         render.gene_btn = gene_btn;
         render.browser_btn = browser_btn;
+        render.browser_example = browser_example;
+        render.gene_example = gene_example;
         
         
         var tpl = templates.search(render);
@@ -438,12 +515,6 @@ module.exports = Backbone.View.extend({
             onBrowserButton();
             updateButtons(obj);
         }
-    },
-    
-    updateButtons : function(obj){
-        document.getElementById(prev_id).href = '/#/browser/' + obj.previous;
-        document.getElementById(next_id).href = '/#/browser/' + obj.next;
-        document.getElementById(zoomout_id).href = '/#/browser/' + obj.out;
     },
     
     search: function(){
@@ -463,11 +534,35 @@ module.exports = Backbone.View.extend({
         if(id === gene_btn){
             _show_gene = true;
             this.showGeneView();
+            
+            //this.trigger('showGene');
         }else if(id === browser_btn) {
             _show_gene = false;
             this.showBrowserView();
+            
+            //this.trigger('showBrowser');
         }
         
+    },
+    
+    linkClick: function(e){
+        e.preventDefault();
+        
+        var id = $(e.currentTarget).data('id');
+        
+        if(id === gene_example){
+            App.router.navigate('/gene/sak', {trigger: true});
+        }else if(id === browser_example){
+            App.router.navigate('/browser/3L:21452610-21582843', {trigger: true});
+        }else if(!_.isUndefined(_links)){
+            if(id === prev_id){
+                App.router.navigate('/browser/' + _links.previous, {trigger: true});
+            }else if(id === next_id){
+                App.router.navigate('/browser/' + _links.next, {trigger: true});
+            }else if(id === prev_id){
+                App.router.navigate('/browser/' + _links.out, {trigger: true});
+            }
+        }
     },
     
     keyAction: function(e){
@@ -486,13 +581,9 @@ module.exports = Backbone.View.extend({
     }, 
     
     showBrowserView : function(id, links){
+        _links = links;
         
         if(!_.isUndefined(id)) $( '#' + browser_search_input ).val(id);
-        
-        links = _.isUndefined(links) ? {previous: '', next: '', out: ''} : links;
-        this.updateButtons(links);
-        
-        if(!_.isUndefined(links)) $( '#' + browser_search_input ).val(id);
         
         $( '#' + gene_btn).removeClass('active');
         $( '#' + browser_btn).addClass('active');
