@@ -2,9 +2,9 @@ var _ = require('underscore');
 var templates = require('../templates');
 
 
-var prev_id = _.uniqueId('prev_id_'), next_id = _.uniqueId('next_id_') ,  zoomout_id = _.uniqueId('zoomout_id_'), browser_search_input = _.uniqueId('search_input_'), gene_search_input = _.uniqueId('search_input_'), search_btn = _.uniqueId('search_btn_'), gene_btn = _.uniqueId('gene_btn_'), browser_btn = _.uniqueId('browser_btn_');
+var prev_id = _.uniqueId('prev_id_'), next_id = _.uniqueId('next_id_') ,  zoomout_id = _.uniqueId('zoomout_id_'), browser_search_input = _.uniqueId('search_input_'), gene_search_input = _.uniqueId('search_input_'), search_btn = _.uniqueId('search_btn_'), gene_btn = _.uniqueId('gene_btn_'), browser_btn = _.uniqueId('browser_btn_'), gene_example = _.uniqueId('gene_example_'), browser_example = _.uniqueId('browser_example_');
 
-var _show_gene = true;
+var _show_gene = true, _links;
 
 function _redirect(url){
     App.router.navigate(url, {trigger: true});
@@ -19,7 +19,8 @@ module.exports = Backbone.View.extend({
     events: {
         'click li' : 'onLiClick',
         'click button' : 'search',
-        'keydown input' : 'keyAction'
+        'keydown input' : 'keyAction',
+        'click a' : 'linkClick'
     },
     
     render: function(render){
@@ -33,6 +34,8 @@ module.exports = Backbone.View.extend({
         render.browser_search_input = browser_search_input;
         render.gene_btn = gene_btn;
         render.browser_btn = browser_btn;
+        render.browser_example = browser_example;
+        render.gene_example = gene_example;
         
         
         var tpl = templates.search(render);
@@ -47,12 +50,6 @@ module.exports = Backbone.View.extend({
             onBrowserButton();
             updateButtons(obj);
         }
-    },
-    
-    updateButtons : function(obj){
-        document.getElementById(prev_id).href = '/#/browser/' + obj.previous;
-        document.getElementById(next_id).href = '/#/browser/' + obj.next;
-        document.getElementById(zoomout_id).href = '/#/browser/' + obj.out;
     },
     
     search: function(){
@@ -72,11 +69,35 @@ module.exports = Backbone.View.extend({
         if(id === gene_btn){
             _show_gene = true;
             this.showGeneView();
+            
+            //this.trigger('showGene');
         }else if(id === browser_btn) {
             _show_gene = false;
             this.showBrowserView();
+            
+            //this.trigger('showBrowser');
         }
         
+    },
+    
+    linkClick: function(e){
+        e.preventDefault();
+        
+        var id = $(e.currentTarget).data('id');
+        
+        if(id === gene_example){
+            App.router.navigate('/gene/sak', {trigger: true});
+        }else if(id === browser_example){
+            App.router.navigate('/browser/3L:21452610-21582843', {trigger: true});
+        }else if(!_.isUndefined(_links)){
+            if(id === prev_id){
+                App.router.navigate('/browser/' + _links.previous, {trigger: true});
+            }else if(id === next_id){
+                App.router.navigate('/browser/' + _links.next, {trigger: true});
+            }else if(id === prev_id){
+                App.router.navigate('/browser/' + _links.out, {trigger: true});
+            }
+        }
     },
     
     keyAction: function(e){
@@ -95,13 +116,9 @@ module.exports = Backbone.View.extend({
     }, 
     
     showBrowserView : function(id, links){
+        _links = links;
         
         if(!_.isUndefined(id)) $( '#' + browser_search_input ).val(id);
-        
-        links = _.isUndefined(links) ? {previous: '', next: '', out: ''} : links;
-        this.updateButtons(links);
-        
-        if(!_.isUndefined(links)) $( '#' + browser_search_input ).val(id);
         
         $( '#' + gene_btn).removeClass('active');
         $( '#' + browser_btn).addClass('active');

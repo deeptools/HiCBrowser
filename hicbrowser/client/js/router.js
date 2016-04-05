@@ -4,7 +4,7 @@ var search = new Search({el:'#search'});
 search.render();
 
 var Index = require('./views/index');
-var index = new Index({el:'body'});
+var index = new Index({el:'#content'});
 
 var GeneView = require('./views/gene');
 var geneView = new GeneView({el:'#content'});
@@ -17,12 +17,20 @@ var browserView = new BrowserView({el:'#content'});
 var Gene = require('./models/gene');
 var Browser = require('./models/browser');
 
-
+function setIndex(){
+    if(!index.rendered) index.render();
+    index.setVisible();
+}
 
 var AppRouter = Backbone.Router.extend({
     routes: {
-        "gene/:id": 'getGene',
-        "browser/:id" : 'getBrowser',
+        
+        "gene": 'getGene',
+        "gene/:id": 'getGeneId',
+        
+        "browser" : 'getBrowser',
+        "browser/:id" : 'getBrowserId',
+        
         "*actions": "defaultRoute"
         // Backbone will try to match the route above first
     }
@@ -31,7 +39,12 @@ var AppRouter = Backbone.Router.extend({
 // Instantiate the router
 var app_router = new AppRouter();
 
-app_router.on('route:getGene', function (id) {
+app_router.on('route:getGene', function(){
+    search.showGeneView();
+    setIndex();
+});
+
+app_router.on('route:getGeneId', function (id) {
     var gene = new Gene({id:id});
     
     gene.fetch({
@@ -41,6 +54,7 @@ app_router.on('route:getGene', function (id) {
             
             search.showGeneView(id);
             geneView.render(gene);
+            geneView.setVisible();
         },
         error: function(gene, res){
             
@@ -49,12 +63,17 @@ app_router.on('route:getGene', function (id) {
             var error = { error : text};
             
             search.showGeneView(id);
-            geneView.render(error);
+            //geneView.render(error);
         }
     });
 });
 
-app_router.on('route:getBrowser', function (id) {
+app_router.on('route:getBrowser', function(){
+    search.showBrowserView();
+    setIndex();
+});
+
+app_router.on('route:getBrowserId', function (id) {
     var browser = new Browser({id:id});
     
     browser.fetch({
@@ -65,6 +84,7 @@ app_router.on('route:getBrowser', function (id) {
             
             search.showBrowserView(id, browser);
             browserView.render(browser);
+            browserView.setVisible();
         },
         error: function(browser, res){
             
@@ -79,9 +99,7 @@ app_router.on('route:getBrowser', function (id) {
     });
 });
 
-app_router.on('route:defaultRoute', function (actions) {
-    index.render();
-});
+app_router.on('route:defaultRoute', setIndex);
 
 // Start Backbone history a necessary step for bookmarkable URL's
 Backbone.history.start();

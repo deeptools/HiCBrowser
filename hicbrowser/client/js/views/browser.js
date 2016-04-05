@@ -2,6 +2,8 @@ var _ = require('underscore');
 
 var templates = require('../templates');
 
+var _browser = {}, $div;
+
 function _getParameterByName(name, url) {
     if (!url) url = window.location.href;
     name = name.replace(/[\[\]]/g, "\\$&");
@@ -56,17 +58,32 @@ module.exports = Backbone.View.extend({
     
     render: function(render){
         
+        if(render.region === _browser.region){
+            return;
+        }
+        
         render.tracks = _.sortBy(_.flatten(render.tracks), function(url){
             return + _getParameterByName('id', url);
         });
         
         $(this.options.el).css({opacity: 0.0, visibility: 'hidden'});
         
+        
         var tpl = templates.browser(render);
-        $(this.options.el).html(tpl);
+        
+        if( ! _.isUndefined($div) ) $div.remove();
+        
+        $div = $('<div></div>')
+            .hide()
+            .append(tpl);
+        
+        $(this.el).append($div);
         
         _load_images(document.getElementsByTagName('img'), 6);
-        
-        $(this.options.el).css({opacity: 0.0, visibility: 'visible'}).animate({opacity: 1.0}, 800);
     },
+    
+    setVisible: function(){
+        $div.show().siblings().hide();
+        $(this.el).css({opacity: 0.0, visibility: 'visible'}).animate({opacity: 1.0}, 800);
+    }
 });

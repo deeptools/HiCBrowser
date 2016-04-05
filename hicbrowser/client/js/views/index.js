@@ -2,7 +2,7 @@ var _ = require('underscore');
 
 var templates = require('../templates');
 
-var _data = {};
+var _data = {}, $div;
 
 module.exports = Backbone.View.extend({
     
@@ -12,15 +12,27 @@ module.exports = Backbone.View.extend({
     
     render: function(render){
         
-        $('.site-heading').removeClass('header_small');
-        
         render = _.isUndefined(render) ? {} : render;
         
-        $('#content').css({opacity: 0.0, visibility: 'hidden'});
+        $(this.el).css({opacity: 0.0, visibility: 'hidden'});
         
-        var tpl = templates.index(render);    
-        $('#content').html(tpl);
+        var tpl = templates.index(render);
         
-        $('#content').css({opacity: 0.0, visibility: 'visible'}).animate({opacity: 1.0}, 800);
+        $div = $('<div></div>')
+            .hide()
+            .append(tpl);
+        
+        $(this.el).append($div);
+        
+        this.rendered = true;
+    },
+    
+    // Returns true if the view element is in the DOM
+    rendered: false,
+    
+    setVisible: function(){
+        $div.show().siblings().hide();
+        $(this.el).css({opacity: 0.0, visibility: 'visible'}).animate({opacity: 1.0}, 800);
     }
+    
 });

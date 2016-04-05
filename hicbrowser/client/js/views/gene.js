@@ -1,5 +1,7 @@
 var templates = require('../templates');
 
+var _gene = {}, $div;
+
 module.exports = Backbone.View.extend({
     
     initialize: function(options){
@@ -10,14 +12,29 @@ module.exports = Backbone.View.extend({
         
         render = _.isUndefined(render) ? {} : render;
         
-        $(this.options.el).css({opacity: 0.0, visibility: 'hidden'});
+        if(render.id === _gene.id){
+            return;
+        }
+        
+        $(this.el).css({opacity: 0.0, visibility: 'hidden'});
         
         var tpl = templates.gene(render);
-        $(this.options.el).html(tpl);
         
-        $(this.options.el).css({opacity: 0.0, visibility: 'visible'}).animate({opacity: 1.0}, 800);
+        if( ! _.isUndefined($div) ) $div.remove();  
+        
+        
+        $div = $('<div></div>')
+            .hide()
+            .append(tpl);
+        
+        $(this.el).append($div);
         
         // Select all elements with data-toggle="tooltips" in the document
         $('[data-toggle="tooltip"]').tooltip(); 
     },
+    
+    setVisible: function(){
+        $div.show().siblings().hide();
+        $(this.el).css({opacity: 0.0, visibility: 'visible'}).animate({opacity: 1.0}, 800);
+    }
 });
