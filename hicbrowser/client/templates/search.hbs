@@ -1,0 +1,52 @@
+<ul class="nav nav-pills">
+    <li id="{{gene_btn}}" data-id="{{gene_btn}}" role="presentation" class="active"><a href="#">Search Gene</a></li>
+    <li id="{{browser_btn}}" data-id="{{browser_btn}}" role="presentation"><a href="#">Browse Region</a></li>
+</ul>
+
+<br>
+
+<div class="jumbotron">
+    
+    <div>
+        <div class="input-group input-group-lg">
+            <input id="{{gene_search_input}}" type="text" class="  search-query form-control" placeholder="Type a gene name here ..." />
+            <span class="input-group-btn">
+                <button id="search" class="btn btn-primary" type="button" data-toggle="tooltip" placement="bottom" title="Search!">
+                    <span class="glyphicon glyphicon-search"></span>
+                </button>
+            </span>
+        </div>
+    </div>
+    
+    <div style="display:none">
+        <div class="input-group input-group-lg">
+            <input id="{{browser_search_input}}" type="text" class="  search-query form-control" placeholder="Type the region that you want to see ..." />
+            <span class="input-group-btn">
+                <button id="search" class="btn btn-primary" type="button" data-toggle="tooltip" placement="bottom" title="Search!">
+                    <span class="glyphicon glyphicon-search"></span>
+                </button>
+            </span>
+        </div>
+
+        <br>
+
+        <div class="row">
+            <div class="col-md-2 col-md-offset-5">
+
+                <div id="control-buttons"  class="btn-group" role="group" aria-label="...">
+                    <a id="{{prev_id}}" href="{{previous}}" role="button" class="btn btn-primary" data-toggle="tooltip" placement="bottom" title="Previous">
+                        <span class="glyphicon glyphicon-backward"></span>
+                    </a>
+                    <a id="{{next_id}}" href="{{next}}" role="button" class="btn btn-primary">
+                        <span class="glyphicon glyphicon-forward" data-toggle="tooltip" placement="bottom" title="Next"></span>
+                    </a>
+                    <a id="{{zoomout_id}}" href="{{out}}" role="button" class="btn btn-primary">
+                        <span class="glyphicon glyphicon-zoom-out" data-toggle="tooltip" placement="bottom" title="Zoom-out"></span>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    
+</div>
