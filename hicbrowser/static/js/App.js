@@ -1,33 +1,52 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (global){
-//Required libs
+//Required global libs
 global.jQuery = $ = require('jquery');
 Backbone = require('backbone');
 Backbone.$ = jQuery;
-_ = require('underscore');
 require('bootstrap');
 
 // Views
 var Loading = require('./js/views/loading');
-var loading = new Loading({el:'body'});
+var Search = require('./js/views/search');
+var Index = require('./js/views/index');
+var GeneView = require('./js/views/gene');
+var BrowserView = require('./js/views/browser');
 
 App = {};
 
-//Router
-App.router = require('./js/router');
-
 App.init = function(){
+    
+    //Views
+    App.views = {};
+    App.views.loading = new Loading({el:'body'});
+    App.views.search = new Search({el:'#search'});
+    App.views.index = new Index({el:'#content'});
+    App.views.gene = new GeneView({el:'#content'});
+    App.views.browser = new BrowserView({el:'#content'});
+    
+    App.views.search.render();
+    
+    // Models
+    App.models = {};
+    App.models.Gene = require('./js/models/gene');
+    App.models.Browser = require('./js/models/browser');
+    
+    
+    //Router
+    App.router = require('./js/router');
+    
 
     // listen to ajax
     $(document).ajaxStart(function() {
-        loading.show();
+        App.views.loading.show();
 
     }).ajaxStop(function() {
-        setTimeout(loading.hide, 800);
+        setTimeout(App.views.loading.hide, 800);
     });
     
     // Render loading
-    loading.render();
+    App.views.loading.render();
     
     // Select all elements with data-toggle="tooltips" in the document
     $('[data-toggle="tooltip"]').tooltip(); 
@@ -35,7 +54,7 @@ App.init = function(){
 
 App.init();
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./js/router":4,"./js/views/loading":9,"backbone":12,"bootstrap":14,"jquery":69,"underscore":72}],2:[function(require,module,exports){
+},{"./js/models/browser":2,"./js/models/gene":3,"./js/router":4,"./js/views/browser":6,"./js/views/gene":7,"./js/views/index":8,"./js/views/loading":9,"./js/views/search":10,"backbone":12,"bootstrap":14,"jquery":69}],2:[function(require,module,exports){
 module.exports = Backbone.Model.extend({
     urlRoot: '/browser'
 });
@@ -44,29 +63,7 @@ module.exports = Backbone.Model.extend({
     urlRoot: '/gene'
 });
 },{}],4:[function(require,module,exports){
-// Views
-var Search = require('./views/search');
-var search = new Search({el:'#search'});
-search.render();
-
-var Index = require('./views/index');
-var index = new Index({el:'#content'});
-
-var GeneView = require('./views/gene');
-var geneView = new GeneView({el:'#content'});
-
-
-var BrowserView = require('./views/browser');
-var browserView = new BrowserView({el:'#content'});
-
-// Models
-var Gene = require('./models/gene');
-var Browser = require('./models/browser');
-
-function setIndex(){
-    if(!index.rendered) index.render();
-    index.setVisible();
-}
+var _ = require('underscore');
 
 var AppRouter = Backbone.Router.extend({
     routes: {
@@ -82,25 +79,59 @@ var AppRouter = Backbone.Router.extend({
     }
 });
 
+function setIndex(){
+    if(!App.views.index.rendered) App.views.index.render();
+    App.views.index.setVisible();
+}
+
+var _current = {};
+
+function _renderGene(gene){
+    
+    App.views.search.showGeneView(gene.id);
+    App.views.gene.render(gene);
+    App.views.gene.setVisible();
+}
+
+function _renderBrowser(browser){
+    
+    App.views.search.showBrowserView(browser);
+    App.views.browser.render(browser);
+    App.views.browser.setVisible();
+}
+
 // Instantiate the router
 var app_router = new AppRouter();
 
 app_router.on('route:getGene', function(){
-    search.showGeneView();
+    
+    if(!_.isUndefined(_current.gene)){
+        App.router.navigate('/gene/' + _current.gene.id, {trigger: false});
+        _renderGene(_current.gene);
+        return;
+    }
+    
+    
+    App.views.search.showGeneView();
     setIndex();
 });
 
 app_router.on('route:getGeneId', function (id) {
-    var gene = new Gene({id:id});
+    
+    if(!_.isUndefined(_current.gene) && _current.gene.id === id){
+        _renderGene(_current.gene);
+        return;
+    }
+    
+    var gene = new App.models.Gene({id:id});
     
     gene.fetch({
         success: function(gene){
             
             gene = gene.toJSON();
+            _current.gene = gene;
+            _renderGene(gene);
             
-            search.showGeneView(id);
-            geneView.render(gene);
-            geneView.setVisible();
         },
         error: function(gene, res){
             
@@ -108,29 +139,38 @@ app_router.on('route:getGeneId', function (id) {
             
             var error = { error : text};
             
-            search.showGeneView(id);
+            //search.showGeneView(id);
             //geneView.render(error);
         }
     });
 });
 
 app_router.on('route:getBrowser', function(){
-    search.showBrowserView();
+    
+    if(!_.isUndefined(_current.browser)){
+        App.router.navigate('/browser/' + _current.browser.id, {trigger: false});
+        _renderBrowser(_current.browser);
+        return;
+    }
+    
+    App.views.search.showBrowserView();
     setIndex();
 });
 
 app_router.on('route:getBrowserId', function (id) {
-    var browser = new Browser({id:id});
+    
+    if(!_.isUndefined(_current.browser) && _current.browser.id === id){
+        _renderBrowser(_current.browser);
+        return;
+    }
+    
+    var browser = new App.models.Browser({id:id});
     
     browser.fetch({
         success: function(browser){
-            
             browser = browser.toJSON();
-            
-            
-            search.showBrowserView(id, browser);
-            browserView.render(browser);
-            browserView.setVisible();
+            _current.browser = browser;
+            _renderBrowser(browser);
         },
         error: function(browser, res){
             
@@ -151,7 +191,7 @@ app_router.on('route:defaultRoute', setIndex);
 Backbone.history.start();
 
 module.exports = app_router;
-},{"./models/browser":2,"./models/gene":3,"./views/browser":6,"./views/gene":7,"./views/index":8,"./views/search":10}],5:[function(require,module,exports){
+},{"underscore":72}],5:[function(require,module,exports){
 (function (global){
 var glob = ('undefined' === typeof window) ? global : window,
 
@@ -350,6 +390,7 @@ module.exports = Backbone.View.extend({
     }
 });
 },{"../templates":5,"underscore":72}],7:[function(require,module,exports){
+var _ = require('underscore');
 var templates = require('../templates');
 
 var _gene = {}, $div;
@@ -390,7 +431,7 @@ module.exports = Backbone.View.extend({
         $(this.el).css({opacity: 0.0, visibility: 'visible'}).animate({opacity: 1.0}, 800);
     }
 });
-},{"../templates":5}],8:[function(require,module,exports){
+},{"../templates":5,"underscore":72}],8:[function(require,module,exports){
 var _ = require('underscore');
 
 var templates = require('../templates');
@@ -430,6 +471,8 @@ module.exports = Backbone.View.extend({
     
 });
 },{"../templates":5,"underscore":72}],9:[function(require,module,exports){
+var _ = require('underscore');
+
 var templates = require('../templates');
 
 var _id = _.uniqueId('loading_');
@@ -456,7 +499,7 @@ module.exports = Backbone.View.extend({
         $('#' + _id).modal('hide');
     }
 });
-},{"../templates":5}],10:[function(require,module,exports){
+},{"../templates":5,"underscore":72}],10:[function(require,module,exports){
 var _ = require('underscore');
 var templates = require('../templates');
 
@@ -529,12 +572,13 @@ module.exports = Backbone.View.extend({
             _show_gene = true;
             this.showGeneView();
             
-            //this.trigger('showGene');
+            App.router.navigate('/gene', {trigger: true, replace:true});
+            
         }else if(id === browser_btn) {
             _show_gene = false;
             this.showBrowserView();
             
-            //this.trigger('showBrowser');
+            App.router.navigate('/browser', {trigger: true, replace:true});
         }
         
     },
@@ -574,10 +618,10 @@ module.exports = Backbone.View.extend({
         $( '#' + gene_search_input ).parent().parent().css({opacity: 0.0, display: 'block'}).animate({opacity: 1.0}, 800);
     }, 
     
-    showBrowserView : function(id, links){
+    showBrowserView : function(links){
         _links = links;
         
-        if(!_.isUndefined(id)) $( '#' + browser_search_input ).val(id);
+        if(!_.isUndefined(links)) $( '#' + browser_search_input ).val(links.id);
         
         $( '#' + gene_btn).removeClass('active');
         $( '#' + browser_btn).addClass('active');
