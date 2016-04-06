@@ -1,3 +1,4 @@
+var _ = require('underscore');
 var templates = require('../templates');
 
 var _gene = {}, $div;

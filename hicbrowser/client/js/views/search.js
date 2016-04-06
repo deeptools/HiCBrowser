@@ -70,12 +70,13 @@ module.exports = Backbone.View.extend({
             _show_gene = true;
             this.showGeneView();
             
-            //this.trigger('showGene');
+            App.router.navigate('/gene', {trigger: true, replace:true});
+            
         }else if(id === browser_btn) {
             _show_gene = false;
             this.showBrowserView();
             
-            //this.trigger('showBrowser');
+            App.router.navigate('/browser', {trigger: true, replace:true});
         }
         
     },
@@ -115,10 +116,10 @@ module.exports = Backbone.View.extend({
         $( '#' + gene_search_input ).parent().parent().css({opacity: 0.0, display: 'block'}).animate({opacity: 1.0}, 800);
     }, 
     
-    showBrowserView : function(id, links){
+    showBrowserView : function(links){
         _links = links;
         
-        if(!_.isUndefined(id)) $( '#' + browser_search_input ).val(id);
+        if(!_.isUndefined(links)) $( '#' + browser_search_input ).val(links.id);
         
         $( '#' + gene_btn).removeClass('active');
         $( '#' + browser_btn).addClass('active');

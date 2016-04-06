@@ -1,26 +1,4 @@
-// Views
-var Search = require('./views/search');
-var search = new Search({el:'#search'});
-search.render();
-
-var Index = require('./views/index');
-var index = new Index({el:'#content'});
-
-var GeneView = require('./views/gene');
-var geneView = new GeneView({el:'#content'});
-
-
-var BrowserView = require('./views/browser');
-var browserView = new BrowserView({el:'#content'});
-
-// Models
-var Gene = require('./models/gene');
-var Browser = require('./models/browser');
-
-function setIndex(){
-    if(!index.rendered) index.render();
-    index.setVisible();
-}
+var _ = require('underscore');
 
 var AppRouter = Backbone.Router.extend({
     routes: {
@@ -36,25 +14,59 @@ var AppRouter = Backbone.Router.extend({
     }
 });
 
+function setIndex(){
+    if(!App.views.index.rendered) App.views.index.render();
+    App.views.index.setVisible();
+}
+
+var _current = {};
+
+function _renderGene(gene){
+    
+    App.views.search.showGeneView(gene.id);
+    App.views.gene.render(gene);
+    App.views.gene.setVisible();
+}
+
+function _renderBrowser(browser){
+    
+    App.views.search.showBrowserView(browser);
+    App.views.browser.render(browser);
+    App.views.browser.setVisible();
+}
+
 // Instantiate the router
 var app_router = new AppRouter();
 
 app_router.on('route:getGene', function(){
-    search.showGeneView();
+    
+    if(!_.isUndefined(_current.gene)){
+        App.router.navigate('/gene/' + _current.gene.id, {trigger: false});
+        _renderGene(_current.gene);
+        return;
+    }
+    
+    
+    App.views.search.showGeneView();
     setIndex();
 });
 
 app_router.on('route:getGeneId', function (id) {
-    var gene = new Gene({id:id});
+    
+    if(!_.isUndefined(_current.gene) && _current.gene.id === id){
+        _renderGene(_current.gene);
+        return;
+    }
+    
+    var gene = new App.models.Gene({id:id});
     
     gene.fetch({
         success: function(gene){
             
             gene = gene.toJSON();
+            _current.gene = gene;
+            _renderGene(gene);
             
-            search.showGeneView(id);
-            geneView.render(gene);
-            geneView.setVisible();
         },
         error: function(gene, res){
             
@@ -62,29 +74,38 @@ app_router.on('route:getGeneId', function (id) {
             
             var error = { error : text};
             
-            search.showGeneView(id);
+            //search.showGeneView(id);
             //geneView.render(error);
         }
     });
 });
 
 app_router.on('route:getBrowser', function(){
-    search.showBrowserView();
+    
+    if(!_.isUndefined(_current.browser)){
+        App.router.navigate('/browser/' + _current.browser.id, {trigger: false});
+        _renderBrowser(_current.browser);
+        return;
+    }
+    
+    App.views.search.showBrowserView();
     setIndex();
 });
 
 app_router.on('route:getBrowserId', function (id) {
-    var browser = new Browser({id:id});
+    
+    if(!_.isUndefined(_current.browser) && _current.browser.id === id){
+        _renderBrowser(_current.browser);
+        return;
+    }
+    
+    var browser = new App.models.Browser({id:id});
     
     browser.fetch({
         success: function(browser){
-            
             browser = browser.toJSON();
-            
-            
-            search.showBrowserView(id, browser);
-            browserView.render(browser);
-            browserView.setVisible();
+            _current.browser = browser;
+            _renderBrowser(browser);
         },
         error: function(browser, res){
             

@@ -1,3 +1,5 @@
+var _ = require('underscore');
+
 var templates = require('../templates');
 
 var _id = _.uniqueId('loading_');
