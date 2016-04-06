@@ -50,6 +50,13 @@ module.exports = function(grunt) {
                }
            }
         },
+        uglify: {
+            my_target: {
+                files: {
+                    '../static/js/App.min.js': ['../static/js/App.js']
+                }
+            }
+        },
         watch: {
             scripts: {
                 files: ['index.js', 'styl/*.styl', 'templates/*.hbs'],
@@ -59,7 +66,7 @@ module.exports = function(grunt) {
     });
     
     //Tasks
-    grunt.registerTask('dist', ['jshint', 'handlebars', 'stylus', 'browserify', 'processhtml']);
+    grunt.registerTask('dist', ['jshint', 'handlebars', 'stylus', 'browserify', 'processhtml', 'uglify']);
     
     // Load the plugins
     grunt.loadNpmTasks('grunt-contrib-jshint');
@@ -68,6 +75,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-processhtml');
     grunt.loadNpmTasks('grunt-contrib-handlebars');
     grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-contrib-uglify');
     
     /*grunt.loadNpmTasks('grunt-browserify');
     grunt.loadNpmTasks('grunt-contrib-handlebars');
