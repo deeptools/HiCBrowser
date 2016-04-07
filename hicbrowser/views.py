@@ -8,12 +8,10 @@ from os.path import basename, exists
 
 import json
 
-
 import hicexplorer.trackPlot
 import hicbrowser.utilities
 
 from ConfigParser import SafeConfigParser
-
 
 hicexplorer.trackPlot.DEFAULT_WIDTH_RATIOS = (1, 0.00)
 hicexplorer.trackPlot.DEFAULT_MARGINS = {'left': 0, 'right': 1, 'bottom': 0, 'top': 1}
@@ -60,7 +58,6 @@ track_file = config.get('general', 'tracks')
 tads = hicexplorer.trackPlot.PlotTracks(track_file, fig_width=40, dpi=70)
 
 tad_img_root = config.get('general', 'images folder')
-
 
 with open(genes, 'r') as fh:
     for line in fh.readlines():
@@ -161,46 +158,44 @@ def snap_to_resolution(start, end):
 
     return start, end, current_resolution
 
+
 @app.route('/', methods=['GET'])
 def index():
     return render_template("index.html")
-    
-@app.route('/gene/<gene_name>', methods = ['GET'])
+
+
+@app.route('/gene/<gene_name>', methods=['GET'])
 def get_tad(gene_name):
-	res = "unknown gene"
-	
-	if gene_name:
-		
-		# see if the gene is known
-		tad_pos = get_TAD_for_gene(gene_name)
-		
-		if tad_pos:
-			chromosome, start, end = tad_pos
-			start -= 50000
-			end += 50000
-			
-			# plot
-			outfile = "{}/{}_{}_{}.png".format(tad_img_root,
+    res = "unknown gene"
+    if gene_name:
+        # see if the gene is known
+        tad_pos = get_TAD_for_gene(gene_name)
+        if tad_pos:
+            chromosome, start, end = tad_pos
+            start -= 50000
+            end += 50000
+
+            # plot
+            outfile = "{}/{}_{}_{}.png".format(tad_img_root,
                                                chromosome,
                                                start,
                                                end)
-			if not exists(outfile):
-				tads.plot(outfile, chromosome, start, end)
-			
-			data = {}
-			data['name'] = gene_name
-			data['img'] = outfile
-			data['chromosome'] = chromosome
-			data['start'] = start
-			data['end'] = end
-			res = json.dumps(data)
+            if not exists(outfile):
+                tads.plot(outfile, chromosome, start, end)
 
-	return res
+            data = {}
+            data['name'] = gene_name
+            data['img'] = outfile
+            data['chromosome'] = chromosome
+            data['start'] = start
+            data['end'] = end
+            res = json.dumps(data)
+
+    return res
 
 
 @app.route('/browser/<query>', methods=['GET'])
 def browser(query):
-    
     if query:
         gene_name = query.strip().lower()
         # check if the query is a valid gene name
@@ -211,7 +206,7 @@ def browser(query):
         else:
             chromosome, start, end = get_region(query.strip())
             if end - start < 10000:
-                sys.stderr.write("region to small ({}bp), enlarging it.".format(end-start))
+                sys.stderr.write("region to small ({}bp), enlarging it.".format(end - start))
                 start -= 5000
                 end += 5000
 
@@ -219,7 +214,7 @@ def browser(query):
 
         # split the interval into three parts
         split_range_length = (end - start) / 3
-        ranges = [(start + x * split_range_length, start + (x+1) * split_range_length) for x in range(3)]
+        ranges = [(start + x * split_range_length, start + (x + 1) * split_range_length) for x in range(3)]
         tracks = []
         content = []
         for _range in ranges:
@@ -266,7 +261,7 @@ def browser(query):
         step = None
         start = start
         end = end
-    
+
     data = {}
     data['region'] = region
     data['tracks'] = tracks
@@ -278,8 +273,9 @@ def browser(query):
     data['start'] = start
     data['end'] = end
     json_data = json.dumps(data)
-	
+
     return json_data
+
 
 @app.route('/get_image', methods=['GET'])
 def get_image():
