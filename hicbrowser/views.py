@@ -10,6 +10,8 @@ import json
 
 import hicexplorer.trackPlot
 import hicbrowser.utilities
+import hicbrowser.tracks2json
+
 
 from ConfigParser import SafeConfigParser
 
@@ -55,7 +57,9 @@ gene2pos = {}
 
 # initialize tads tracks
 track_file = config.get('general', 'tracks')
-tads = hicexplorer.trackPlot.PlotTracks(track_file, fig_width=40, dpi=70)
+tads = hicbrowser.tracks2json.SetTracks(track_file, fig_width=40)
+
+#tads = hicexplorer.trackPlot.PlotTracks(track_file, fig_width=40, dpi=70)
 
 tad_img_root = config.get('general', 'images folder')
 
@@ -176,12 +180,14 @@ def get_tad(gene_name):
             end += 50000
 
             # plot
-            outfile = "{}/{}_{}_{}.png".format(tad_img_root,
+            outfile = "{}/{}_{}_{}.json".format(tad_img_root,
                                                chromosome,
                                                start,
                                                end)
             if not exists(outfile):
-                tads.plot(outfile, chromosome, start, end)
+                with open(outfile, 'w') as fh:
+                    sys.stderr.write("Saving json file: {}\n".format(outfile))
+                    fh.write(tads.get_json_interval_values(chromosome, start, end))
 
             data = {}
             data['name'] = gene_name
