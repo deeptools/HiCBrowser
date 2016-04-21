@@ -188,13 +188,19 @@ def get_tad(gene_name):
                 with open(outfile, 'w') as fh:
                     sys.stderr.write("Saving json file: {}\n".format(outfile))
                     fh.write(tads.get_json_interval_values(chromosome, start, end))
-
+            
             data = {}
             data['name'] = gene_name
             data['img'] = outfile
             data['chromosome'] = chromosome
             data['start'] = start
             data['end'] = end
+            
+            d = {}
+            with open(outfile) as tracks:
+                    d = json.load(tracks)
+                    
+            data['tracks'] = d
             res = json.dumps(data)
 
     return res
