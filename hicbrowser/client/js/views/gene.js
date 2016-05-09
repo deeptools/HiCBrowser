@@ -51,6 +51,9 @@ function parseData(data){
                     y: d.bed[2]
                 };
                 
+                if(track.title === 'genes')
+                    feat.description = d.bed[3];
+                
                 if(!_.isUndefined(d.bed[8])) feat.color = rgbToHex.apply(null, d.bed[8]);
                 
                 return feat;
