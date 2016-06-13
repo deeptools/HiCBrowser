@@ -46,7 +46,6 @@ app_router.on('route:getGene', function(){
         return;
     }
     
-    
     App.views.search.showGeneView();
     setIndex();
 });

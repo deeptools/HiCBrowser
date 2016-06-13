@@ -30,7 +30,6 @@ App.init = function(){
     App.models.Gene = require('./js/models/gene');
     App.models.Browser = require('./js/models/browser');
     
-    
     //Router
     App.router = require('./js/router');
     
