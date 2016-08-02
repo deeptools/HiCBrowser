@@ -18,65 +18,6 @@ from ConfigParser import SafeConfigParser
 hicexplorer.trackPlot.DEFAULT_WIDTH_RATIOS = (1, 0.00)
 hicexplorer.trackPlot.DEFAULT_MARGINS = {'left': 0, 'right': 1, 'bottom': 0, 'top': 1}
 
-config = SafeConfigParser()
-config.readfp(open(sys.argv[1], 'r'))
-
-if 'static_folder' in config._sections['general']:
-    print "setting static folder to {}".format(config.get('general', 'static_folder'))
-    app = Flask(__name__, static_folder=config.get('general', 'static_folder'), static_url_path="/static")
-else:
-    app = Flask(__name__)
-
-if 'debug' in config._sections and config.get('general', 'debug') == 'yes':
-    app.debug = True
-
-track_file = config.get("browser", "tracks")
-print track_file
-trp_list = []
-for track in track_file.split(" "):
-    track_list = hicbrowser.utilities.parse_tracks(track)
-    for temp_file_name in track_list:
-        print temp_file_name
-        trp_list.append(hicexplorer.trackPlot.PlotTracks(temp_file_name, fig_width=20, dpi=70))
-        os.unlink(temp_file_name)
-
-img_root = config.get('browser', 'images folder')
-
-# initialize TAD interval tree
-# using the 'TAD intervals' file in the config file
-
-tads_file = config.get('general', 'TAD intervals')
-global tads_intval_tree
-tads_intval_tree, __, __ = hicexplorer.trackPlot.file_to_intervaltree(tads_file)
-
-# initialize gene name to position mapping
-genes = config.get('general', 'genes')
-
-global gene2pos
-gene2pos = {}
-
-# initialize tads tracks
-track_file = config.get('general', 'tracks')
-tads = hicbrowser.tracks2json.SetTracks(track_file, fig_width=40)
-
-#tads = hicexplorer.trackPlot.PlotTracks(track_file, fig_width=40, dpi=70)
-
-tad_img_root = config.get('general', 'images folder')
-
-with open(genes, 'r') as fh:
-    for line in fh.readlines():
-        if line.startswith('browser') or line.startswith('track') or line.startswith('#'):
-            continue
-        gene_chrom, gene_start, gene_end, gene_name = line.strip().split("\t")[0:4]
-        try:
-            gene_start = int(gene_start)
-            gene_end = int(gene_end)
-        except ValueError:
-            sys.stderr.write("Problem with line {}".format(line))
-            pass
-        gene2pos[gene_name.lower()] = (gene_chrom, gene_start, gene_end)
-
-
 def get_TAD_for_gene(gene_name):
     """
     Returs the TAD position of a given gene name
@@ -188,18 +129,18 @@ def get_tad(gene_name):
                 with open(outfile, 'w') as fh:
                     sys.stderr.write("Saving json file: {}\n".format(outfile))
                     fh.write(tads.get_json_interval_values(chromosome, start, end))
-            
+
             data = {}
             data['name'] = gene_name
             data['img'] = outfile
             data['chromosome'] = chromosome
             data['start'] = start
             data['end'] = end
-            
+
             d = {}
             with open(outfile) as tracks:
                     d = json.load(tracks)
-                    
+
             data['tracks'] = d
             res = json.dumps(data)
 
@@ -307,9 +248,68 @@ def get_image():
                                               start,
                                               end,
                                               img_id)
+                                              return None
         if not exists(outfile):
             trp_list[img_id].plot(outfile, chromosome, start, end)
 
         return send_file(os.getcwd() + "/" + outfile, mimetype='image/png')
 
-    return None
+def main(config_file):
+
+    config = SafeConfigParser()
+    config.readfp(open(config_file, 'r')) ## how can i pass config file as an argument??
+
+    if 'static_folder' in config._sections['general']:
+        print "setting static folder to {}".format(config.get('general', 'static_folder'))
+        app = Flask(__name__, static_folder=config.get('general', 'static_folder'), static_url_path="/static")
+    else:
+        app = Flask(__name__)
+
+    if 'debug' in config._sections and config.get('general', 'debug') == 'yes':
+        app.debug = True
+
+    track_file = config.get("browser", "tracks")
+    print track_file
+    trp_list = []
+    for track in track_file.split(" "):
+        track_list = hicbrowser.utilities.parse_tracks(track)
+        for temp_file_name in track_list:
+            print temp_file_name
+            trp_list.append(hicexplorer.trackPlot.PlotTracks(temp_file_name, fig_width=20, dpi=70))
+            os.unlink(temp_file_name)
+
+    img_root = config.get('browser', 'images folder')
+
+    # initialize TAD interval tree
+    # using the 'TAD intervals' file in the config file
+
+    tads_file = config.get('general', 'TAD intervals')
+    global tads_intval_tree
+    tads_intval_tree, __, __ = hicexplorer.trackPlot.file_to_intervaltree(tads_file)
+
+    # initialize gene name to position mapping
+    genes = config.get('general', 'genes')
+
+    global gene2pos
+    gene2pos = {}
+
+    # initialize tads tracks
+    track_file = config.get('general', 'tracks')
+    tads = hicbrowser.tracks2json.SetTracks(track_file, fig_width=40)
+
+    #tads = hicexplorer.trackPlot.PlotTracks(track_file, fig_width=40, dpi=70)
+
+    tad_img_root = config.get('general', 'images folder')
+
+    with open(genes, 'r') as fh:
+        for line in fh.readlines():
+            if line.startswith('browser') or line.startswith('track') or line.startswith('#'):
+                continue
+            gene_chrom, gene_start, gene_end, gene_name = line.strip().split("\t")[0:4]
+            try:
+                gene_start = int(gene_start)
+                gene_end = int(gene_end)
+            except ValueError:
+                sys.stderr.write("Problem with line {}".format(line))
+                pass
+            gene2pos[gene_name.lower()] = (gene_chrom, gene_start, gene_end)
