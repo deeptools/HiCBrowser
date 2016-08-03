@@ -307,10 +307,13 @@ def main(config_file, port, numProc):
                                                   start,
                                                   end,
                                                   img_id)
-            return None
+
             if not exists(outfile):
                 trp_list[img_id].plot(outfile, chromosome, start, end)
 
             return send_file(os.getcwd() + "/" + outfile, mimetype='image/png')
+
+        return None
+
     # run the app
     app.run(host='0.0.0.0', debug=True,use_reloader=False, port=port, processes=numProc)

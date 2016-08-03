@@ -67,6 +67,7 @@ setup(
     packages=['hicbrowser'],
     scripts=['bin/runserver'],
     include_package_data=True,
+    zip_safe=False,
     license='LICENSE',
     description='Simple web browser to visualize Hi-C and other genomic data.',
     long_description=open('README.md').read(),
