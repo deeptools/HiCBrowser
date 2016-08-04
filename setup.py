@@ -65,7 +65,7 @@ setup(
     author='Fidel Ramirez',
     author_email='ramirez@ie-freiburg.mpg.de',
     packages=['hicbrowser'],
-    scripts=['bin/runserver'],
+    scripts=['bin/runBrowser'],
     include_package_data=True,
     zip_safe=False,
     license='LICENSE',
