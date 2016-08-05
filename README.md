@@ -37,9 +37,9 @@ export PYTHONPATH=/path/to/HiCExplorer:/path/to/HiCBrowser
 
 HiCBrowser needs three config files.
 
-+ **region tracks** : To visualize all genomic tracks for given regions. (eg. gene_tracks.ini)
-+ **gene tracks** : To visualize TADs near given gene. (eg. region_tracks.ini)
-+ **browser config file** : To providing information about directories to save images and the two tracks above. (eg. browserConfig.ini)
++ **region tracks** : To visualize all genomic tracks for given regions. (eg. [gene_tracks.ini](./gene_tracks.ini))
++ **gene tracks** : To visualize TADs near given gene. (eg. [region_tracks.ini](./region_tracks.ini))
++ **browser config file** : To providing information about directories to save images and the two tracks above. (eg. [browserConfig.ini](./browserConfig.ini))
 
 We have provided example for each of these files with the package, as shown above.
 
