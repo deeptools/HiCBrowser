@@ -62,8 +62,8 @@ class sdist(_sdist):
 setup(
     name='HiCBrowser',
     version=get_version(),
-    author='Fidel Ramirez',
-    author_email='ramirez@ie-freiburg.mpg.de',
+    author='Fidel Ramirez','José Villaveces','Vivek Bhardwaj'
+    author_email='hicexplorer@googlegroup.com',
     packages=['hicbrowser'],
     scripts=['bin/runBrowser'],
     include_package_data=True,
