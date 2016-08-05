@@ -56,7 +56,7 @@ To run the browser, simply run **runBrowser** command, as shown below.
 # -p = localhost port to run the server
 # -np = number of processors
 
-runBrowser -c <browserConfig.ini> -p <port_number> -np 10 
+runBrowser -c browserConfig.ini -p 8888 -np 10 
 ```
 
 ## Help
