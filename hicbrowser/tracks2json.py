@@ -5,7 +5,6 @@ from collections import OrderedDict
 
 from bx.intervals.intersection import IntervalTree, Interval
 import hicexplorer.readBed
-import hicexplorer.trackPlot
 
 DEFAULT_TRACK_HEIGHT = 3  # in centimeters
 DEFAULT_FIGURE_WIDTH = 40  # in centimeters
