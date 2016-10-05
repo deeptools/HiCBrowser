@@ -8,15 +8,13 @@ from os.path import basename, exists
 
 import json
 
-
 import hicexplorer.trackPlot
 import hicbrowser.utilities
 
 from ConfigParser import SafeConfigParser
 
-
-hicexplorer.trackPlot.DEFAULT_WIDTH_RATIOS = (1, 0.00)
-hicexplorer.trackPlot.DEFAULT_MARGINS = {'left': 0, 'right': 1, 'bottom': 0, 'top': 1}
+hicexplorer.trackPlot.DEFAULT_WIDTH_RATIOS = (0.89, 0.11)
+hicexplorer.trackPlot.DEFAULT_MARGINS = {'left': 0.02, 'right': 0.98, 'bottom': 0, 'top': 1}
 
 config = SafeConfigParser()
 config.readfp(open(sys.argv[1], 'r'))
@@ -37,7 +35,7 @@ for track in track_file.split(" "):
     track_list = hicbrowser.utilities.parse_tracks(track)
     for temp_file_name in track_list:
         print temp_file_name
-        trp_list.append(hicexplorer.trackPlot.PlotTracks(temp_file_name, fig_width=20, dpi=70))
+        trp_list.append(hicexplorer.trackPlot.PlotTracks(temp_file_name, fig_width=40, dpi=70))
         os.unlink(temp_file_name)
 
 img_root = config.get('browser', 'images folder')
@@ -60,7 +58,6 @@ track_file = config.get('general', 'tracks')
 tads = hicexplorer.trackPlot.PlotTracks(track_file, fig_width=40, dpi=70)
 
 tad_img_root = config.get('general', 'images folder')
-
 
 with open(genes, 'r') as fh:
     for line in fh.readlines():
@@ -164,43 +161,42 @@ def snap_to_resolution(start, end):
 @app.route('/', methods=['GET'])
 def index():
     return render_template("index.html")
-    
-@app.route('/gene/<gene_name>', methods = ['GET'])
+
+
+@app.route('/gene/<gene_name>', methods=['GET'])
 def get_tad(gene_name):
-	res = "unknown gene"
-	
-	if gene_name:
-		
-		# see if the gene is known
-		tad_pos = get_TAD_for_gene(gene_name)
-		
-		if tad_pos:
-			chromosome, start, end = tad_pos
-			start -= 50000
-			end += 50000
-			
-			# plot
-			outfile = "{}/{}_{}_{}.png".format(tad_img_root,
+    res = "unknown gene"
+
+    if gene_name:
+
+        # see if the gene is known
+        tad_pos = get_TAD_for_gene(gene_name)
+
+        if tad_pos:
+            chromosome, start, end = tad_pos
+            start -= 50000
+            end += 50000
+
+            # plot
+            outfile = "{}/{}_{}_{}.png".format(tad_img_root,
                                                chromosome,
                                                start,
                                                end)
-			if not exists(outfile):
-				tads.plot(outfile, chromosome, start, end)
-			
-			data = {}
-			data['name'] = gene_name
-			data['img'] = outfile
-			data['chromosome'] = chromosome
-			data['start'] = start
-			data['end'] = end
-			res = json.dumps(data)
+            if not exists(outfile):
+                tads.plot(outfile, chromosome, start, end)
 
-	return res
+            data = {}
+            data['name'] = gene_name
+            data['img'] = outfile
+            data['chromosome'] = chromosome
+            data['start'] = start
+            data['end'] = end
+            res = json.dumps(data)
+    return res
 
 
 @app.route('/browser/<query>', methods=['GET'])
 def browser(query):
-    
     if query:
         gene_name = query.strip().lower()
         # check if the query is a valid gene name
@@ -211,17 +207,29 @@ def browser(query):
         else:
             chromosome, start, end = get_region(query.strip())
             if end - start < 10000:
-                sys.stderr.write("region to small ({}bp), enlarging it.".format(end-start))
+                sys.stderr.write("region to small ({}bp), enlarging it.".format(end - start))
                 start -= 5000
                 end += 5000
 
         start, end, resolution = snap_to_resolution(start, end)
 
+        ### split tracks
         # split the interval into three parts
-        split_range_length = (end - start) / 3
-        ranges = [(start + x * split_range_length, start + (x+1) * split_range_length) for x in range(3)]
         tracks = []
         content = []
+        print "EST"
+        """
+        # this commented code, splits each track into 'split_number' tiles that could be quicker to
+        # generate. For this to take effect the varibles at the top of this file had to be set
+        # as follows:
+
+        # hicexplorer.trackPlot.DEFAULT_WIDTH_RATIOS = (1, 0)
+        # hicexplorer.trackPlot.DEFAULT_MARGINS = {'left': 0, 'right': 1, 'bottom': 0, 'top': 1}
+
+        # the downside of this approach is that the track labels are missing.
+        split_number = 3
+        split_range_length = (end - start) / split_number
+        ranges = [(start + x * split_range_length, start + (x + 1) * split_range_length) for x in range(split_number)]
         for _range in ranges:
             img_code = []
             img_content = []
@@ -235,7 +243,22 @@ def browser(query):
             tracks.append(img_code)
             if len(content) == 0:
                 content.append(" ".join(img_content))
+        ###
+        """
+        img_code = []
+        img_content = []
+        for trp_idx in range(len(trp_list)):
+            figure_path = "/get_image?region={}:{}-{}&id={}".format(chromosome, start, end, trp_idx)
+            img_code.append(figure_path)
 
+            figure_content_path = "/get_image?region={}:|+start+|-|+end+|&id={}".format(chromosome, trp_idx)
+            img_content.append(figure_content_path)
+
+        tracks.append(img_code)
+        if len(content) == 0:
+            content.append(" ".join(img_content))
+
+        print "END"
         content = " ".join(content)
         content = content.replace('"', '\\"')
         content = content.replace('|', '"')
@@ -245,9 +268,7 @@ def browser(query):
         half_rage = view_range / 2
         center = start + half_rage
         zoom_out = "{}:{}-{}".format(chromosome, center - half_rage * 3, center + half_rage * 3)
-        step = ranges[0][1] - ranges[0][0]
-        end = ranges[-1][1]
-        start = ranges[0][0]
+        step = end - start
     else:
         chromosome = ''
         start = ''
@@ -278,7 +299,7 @@ def browser(query):
     data['start'] = start
     data['end'] = end
     json_data = json.dumps(data)
-	
+
     return json_data
 
 @app.route('/get_image', methods=['GET'])
