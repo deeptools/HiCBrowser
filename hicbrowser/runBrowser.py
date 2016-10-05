@@ -15,21 +15,27 @@ def parse_arguments(args=None):
                         help='Configuration file with genomic tracks.',
                         required=True)
 
-    parser.add_argument('--port', '-p' ,
+    parser.add_argument('--port', '-p',
                         help='Local browser port to use.',
                         type=int,
                         default=8000)
 
-    parser.add_argument('--numProcessors', '-np' ,
+    parser.add_argument('--numProcessors', '-np',
                         help='Number of processors to use.',
                         type=int,
                         default=1)
+
+    parser.add_argument('--debug',
+                        help='Set to run the server in debug mode which will '
+                             'print useful information.',
+                        action='store_true')
 
     parser.add_argument('--version', action='version',
                         version='%(prog)s {}'.format(__version__))
 
     return parser
 
+
 def main():
     args = parse_arguments().parse_args()
-    views.main(config_file=args.config, port=args.port, numProc=args.numProcessors)
+    views.main(config_file=args.config, port=args.port, numProc=args.numProcessors, debug=args.debug)
