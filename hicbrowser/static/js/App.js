@@ -16,7 +16,7 @@ var BrowserView = require('./js/views/browser');
 App = {};
 
 App.init = function(){
-    
+
     //Views
     App.views = {};
     App.views.loading = new Loading({el:'body'});
@@ -24,17 +24,17 @@ App.init = function(){
     App.views.index = new Index({el:'#content'});
     App.views.gene = new GeneView({el:'#content'});
     App.views.browser = new BrowserView({el:'#content'});
-    
+
     App.views.search.render();
-    
+
     // Models
     App.models = {};
     App.models.Gene = require('./js/models/gene');
     App.models.Browser = require('./js/models/browser');
-    
+
     //Router
     App.router = require('./js/router');
-    
+
 
     // listen to ajax
     $(document).ajaxStart(function() {
@@ -43,12 +43,12 @@ App.init = function(){
     }).ajaxStop(function() {
         setTimeout(App.views.loading.hide, 800);
     });
-    
+
     // Render loading
     App.views.loading.render();
-    
+
     // Select all elements with data-toggle="tooltips" in the document
-    $('[data-toggle="tooltip"]').tooltip(); 
+    $('[data-toggle="tooltip"]').tooltip();
 };
 
 App.init();
@@ -66,13 +66,13 @@ var _ = require('underscore');
 
 var AppRouter = Backbone.Router.extend({
     routes: {
-        
+
         "gene": 'getGene',
         "gene/:id": 'getGeneId',
-        
+
         "browser" : 'getBrowser',
         "browser/:id" : 'getBrowserId',
-        
+
         "*actions": "defaultRoute"
         // Backbone will try to match the route above first
     }
@@ -86,14 +86,14 @@ function setIndex(){
 var _current = {};
 
 function _renderGene(gene){
-    
+
     App.views.search.showGeneView(gene.id);
     App.views.gene.render(gene);
     App.views.gene.setVisible();
 }
 
 function _renderBrowser(browser){
-    
+
     App.views.search.showBrowserView(browser);
     App.views.browser.render(browser);
     App.views.browser.setVisible();
@@ -103,40 +103,40 @@ function _renderBrowser(browser){
 var app_router = new AppRouter();
 
 app_router.on('route:getGene', function(){
-    
+
     if(!_.isUndefined(_current.gene)){
         App.router.navigate('/gene/' + _current.gene.id, {trigger: false});
         _renderGene(_current.gene);
         return;
     }
-    
+
     App.views.search.showGeneView();
     setIndex();
 });
 
 app_router.on('route:getGeneId', function (id) {
-    
+
     if(!_.isUndefined(_current.gene) && _current.gene.id === id){
         _renderGene(_current.gene);
         return;
     }
-    
+
     var gene = new App.models.Gene({id:id});
-    
+
     gene.fetch({
         success: function(gene){
-            
+
             gene = gene.toJSON();
             _current.gene = gene;
             _renderGene(gene);
-            
+
         },
         error: function(gene, res){
-            
+
             var text = ( res.responseText === 'unknown gene' ) ? 'No results for ' + id : res.responseText;
-            
+
             var error = { error : text};
-            
+
             //search.showGeneView(id);
             //geneView.render(error);
         }
@@ -144,26 +144,26 @@ app_router.on('route:getGeneId', function (id) {
 });
 
 app_router.on('route:getBrowser', function(){
-    
+
     if(!_.isUndefined(_current.browser)){
         App.router.navigate('/browser/' + _current.browser.id, {trigger: false});
         _renderBrowser(_current.browser);
         return;
     }
-    
+
     App.views.search.showBrowserView();
     setIndex();
 });
 
 app_router.on('route:getBrowserId', function (id) {
-    
+
     if(!_.isUndefined(_current.browser) && _current.browser.id === id){
         _renderBrowser(_current.browser);
         return;
     }
-    
+
     var browser = new App.models.Browser({id:id});
-    
+
     browser.fetch({
         success: function(browser){
             browser = browser.toJSON();
@@ -171,11 +171,11 @@ app_router.on('route:getBrowserId', function (id) {
             _renderBrowser(browser);
         },
         error: function(browser, res){
-            
+
             /*var text = ( res.responseText === 'unknown gene' ) ? 'No results for ' + id : res.responseText;
-            
+
             var error = { error : text};
-            
+
             index.setId(gene.name);
             index.slideUp();
             geneView.render(error);*/
@@ -252,7 +252,7 @@ this["Templates"]["gene"] = Handlebars.template({"1":function(container,depth0,h
 },"useData":true});
 
 this["Templates"]["index"] = Handlebars.template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
-    return "<hr>\n<div class=\"row\">\n    <div class=\"col-md-6\">\n        <p>The Drosophila Chorogenome Navigator is simple web browser to visualize <strong>Hi-C</strong> and other genomic tracks. \n        <p>It is based on <strong>HiCExplorer</strong>, a set of programs that enable you to process, normalize, analyze and visualize Hi-C data.</p>\n    </div>\n    <div class=\"col-md-6\">\n        <!-- build:src /static/img/vis.png -->\n        <img class=\"img-responsive\" src=\"../static/img/vis.png\" alt=\"\">\n        <!-- /build -->\n    </div>\n</div>\n<br>\n<br>";
+    return "<hr>\n<div class=\"row\">\n    <div class=\"col-md-6\">\n        <p>HiCBrowser is simple web browser to visualize <strong>Hi-C</strong> and other genomic tracks. \n        <p>It is based on <strong>HiCExplorer</strong>, a set of programs that enable you to process, normalize, analyze and visualize Hi-C data.</p>\n    </div>\n    <div class=\"col-md-6\">\n        <!-- build:src /static/img/vis.png -->\n        <img class=\"img-responsive\" src=\"../static/img/vis.png\" alt=\"\">\n        <!-- /build -->\n    </div>\n</div>\n<br>\n<br>";
 },"useData":true});
 
 this["Templates"]["loading"] = Handlebars.template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
@@ -317,9 +317,9 @@ function _getParameterByName(name, url) {
 }
 
 function _onload(e){
-    
+
     var img = e.target;
-    
+
     var imgWrapper = img.parentNode;
     imgWrapper.className += imgWrapper.className ? ' loaded' : 'loaded';
 }
@@ -327,17 +327,17 @@ function _onload(e){
 function _onerror(e){
     var img = e.target;
     img.src = '/static/img/not_found.png';
-    
+
     var imgWrapper = img.parentNode;
     imgWrapper.className += imgWrapper.className ? ' loaded' : 'loaded';
 }
 
 function _load_images(imgDefer, n, index){
-    
+
     var i = index || 0, j = 0;
     while( i < imgDefer.length && j < n){
         if(imgDefer[i].getAttribute('data-original')) {
-            
+
             imgDefer[i].onload = _onload;
             imgDefer[i].onerror = _onerror;
             imgDefer[i].setAttribute('src', imgDefer[i].getAttribute('data-original'));
@@ -345,7 +345,7 @@ function _load_images(imgDefer, n, index){
         }
         i++;
     }
-    
+
     if(i < imgDefer.length -1 ){
         setTimeout(_load_images, 600, imgDefer, n, i);
     }
@@ -353,37 +353,37 @@ function _load_images(imgDefer, n, index){
 
 
 module.exports = Backbone.View.extend({
-    
+
     initialize: function(options){
         this.options = options;
     },
-    
+
     render: function(render){
-        
+
         if(render.region === _browser.region){
             return;
         }
-        
+
         render.tracks = _.sortBy(_.flatten(render.tracks), function(url){
             return + _getParameterByName('id', url);
         });
-        
+
         $(this.options.el).css({opacity: 0.0, visibility: 'hidden'});
-        
-        
+
+
         var tpl = templates.browser(render);
-        
+
         if( ! _.isUndefined($div) ) $div.remove();
-        
+
         $div = $('<div></div>')
             .hide()
             .append(tpl);
-        
+
         $(this.el).append($div);
-        
+
         _load_images(document.getElementsByTagName('img'), 6);
     },
-    
+
     setVisible: function(){
         $div.show().siblings().hide();
         $(this.el).css({opacity: 0.0, visibility: 'visible'}).animate({opacity: 1.0}, 800);
@@ -408,22 +408,22 @@ function rgbToHex(r, g, b) {
 }
 
 function parseData(data){
-    
+
     var parsed = {};
-    
+
     parsed.tracks = _.compact(_.map(data.tracks, function(track, i){
-        
+
         var feats;
-        
+
         if(track.file_type === 'boundaries'){
-            
+
             parsed.extent = d3.extent(track.x_values);
-            
+
             feats =  _.map(track.x_values, function(d, j){
                 return { x: d, y: track.y_values[j]};
             });
-            
-            
+
+
             return {
                 type: 'line',
                 name: track.section_name,
@@ -433,24 +433,24 @@ function parseData(data){
                 data: feats,
                 interpolation: 'linear'
             };
-            
+
         }else if(track.file_type === 'bed'){
-            
+
             feats = _.map(track.intervals, function(d, j){
-                
+
                 var feat = {
-                    x: d.bed[1], 
+                    x: d.bed[1],
                     y: d.bed[2]
                 };
-                
+
                 if(track.title === 'genes')
                     feat.description = d.bed[3];
-                
+
                 if(!_.isUndefined(d.bed[8])) feat.color = rgbToHex.apply(null, d.bed[8]);
-                
+
                 return feat;
             });
-            
+
             return {
                 type: 'rect',
                 name: track.title,
@@ -458,71 +458,71 @@ function parseData(data){
                 color: 'steelblue'
             };
         }
-        
+
     }));
-    
+
     return parsed;
-    
+
 }
 
 module.exports = Backbone.View.extend({
-    
+
     initialize: function(options){
         this.options = options;
     },
-    
+
     render: function(render){
-        
+
         render = _.isUndefined(render) ? {} : render;
         render.feature_viewer = _feature_viewer_id;
-        
+
         if(render.id === _gene.id){
             return;
         }
-        
+
         $(this.el).css({opacity: 0.0, visibility: 'hidden'});
-        
+
         var tpl = templates.gene(render);
-        
-        if( ! _.isUndefined($div) ) $div.remove();  
-        
-        
+
+        if( ! _.isUndefined($div) ) $div.remove();
+
+
         $div = $('<div></div>')
             .hide()
             .append(tpl);
-        
+
         $(this.el).append($div);
-        
+
         this.renderViewer(render.tracks);
-        
+
         // Select all elements with data-toggle="tooltips" in the document
-        $('[data-toggle="tooltip"]').tooltip(); 
+        $('[data-toggle="tooltip"]').tooltip();
     },
-    
+
     setVisible: function(){
         $div.show().siblings().hide();
         $(this.el).css({opacity: 0.0, visibility: 'visible'}).animate({opacity: 1.0}, 800);
     },
-    
+
     renderViewer: function(tracks){
-        
+
         data = parseData(tracks);
-        
-        
+
+
         var ft = new FeatureViewer(
             data.extent[1],
-            "#"+_feature_viewer_id, 
+            "#"+_feature_viewer_id,
             {
                 showAxis: false,
                 showSequence: false,
                 brushActive: true,
                 toolbar:false,
                 bubbleHelp:false,
-                zoomMax:10, 
+                zoomMax:10,
                 offset: {start: data.extent[0], end: data.extent[1]}
             });
 
-        
+
         _.each(data.tracks, ft.addFeature);
     }
 });
@@ -534,36 +534,36 @@ var templates = require('../templates');
 var _data = {}, $div;
 
 module.exports = Backbone.View.extend({
-    
+
     initialize: function(options){
         this.options = options;
     },
-    
+
     render: function(render){
-        
+
         render = _.isUndefined(render) ? {} : render;
-        
+
         $(this.el).css({opacity: 0.0, visibility: 'hidden'});
-        
+
         var tpl = templates.index(render);
-        
+
         $div = $('<div></div>')
             .hide()
             .append(tpl);
-        
+
         $(this.el).append($div);
-        
+
         this.rendered = true;
     },
-    
+
     // Returns true if the view element is in the DOM
     rendered: false,
-    
+
     setVisible: function(){
         $div.show().siblings().hide();
         $(this.el).css({opacity: 0.0, visibility: 'visible'}).animate({opacity: 1.0}, 800);
     }
-    
+
 });
 },{"../templates":5,"underscore":81}],9:[function(require,module,exports){
 var _ = require('underscore');
@@ -573,20 +573,20 @@ var templates = require('../templates');
 var _id = _.uniqueId('loading_');
 
 module.exports = Backbone.View.extend({
-    
+
     initialize: function(options){
         this.options = options;
     },
-    
+
     render: function(render){
-        
+
         render = _.isUndefined(render) ? {} : render;
         render.id = _id;
-        
-        var tpl = templates.loading(render);    
+
+        var tpl = templates.loading(render);
         $(this.options.el).append(tpl);
     },
-    
+
     show: function(){
         $('#' + _id).modal({show:true, backdrop: 'static', keyboard: false});
     },
@@ -608,22 +608,22 @@ function _redirect(url){
 }
 
 module.exports = Backbone.View.extend({
-    
+
     initialize: function(options){
         this.options = options;
     },
-    
+
     events: {
         'click li' : 'onLiClick',
         'click button' : 'search',
         'keydown input' : 'keyAction',
         'click a' : 'linkClick'
     },
-    
+
     render: function(render){
-        
+
         render = _.isUndefined(render) ? {} : render;
-        
+
         render.prev_id = prev_id;
         render.next_id = next_id;
         render.zoomout_id = zoomout_id;
@@ -633,14 +633,14 @@ module.exports = Backbone.View.extend({
         render.browser_btn = browser_btn;
         render.browser_example = browser_example;
         render.gene_example = gene_example;
-        
-        
+
+
         var tpl = templates.search(render);
         $(this.options.el).html(tpl);
     },
-    
+
     update : function(obj){
-        
+
         if(_.isUndefined(obj.name)){
             onGeneButton();
         }else{
@@ -648,41 +648,41 @@ module.exports = Backbone.View.extend({
             updateButtons(obj);
         }
     },
-    
+
     search: function(){
         var val = (_show_gene) ? $( '#' + gene_search_input).val() : $( '#' + browser_search_input).val();
-        
+
         if(val.length > 0){
             var url = (_show_gene) ? '/gene/' + val : '/browser/' + val;
             App.router.navigate(url, {trigger: true});
         }
     },
-    
+
     onLiClick : function(e){
         e.preventDefault();
-        
+
         var id = $(e.currentTarget).data('id');
-        
+
         if(id === gene_btn){
             _show_gene = true;
             this.showGeneView();
-            
+
             App.router.navigate('/gene', {trigger: true, replace:true});
-            
+
         }else if(id === browser_btn) {
             _show_gene = false;
             this.showBrowserView();
-            
+
             App.router.navigate('/browser', {trigger: true, replace:true});
         }
-        
+
     },
-    
+
     linkClick: function(e){
         e.preventDefault();
-        
+
         var id = $(e.currentTarget).data('id');
-        
+
         if(id === gene_example){
             App.router.navigate('/gene/sak', {trigger: true});
         }else if(id === browser_example){
@@ -692,35 +692,35 @@ module.exports = Backbone.View.extend({
                 App.router.navigate('/browser/' + _links.previous, {trigger: true});
             }else if(id === next_id){
                 App.router.navigate('/browser/' + _links.next, {trigger: true});
-            }else if(id === prev_id){
+            }else if(id === zoomout_id){
                 App.router.navigate('/browser/' + _links.out, {trigger: true});
             }
         }
     },
-    
+
     keyAction: function(e){
         if(e.which === 13) this.search();
     },
-    
+
     showGeneView : function(id){
-        
+
         if(!_.isUndefined(id)) $( '#' + gene_search_input ).val(id);
-        
+
         $( '#' + browser_btn).removeClass('active');
         $( '#' + gene_btn).addClass('active');
-        
+
         $( '#' + browser_search_input ).parent().parent().css({opacity: 0.0, display: 'none'});
         $( '#' + gene_search_input ).parent().parent().css({opacity: 0.0, display: 'block'}).animate({opacity: 1.0}, 800);
-    }, 
-    
+    },
+
     showBrowserView : function(links){
         _links = links;
-        
+
         if(!_.isUndefined(links)) $( '#' + browser_search_input ).val(links.id);
-        
+
         $( '#' + gene_btn).removeClass('active');
         $( '#' + browser_btn).addClass('active');
-        
+
         $( '#' + gene_search_input ).parent().parent().css({opacity: 0.0, display: 'none'});
         $( '#' + browser_search_input ).parent().parent().css({opacity: 0.0, display: 'block'}).animate({opacity: 1.0}, 800);
     }
@@ -6817,7 +6817,7 @@ require('../../js/affix.js')
           svg.remove();
         }
       }
-      if (d3_mouse_bug44083) point.x = e.pageX, point.y = e.pageY; else point.x = e.clientX, 
+      if (d3_mouse_bug44083) point.x = e.pageX, point.y = e.pageY; else point.x = e.clientX,
       point.y = e.clientY;
       point = point.matrixTransform(container.getScreenCTM().inverse());
       return [ point.x, point.y ];
@@ -7192,7 +7192,7 @@ require('../../js/affix.js')
     }
     function mousewheeled() {
       var dispatch = event.of(this, arguments);
-      if (mousewheelTimer) clearTimeout(mousewheelTimer); else d3_selection_interrupt.call(this), 
+      if (mousewheelTimer) clearTimeout(mousewheelTimer); else d3_selection_interrupt.call(this),
       translate0 = location(center0 = center || d3.mouse(this)), zoomstarted(dispatch);
       mousewheelTimer = setTimeout(function() {
         mousewheelTimer = null;
@@ -7561,7 +7561,7 @@ require('../../js/affix.js')
   d3.xhr = d3_xhrType(d3_identity);
   function d3_xhrType(response) {
     return function(url, mimeType, callback) {
-      if (arguments.length === 2 && typeof mimeType === "function") callback = mimeType, 
+      if (arguments.length === 2 && typeof mimeType === "function") callback = mimeType,
       mimeType = null;
       return d3_xhr(url, mimeType, response, callback);
     };
@@ -8402,7 +8402,7 @@ require('../../js/affix.js')
     return n ? (date.y = d3_time_expandYear(+n[0]), i + n[0].length) : -1;
   }
   function d3_time_parseZone(date, string, i) {
-    return /^[+-]\d{4}$/.test(string = string.slice(i, i + 5)) ? (date.Z = -string, 
+    return /^[+-]\d{4}$/.test(string = string.slice(i, i + 5)) ? (date.Z = -string,
     i + 5) : -1;
   }
   function d3_time_expandYear(d) {
@@ -8595,7 +8595,7 @@ require('../../js/affix.js')
     var λ00, φ00, λ0, cosφ0, sinφ0;
     d3_geo_area.point = function(λ, φ) {
       d3_geo_area.point = nextPoint;
-      λ0 = (λ00 = λ) * d3_radians, cosφ0 = Math.cos(φ = (φ00 = φ) * d3_radians / 2 + π / 4), 
+      λ0 = (λ00 = λ) * d3_radians, cosφ0 = Math.cos(φ = (φ00 = φ) * d3_radians / 2 + π / 4),
       sinφ0 = Math.sin(φ);
     };
     function nextPoint(λ, φ) {
@@ -10424,7 +10424,7 @@ require('../../js/affix.js')
       return _ ? center([ -_[1], _[0] ]) : (_ = center(), [ _[1], -_[0] ]);
     };
     projection.rotate = function(_) {
-      return _ ? rotate([ _[0], _[1], _.length > 2 ? _[2] + 90 : 90 ]) : (_ = rotate(), 
+      return _ ? rotate([ _[0], _[1], _.length > 2 ? _[2] + 90 : 90 ]) : (_ = rotate(),
       [ _[0], _[1], _[2] - 90 ]);
     };
     return rotate([ 0, 0, 90 ]);
@@ -11278,7 +11278,7 @@ require('../../js/affix.js')
     };
     quadtree.extent = function(_) {
       if (!arguments.length) return x1 == null ? null : [ [ x1, y1 ], [ x2, y2 ] ];
-      if (_ == null) x1 = y1 = x2 = y2 = null; else x1 = +_[0][0], y1 = +_[0][1], x2 = +_[1][0], 
+      if (_ == null) x1 = y1 = x2 = y2 = null; else x1 = +_[0][0], y1 = +_[0][1], x2 = +_[1][0],
       y2 = +_[1][1];
       return quadtree;
     };
@@ -13003,7 +13003,7 @@ require('../../js/affix.js')
         return d3_layout_treemapPad(node, x);
       }
       var type;
-      pad = (padding = x) == null ? d3_layout_treemapPadNull : (type = typeof x) === "function" ? padFunction : type === "number" ? (x = [ x, x, x, x ], 
+      pad = (padding = x) == null ? d3_layout_treemapPadNull : (type = typeof x) === "function" ? padFunction : type === "number" ? (x = [ x, x, x, x ],
       padConstant) : padConstant;
       return treemap;
     };
@@ -13406,7 +13406,7 @@ require('../../js/affix.js')
     };
     scale.rangePoints = function(x, padding) {
       if (arguments.length < 2) padding = 0;
-      var start = x[0], stop = x[1], step = domain.length < 2 ? (start = (start + stop) / 2, 
+      var start = x[0], stop = x[1], step = domain.length < 2 ? (start = (start + stop) / 2,
       0) : (stop - start) / (domain.length - 1 + padding);
       range = steps(start + step * padding / 2, step);
       rangeBand = 0;
@@ -13418,7 +13418,7 @@ require('../../js/affix.js')
     };
     scale.rangeRoundPoints = function(x, padding) {
       if (arguments.length < 2) padding = 0;
-      var start = x[0], stop = x[1], step = domain.length < 2 ? (start = stop = Math.round((start + stop) / 2), 
+      var start = x[0], stop = x[1], step = domain.length < 2 ? (start = stop = Math.round((start + stop) / 2),
       0) : (stop - start) / (domain.length - 1 + padding) | 0;
       range = steps(start + Math.round(step * padding / 2 + (stop - start - (domain.length - 1 + padding) * step) / 2), step);
       rangeBand = 0;
@@ -13846,7 +13846,7 @@ require('../../js/affix.js')
     return points.length < 4 ? d3_svg_lineLinear(points) : points[1] + d3_svg_lineHermite(points.slice(1, -1), d3_svg_lineCardinalTangents(points, tension));
   }
   function d3_svg_lineCardinalClosed(points, tension) {
-    return points.length < 3 ? d3_svg_lineLinearClosed(points) : points[0] + d3_svg_lineHermite((points.push(points[0]), 
+    return points.length < 3 ? d3_svg_lineLinearClosed(points) : points[0] + d3_svg_lineHermite((points.push(points[0]),
     points), d3_svg_lineCardinalTangents([ points[points.length - 2] ].concat(points, [ points[1] ]), tension));
   }
   function d3_svg_lineCardinal(points, tension) {
@@ -14619,7 +14619,7 @@ require('../../js/affix.js')
         var g = d3.select(this);
         var scale0 = this.__chart__ || scale, scale1 = this.__chart__ = scale.copy();
         var ticks = tickValues == null ? scale1.ticks ? scale1.ticks.apply(scale1, tickArguments_) : scale1.domain() : tickValues, tickFormat = tickFormat_ == null ? scale1.tickFormat ? scale1.tickFormat.apply(scale1, tickArguments_) : d3_identity : tickFormat_, tick = g.selectAll(".tick").data(ticks, scale1), tickEnter = tick.enter().insert("g", ".domain").attr("class", "tick").style("opacity", ε), tickExit = d3.transition(tick.exit()).style("opacity", ε).remove(), tickUpdate = d3.transition(tick.order()).style("opacity", 1), tickSpacing = Math.max(innerTickSize, 0) + tickPadding, tickTransform;
-        var range = d3_scaleRange(scale1), path = g.selectAll(".domain").data([ 0 ]), pathUpdate = (path.enter().append("path").attr("class", "domain"), 
+        var range = d3_scaleRange(scale1), path = g.selectAll(".domain").data([ 0 ]), pathUpdate = (path.enter().append("path").attr("class", "domain"),
         d3.transition(path));
         tickEnter.append("line");
         tickEnter.append("text");
@@ -15207,7 +15207,7 @@ require("bootstrap/js/tooltip.js");
 require("bootstrap/js/popover.js");
 
 var FeatureViewer = require("../src/feature-viewer.js");
- 
+
 //Optionnal : usage with nextprot
 Nextprot = require("nextprot/src/nextprot-core.js");
 NXUtils = require("nextprot/src/nextprot-utils.js")["NXUtils"];
@@ -16406,7 +16406,7 @@ module.exports = FeatureViewer;
           svg.remove();
         }
       }
-      if (d3_mouse_bug44083) point.x = e.pageX, point.y = e.pageY; else point.x = e.clientX, 
+      if (d3_mouse_bug44083) point.x = e.pageX, point.y = e.pageY; else point.x = e.clientX,
       point.y = e.clientY;
       point = point.matrixTransform(container.getScreenCTM().inverse());
       return [ point.x, point.y ];
@@ -16776,7 +16776,7 @@ module.exports = FeatureViewer;
     }
     function mousewheeled() {
       var dispatch = event.of(this, arguments);
-      if (mousewheelTimer) clearTimeout(mousewheelTimer); else d3_selection_interrupt.call(this), 
+      if (mousewheelTimer) clearTimeout(mousewheelTimer); else d3_selection_interrupt.call(this),
       translate0 = location(center0 = center || d3.mouse(this)), zoomstarted(dispatch);
       mousewheelTimer = setTimeout(function() {
         mousewheelTimer = null;
@@ -17146,7 +17146,7 @@ module.exports = FeatureViewer;
   d3.xhr = d3_xhrType(d3_identity);
   function d3_xhrType(response) {
     return function(url, mimeType, callback) {
-      if (arguments.length === 2 && typeof mimeType === "function") callback = mimeType, 
+      if (arguments.length === 2 && typeof mimeType === "function") callback = mimeType,
       mimeType = null;
       return d3_xhr(url, mimeType, response, callback);
     };
@@ -17984,7 +17984,7 @@ module.exports = FeatureViewer;
     return n ? (date.y = d3_time_expandYear(+n[0]), i + n[0].length) : -1;
   }
   function d3_time_parseZone(date, string, i) {
-    return /^[+-]\d{4}$/.test(string = string.slice(i, i + 5)) ? (date.Z = -string, 
+    return /^[+-]\d{4}$/.test(string = string.slice(i, i + 5)) ? (date.Z = -string,
     i + 5) : -1;
   }
   function d3_time_expandYear(d) {
@@ -18177,7 +18177,7 @@ module.exports = FeatureViewer;
     var λ00, φ00, λ0, cosφ0, sinφ0;
     d3_geo_area.point = function(λ, φ) {
       d3_geo_area.point = nextPoint;
-      λ0 = (λ00 = λ) * d3_radians, cosφ0 = Math.cos(φ = (φ00 = φ) * d3_radians / 2 + π / 4), 
+      λ0 = (λ00 = λ) * d3_radians, cosφ0 = Math.cos(φ = (φ00 = φ) * d3_radians / 2 + π / 4),
       sinφ0 = Math.sin(φ);
     };
     function nextPoint(λ, φ) {
@@ -20006,7 +20006,7 @@ module.exports = FeatureViewer;
       return _ ? center([ -_[1], _[0] ]) : (_ = center(), [ _[1], -_[0] ]);
     };
     projection.rotate = function(_) {
-      return _ ? rotate([ _[0], _[1], _.length > 2 ? _[2] + 90 : 90 ]) : (_ = rotate(), 
+      return _ ? rotate([ _[0], _[1], _.length > 2 ? _[2] + 90 : 90 ]) : (_ = rotate(),
       [ _[0], _[1], _[2] - 90 ]);
     };
     return rotate([ 0, 0, 90 ]);
@@ -20860,7 +20860,7 @@ module.exports = FeatureViewer;
     };
     quadtree.extent = function(_) {
       if (!arguments.length) return x1 == null ? null : [ [ x1, y1 ], [ x2, y2 ] ];
-      if (_ == null) x1 = y1 = x2 = y2 = null; else x1 = +_[0][0], y1 = +_[0][1], x2 = +_[1][0], 
+      if (_ == null) x1 = y1 = x2 = y2 = null; else x1 = +_[0][0], y1 = +_[0][1], x2 = +_[1][0],
       y2 = +_[1][1];
       return quadtree;
     };
@@ -22564,7 +22564,7 @@ module.exports = FeatureViewer;
         return d3_layout_treemapPad(node, x);
       }
       var type;
-      pad = (padding = x) == null ? d3_layout_treemapPadNull : (type = typeof x) === "function" ? padFunction : type === "number" ? (x = [ x, x, x, x ], 
+      pad = (padding = x) == null ? d3_layout_treemapPadNull : (type = typeof x) === "function" ? padFunction : type === "number" ? (x = [ x, x, x, x ],
       padConstant) : padConstant;
       return treemap;
     };
@@ -22864,7 +22864,7 @@ module.exports = FeatureViewer;
     scale.tickFormat = function(n, format) {
       if (!arguments.length) return d3_scale_logFormat;
       if (arguments.length < 2) format = d3_scale_logFormat; else if (typeof format !== "function") format = d3.format(format);
-      var k = Math.max(.1, n / scale.ticks().length), f = positive ? (e = 1e-12, Math.ceil) : (e = -1e-12, 
+      var k = Math.max(.1, n / scale.ticks().length), f = positive ? (e = 1e-12, Math.ceil) : (e = -1e-12,
       Math.floor), e;
       return function(d) {
         return d / pow(f(log(d) + e)) <= k ? format(d) : "";
@@ -22964,7 +22964,7 @@ module.exports = FeatureViewer;
     };
     scale.rangePoints = function(x, padding) {
       if (arguments.length < 2) padding = 0;
-      var start = x[0], stop = x[1], step = domain.length < 2 ? (start = (start + stop) / 2, 
+      var start = x[0], stop = x[1], step = domain.length < 2 ? (start = (start + stop) / 2,
       0) : (stop - start) / (domain.length - 1 + padding);
       range = steps(start + step * padding / 2, step);
       rangeBand = 0;
@@ -22976,7 +22976,7 @@ module.exports = FeatureViewer;
     };
     scale.rangeRoundPoints = function(x, padding) {
       if (arguments.length < 2) padding = 0;
-      var start = x[0], stop = x[1], step = domain.length < 2 ? (start = stop = Math.round((start + stop) / 2), 
+      var start = x[0], stop = x[1], step = domain.length < 2 ? (start = stop = Math.round((start + stop) / 2),
       0) : (stop - start) / (domain.length - 1 + padding) | 0;
       range = steps(start + Math.round(step * padding / 2 + (stop - start - (domain.length - 1 + padding) * step) / 2), step);
       rangeBand = 0;
@@ -23399,7 +23399,7 @@ module.exports = FeatureViewer;
     return points.length < 4 ? d3_svg_lineLinear(points) : points[1] + d3_svg_lineHermite(points.slice(1, -1), d3_svg_lineCardinalTangents(points, tension));
   }
   function d3_svg_lineCardinalClosed(points, tension) {
-    return points.length < 3 ? d3_svg_lineLinear(points) : points[0] + d3_svg_lineHermite((points.push(points[0]), 
+    return points.length < 3 ? d3_svg_lineLinear(points) : points[0] + d3_svg_lineHermite((points.push(points[0]),
     points), d3_svg_lineCardinalTangents([ points[points.length - 2] ].concat(points, [ points[1] ]), tension));
   }
   function d3_svg_lineCardinal(points, tension) {
@@ -24157,7 +24157,7 @@ module.exports = FeatureViewer;
         var g = d3.select(this);
         var scale0 = this.__chart__ || scale, scale1 = this.__chart__ = scale.copy();
         var ticks = tickValues == null ? scale1.ticks ? scale1.ticks.apply(scale1, tickArguments_) : scale1.domain() : tickValues, tickFormat = tickFormat_ == null ? scale1.tickFormat ? scale1.tickFormat.apply(scale1, tickArguments_) : d3_identity : tickFormat_, tick = g.selectAll(".tick").data(ticks, scale1), tickEnter = tick.enter().insert("g", ".domain").attr("class", "tick").style("opacity", ε), tickExit = d3.transition(tick.exit()).style("opacity", ε).remove(), tickUpdate = d3.transition(tick.order()).style("opacity", 1), tickSpacing = Math.max(innerTickSize, 0) + tickPadding, tickTransform;
-        var range = d3_scaleRange(scale1), path = g.selectAll(".domain").data([ 0 ]), pathUpdate = (path.enter().append("path").attr("class", "domain"), 
+        var range = d3_scaleRange(scale1), path = g.selectAll(".domain").data([ 0 ]), pathUpdate = (path.enter().append("path").attr("class", "domain"),
         d3.transition(path));
         tickEnter.append("line");
         tickEnter.append("text");
@@ -24764,7 +24764,7 @@ var FeatureViewer = (function () {
         var seqShift = 0;
         var zoom = false;
         var zoomMax = 50;
-        var current_extend = { 
+        var current_extend = {
                     length : offset.end - offset.start,
                     start : offset.start,
                     end : offset.end
@@ -24805,9 +24805,9 @@ var FeatureViewer = (function () {
         var scalingPosition = d3.scale.linear()
             .domain([0, width])
             .range([offset.start, offset.end]);
-        
-        
-        
+
+
+
 
         function updateLineTooltip(mouse,pD){
             var xP = mouse-110;
@@ -24823,7 +24823,7 @@ var FeatureViewer = (function () {
             }
             return elemHover;
         }
-        
+
         d3.helper = {};
 
         d3.helper.tooltip = function (object) {
@@ -24863,7 +24863,7 @@ var FeatureViewer = (function () {
                         'text-align': 'center',
                         position: 'absolute',
                         'z-index': 45,
-                        'box-shadow': '0 1px 2px 0 #656565' 
+                        'box-shadow': '0 1px 2px 0 #656565'
                     });
                     if (object.type === "path") {
                         var first_line = '<p style="margin:2px;color:white">start : <span style="color:orangered">' + pD[0].x + '</span></p>';
@@ -24896,7 +24896,7 @@ var FeatureViewer = (function () {
                     }
                 })
                     .on('mousemove.tooltip', function (pD, pI) {
-                    
+
                         if (object.type === "line") {
                             var absoluteMousePos = d3.mouse(bodyNode);
                             var elemHover = updateLineTooltip(absoluteMousePos[0],pD);
@@ -24910,7 +24910,7 @@ var FeatureViewer = (function () {
                             }
                             tooltipDiv.html(first_line + second_line);
 //                            $('#tLineX').text(elemHover.x);
-//                            $('#tLineC').text(elemHover.y);  
+//                            $('#tLineC').text(elemHover.y);
                         }
                         // Move tooltip
                         // IE 11 sometimes fires mousemove before mouseover
@@ -25125,7 +25125,7 @@ var FeatureViewer = (function () {
                 return -d.y * 10 + pathLevel;
             });
         var lineGen = d3.svg.line()
-          
+
 //          .interpolate("cardinal")
           .x(function(d) {
             return scaling(d.x);
@@ -25150,7 +25150,7 @@ var FeatureViewer = (function () {
             .scale(scaling)
             .tickFormat(d3.format("d"))
             .orient("bottom");
-        
+
         function shadeBlendConvert(p, from, to) {
             if(typeof(p)!="number"||p<-1||p>1||typeof(from)!="string"||(from[0]!='r'&&from[0]!='#')||(typeof(to)!="string"&&typeof(to)!="undefined"))return null; //ErrorCheck
             if(!this.sbcRip)this.sbcRip=function(d){
@@ -25301,7 +25301,7 @@ var FeatureViewer = (function () {
                     }
                     var maxValue = Math.max.apply(Math,object.data[i].map(function(o){return Math.abs(o.y);}));
                     level = maxValue > level ? maxValue : level;
-                    
+
 
                     object.data[i] = [object.data[i].map(function (d) {
                         return {
@@ -25412,7 +25412,7 @@ var FeatureViewer = (function () {
             rectangle: function (object, position) {
                 //var rectShift = 20;
                 var rectHeight =(object.height) ? object.height : 12;
-                
+
                 var rectShift = rectHeight + rectHeight/3;
                 var lineShift = rectHeight/2 - 6;
 //                var lineShift = rectHeight/2 - 6;
@@ -25421,7 +25421,7 @@ var FeatureViewer = (function () {
                     .attr("class", "rectangle")
                     .attr("clip-path", "url(#clip)")
                     .attr("transform", "translate(0," + position + ")");
-                
+
                 var dataline=[];
                 for (var i = 0; i < level; i++) {
                     dataline.push([{
@@ -25521,7 +25521,7 @@ var FeatureViewer = (function () {
                         x: fvLength,
                         y: 0
                     }]);
-                
+
                 rectsPro.selectAll(".line" + object.className)
                     .data(dataline)
                     .enter()
@@ -25569,7 +25569,7 @@ var FeatureViewer = (function () {
                         x: fvLength,
                         y: 0
                     }]);
-                
+
                 pathsDB.selectAll(".line" + object.className)
                     .data(dataline)
                     .enter()
@@ -25614,7 +25614,7 @@ var FeatureViewer = (function () {
                         x: fvLength,
                         y: 0
                     }]);
-                
+
                 histog.selectAll(".line" + object.className)
                     .data(dataline)
                     .enter()
@@ -25640,7 +25640,7 @@ var FeatureViewer = (function () {
 //                    .style("shape-rendering", "crispEdges")
                     .call(d3.helper.tooltip(object));
                 })
-                
+
                 forcePropagation(histog);
             },
             multipleRect: function (object, position, level) {
@@ -25852,7 +25852,7 @@ var FeatureViewer = (function () {
                 else {
                     transit = svgContainer.selectAll("." + object.className);
                 }
-                
+
                 transit
                     .attr("d", lineGen.y(function (d) {
                         return lineYscale(-d.y) * 10 + object.shift;
@@ -25921,10 +25921,10 @@ var FeatureViewer = (function () {
                 current_extend.length = extentLength;
                 var zoomScale = (fvLength / extentLength).toFixed(1);
                 $(div + " .zoomUnit").text(zoomScale.toString());
-                
-//                scaling.range([5,width-5]); 
+
+//                scaling.range([5,width-5]);
                 if (SVGOptions.showSequence && !(intLength) && seq && svgContainer.selectAll(".AA").empty()) {
-                    current_extend = { 
+                    current_extend = {
                     length : extentLength,
                     start : start,
                     end : end
@@ -25939,7 +25939,7 @@ var FeatureViewer = (function () {
                 scaling.domain(extent);
                 scalingPosition.range(extent);
                 var currentShift = seqShift ? seqShift : offset.start;
-                
+
 
                 transition_data(features, currentShift);
                 reset_axis();
@@ -25964,21 +25964,21 @@ var FeatureViewer = (function () {
                 d3.select(div+" .background").attr("width", width);
             }
             d3.select(div).selectAll(".brush").call(brush.clear());
-            
+
 //            var currentSeqLength = svgContainer.selectAll(".AA").size();
             var seq = displaySequence(current_extend.length);
             if (SVGOptions.showSequence && !(intLength)){
                 if (seq === false && !svgContainer.selectAll(".AA").empty()) {svgContainer.selectAll(".seqGroup").remove();}
                 else if (seq === true && svgContainer.selectAll(".AA").empty()) {fillSVG.sequence(sequence.substring(current_extend.start-1, current_extend.end), 20, current_extend.start-1);}
             }
-            
+
 //            console.log(current_extend);
             scaling.range([5,width-5]);
             scalingPosition.domain([0, width]);
-            
+
             transition_data(features, current_extend.start);
             reset_axis();
-            
+
         }
 
         // If brush is too small, reset view as origin
@@ -25990,7 +25990,7 @@ var FeatureViewer = (function () {
             scaling.domain([offset.start, offset.end]);
             scalingPosition.range([offset.start, offset.end]);
             var seq = displaySequence(offset.end - offset.start);
-            
+
             if (SVGOptions.showSequence && !(intLength)){
                 if (seq === false && !svgContainer.selectAll(".AA").empty()) svgContainer.selectAll(".seqGroup").remove();
                 else if (current_extend.length !== fvLength && seq === true && !svgContainer.selectAll(".AA").empty()) {
@@ -25999,13 +25999,13 @@ var FeatureViewer = (function () {
                 }
             }
 
-            current_extend={ 
+            current_extend={
                     length : offset.end-offset.start,
                     start : offset.start,
                     end : offset.end
                 };
             seqShift=0;
-            
+
             transition_data(features, offset.start);
             reset_axis();
             d3.select(div).selectAll(".brush").call(brush.clear());
@@ -26283,7 +26283,7 @@ var FeatureViewer = (function () {
                 .attr("in", "SourceGraphic");
 
             svgContainer.on('mousemove', function () {
-                var absoluteMousePos = SVGOptions.brushActive ? d3.mouse(d3.select(".background").node()) : d3.mouse(svgContainer.node());; 
+                var absoluteMousePos = SVGOptions.brushActive ? d3.mouse(d3.select(".background").node()) : d3.mouse(svgContainer.node());;
                 $(div + " #zoomPosition").text(Math.round(scalingPosition(absoluteMousePos[0])));
             });
 
@@ -26396,7 +26396,7 @@ function mergeData(oneData, metaData, viewer) {
 }
 
 function getFeaturesByview(nx, list, entry) {
-    
+
     var data = [];
     for (var feat in list) {
         switch (list[feat]) {
@@ -26430,7 +26430,7 @@ function addNxFeature(featuresName, featuresStyle) {
                 console.log("Argh, broken: " + err.message);
                 console.log("Error at line : " + err.stack);
             });
-        
+
     });
 }
 
@@ -44225,8 +44225,8 @@ var NXUtils = {
         else return a.name > b.name;
     },
     sortByAlphabet: function(a,b) {
-        var a = typeof a === "string" ? a : a.name ? a.name : null;        
-        var b = typeof b === "string" ? b : b.name ? b.name : null;        
+        var a = typeof a === "string" ? a : a.name ? a.name : null;
+        var b = typeof b === "string" ? b : b.name ? b.name : null;
         if (a < b) return -1;
         if (a > b) return 1;
         return 0;

@@ -95,7 +95,7 @@ module.exports = Backbone.View.extend({
                 App.router.navigate('/browser/' + _links.previous, {trigger: true});
             }else if(id === next_id){
                 App.router.navigate('/browser/' + _links.next, {trigger: true});
-            }else if(id === prev_id){
+            }else if(id === zoomout_id){
                 App.router.navigate('/browser/' + _links.out, {trigger: true});
             }
         }

@@ -1,0 +1,3 @@
+recursive-include hicbrowser/templates *
+recursive-include hicbrowser/static *
+recursive-include hicbrowser/client *
