@@ -62,13 +62,14 @@ class sdist(_sdist):
 setup(
     name='HiCBrowser',
     version=get_version(),
-    author='Fidel Ramirez',
+    author='Fidel Ramirez, José Villaveces, Vivek Bhardwaj',
     author_email='ramirez@ie-freiburg.mpg.de',
     packages=['hicbrowser'],
-    scripts=['bin/runserver.py'],
+    scripts=['bin/runBrowser'],
     include_package_data=True,
+    zip_safe=False,
     license='LICENSE',
-    description='Simple web browser to visualize Hi-C and other genomid data.',
+    description='Simple web browser to visualize Hi-C and other genomic data.',
     long_description=open('README.md').read(),
     install_requires=[
         "Flask==0.10.1",

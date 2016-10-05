@@ -16,63 +16,6 @@ from ConfigParser import SafeConfigParser
 hicexplorer.trackPlot.DEFAULT_WIDTH_RATIOS = (0.89, 0.11)
 hicexplorer.trackPlot.DEFAULT_MARGINS = {'left': 0.02, 'right': 0.98, 'bottom': 0, 'top': 1}
 
-config = SafeConfigParser()
-config.readfp(open(sys.argv[1], 'r'))
-
-if 'static_folder' in config._sections['general']:
-    print "setting static folder to {}".format(config.get('general', 'static_folder'))
-    app = Flask(__name__, static_folder=config.get('general', 'static_folder'), static_url_path="/static")
-else:
-    app = Flask(__name__)
-
-if 'debug' in config._sections and config.get('general', 'debug') == 'yes':
-    app.debug = True
-
-track_file = config.get("browser", "tracks")
-print track_file
-trp_list = []
-for track in track_file.split(" "):
-    track_list = hicbrowser.utilities.parse_tracks(track)
-    for temp_file_name in track_list:
-        print temp_file_name
-        trp_list.append(hicexplorer.trackPlot.PlotTracks(temp_file_name, fig_width=40, dpi=70))
-        os.unlink(temp_file_name)
-
-img_root = config.get('browser', 'images folder')
-
-# initialize TAD interval tree
-# using the 'TAD intervals' file in the config file
-
-tads_file = config.get('general', 'TAD intervals')
-global tads_intval_tree
-tads_intval_tree, __, __ = hicexplorer.trackPlot.file_to_intervaltree(tads_file)
-
-# initialize gene name to position mapping
-genes = config.get('general', 'genes')
-
-global gene2pos
-gene2pos = {}
-
-# initialize tads tracks
-track_file = config.get('general', 'tracks')
-tads = hicexplorer.trackPlot.PlotTracks(track_file, fig_width=40, dpi=70)
-
-tad_img_root = config.get('general', 'images folder')
-
-with open(genes, 'r') as fh:
-    for line in fh.readlines():
-        if line.startswith('browser') or line.startswith('track') or line.startswith('#'):
-            continue
-        gene_chrom, gene_start, gene_end, gene_name = line.strip().split("\t")[0:4]
-        try:
-            gene_start = int(gene_start)
-            gene_end = int(gene_end)
-        except ValueError:
-            sys.stderr.write("Problem with line {}".format(line))
-            pass
-        gene2pos[gene_name.lower()] = (gene_chrom, gene_start, gene_end)
-
-
 def get_TAD_for_gene(gene_name):
     """
     Returs the TAD position of a given gene name
@@ -158,83 +101,146 @@ def snap_to_resolution(start, end):
 
     return start, end, current_resolution
 
-@app.route('/', methods=['GET'])
-def index():
-    return render_template("index.html")
 
+def main(config_file, port, numProc, debug=False):
 
-@app.route('/gene/<gene_name>', methods=['GET'])
-def get_tad(gene_name):
-    res = "unknown gene"
+    config = SafeConfigParser()
+    config.readfp(open(config_file, 'r'))
 
-    if gene_name:
+    if 'static_folder' in config._sections['general']:
+        print "setting static folder to {}".format(config.get('general', 'static_folder'))
+        app = Flask(__name__, static_folder=config.get('general', 'static_folder'), static_url_path="/static")
+    else:
+        app = Flask(__name__)
 
-        # see if the gene is known
-        tad_pos = get_TAD_for_gene(gene_name)
+    track_file = config.get("browser", "tracks")
+    print track_file
+    trp_list = []
+    for track in track_file.split(" "):
+        track_list = hicbrowser.utilities.parse_tracks(track)
+        for temp_file_name in track_list:
+            print temp_file_name
+            trp_list.append(hicexplorer.trackPlot.PlotTracks(temp_file_name, fig_width=40, dpi=70))
+            os.unlink(temp_file_name)
 
-        if tad_pos:
-            chromosome, start, end = tad_pos
-            start -= 50000
-            end += 50000
+    img_root = config.get('browser', 'images folder')
 
-            # plot
-            outfile = "{}/{}_{}_{}.png".format(tad_img_root,
-                                               chromosome,
-                                               start,
-                                               end)
-            if not exists(outfile):
-                tads.plot(outfile, chromosome, start, end)
+    # initialize TAD interval tree
+    # using the 'TAD intervals' file in the config file
 
-            data = {}
-            data['name'] = gene_name
-            data['img'] = outfile
-            data['chromosome'] = chromosome
-            data['start'] = start
-            data['end'] = end
-            res = json.dumps(data)
-    return res
+    tads_file = config.get('general', 'TAD intervals')
+    global tads_intval_tree
+    tads_intval_tree, __, __ = hicexplorer.trackPlot.file_to_intervaltree(tads_file)
 
+    # initialize gene name to position mapping
+    genes = config.get('general', 'genes')
 
-@app.route('/browser/<query>', methods=['GET'])
-def browser(query):
-    if query:
-        gene_name = query.strip().lower()
-        # check if the query is a valid gene name
-        if gene_name in gene2pos:
-            chromosome, start, end = gene2pos[gene_name]
-            start -= 50000
-            end += 50000
-        else:
-            chromosome, start, end = get_region(query.strip())
-            if end - start < 10000:
-                sys.stderr.write("region to small ({}bp), enlarging it.".format(end - start))
-                start -= 5000
-                end += 5000
+    global gene2pos
+    gene2pos = {}
 
-        start, end, resolution = snap_to_resolution(start, end)
+    # initialize tads tracks
+    track_file = config.get('general', 'tracks')
+    tads = hicexplorer.trackPlot.PlotTracks(track_file, fig_width=40, dpi=70)
 
-        ### split tracks
-        # split the interval into three parts
-        tracks = []
-        content = []
-        print "EST"
-        """
-        # this commented code, splits each track into 'split_number' tiles that could be quicker to
-        # generate. For this to take effect the varibles at the top of this file had to be set
-        # as follows:
+    tad_img_root = config.get('general', 'images folder')
 
-        # hicexplorer.trackPlot.DEFAULT_WIDTH_RATIOS = (1, 0)
-        # hicexplorer.trackPlot.DEFAULT_MARGINS = {'left': 0, 'right': 1, 'bottom': 0, 'top': 1}
+    with open(genes, 'r') as fh:
+        for line in fh.readlines():
+            if line.startswith('browser') or line.startswith('track') or line.startswith('#'):
+                continue
+            gene_chrom, gene_start, gene_end, gene_name = line.strip().split("\t")[0:4]
+            try:
+                gene_start = int(gene_start)
+                gene_end = int(gene_end)
+            except ValueError:
+                sys.stderr.write("Problem with line {}".format(line))
+                pass
+            gene2pos[gene_name.lower()] = (gene_chrom, gene_start, gene_end)
 
-        # the downside of this approach is that the track labels are missing.
-        split_number = 3
-        split_range_length = (end - start) / split_number
-        ranges = [(start + x * split_range_length, start + (x + 1) * split_range_length) for x in range(split_number)]
-        for _range in ranges:
+    @app.route('/', methods=['GET'])
+    def index():
+        return render_template("index.html")
+
+    @app.route('/gene/<gene_name>', methods=['GET'])
+    def get_tad(gene_name):
+        res = "unknown gene"
+        if gene_name:
+            # see if the gene is known
+            tad_pos = get_TAD_for_gene(gene_name)
+            if tad_pos:
+                chromosome, start, end = tad_pos
+                start -= 50000
+                end += 50000
+
+                # plot
+                outfile = "{}/{}_{}_{}.png".format(tad_img_root,
+                                                   chromosome,
+                                                   start,
+                                                   end)
+                if not exists(outfile):
+                    tads.plot(outfile, chromosome, start, end)
+
+                data = {}
+                data['name'] = gene_name
+                data['img'] = outfile
+                data['chromosome'] = chromosome
+                data['start'] = start
+                data['end'] = end
+                res = json.dumps(data)
+        return res
+
+    @app.route('/browser/<query>', methods=['GET'])
+    def browser(query):
+        if query:
+            gene_name = query.strip().lower()
+            # check if the query is a valid gene name
+            if gene_name in gene2pos:
+                chromosome, start, end = gene2pos[gene_name]
+                start -= 50000
+                end += 50000
+            else:
+                chromosome, start, end = get_region(query.strip())
+                if end - start < 10000:
+                    sys.stderr.write("region to small ({}bp), enlarging it.".format(end - start))
+                    start -= 5000
+                    end += 5000
+
+            start, end, resolution = snap_to_resolution(start, end)
+            ### split tracks
+            # split the interval into three parts
+            tracks = []
+            content = []
+            """
+            # this commented code, splits each track into 'split_number' tiles that could be quicker to
+            # generate. For this to take effect the varibles at the top of this file had to be set
+            # as follows:
+
+            # hicexplorer.trackPlot.DEFAULT_WIDTH_RATIOS = (1, 0)
+            # hicexplorer.trackPlot.DEFAULT_MARGINS = {'left': 0, 'right': 1, 'bottom': 0, 'top': 1}
+
+            # the downside of this approach is that the track labels are missing.
+            split_number = 3
+            split_range_length = (end - start) / split_number
+            ranges = [(start + x * split_range_length, start + (x + 1) * split_range_length) for x in range(split_number)]
+            for _range in ranges:
+                img_code = []
+                img_content = []
+                for trp_idx in range(len(trp_list)):
+                    figure_path = "/get_image?region={}:{}-{}&id={}".format(chromosome, _range[0], _range[1], trp_idx)
+                    img_code.append(figure_path)
+
+                    figure_content_path = "/get_image?region={}:|+start+|-|+end+|&id={}".format(chromosome, trp_idx)
+                    img_content.append(figure_content_path)
+
+                tracks.append(img_code)
+                if len(content) == 0:
+                    content.append(" ".join(img_content))
+            ###
+            """
             img_code = []
             img_content = []
             for trp_idx in range(len(trp_list)):
-                figure_path = "/get_image?region={}:{}-{}&id={}".format(chromosome, _range[0], _range[1], trp_idx)
+                figure_path = "/get_image?region={}:{}-{}&id={}".format(chromosome, start, end, trp_idx)
                 img_code.append(figure_path)
 
                 figure_content_path = "/get_image?region={}:|+start+|-|+end+|&id={}".format(chromosome, trp_idx)
@@ -243,86 +249,74 @@ def browser(query):
             tracks.append(img_code)
             if len(content) == 0:
                 content.append(" ".join(img_content))
-        ###
-        """
-        img_code = []
-        img_content = []
-        for trp_idx in range(len(trp_list)):
-            figure_path = "/get_image?region={}:{}-{}&id={}".format(chromosome, start, end, trp_idx)
-            img_code.append(figure_path)
 
-            figure_content_path = "/get_image?region={}:|+start+|-|+end+|&id={}".format(chromosome, trp_idx)
-            img_content.append(figure_content_path)
+            content = " ".join(content)
+            content = content.replace('"', '\\"')
+            content = content.replace('|', '"')
+            view_range = end - start
+            prev_query_str = "{}:{}-{}".format(chromosome, start - view_range, end - view_range)
+            next_query_str = "{}:{}-{}".format(chromosome, start + view_range, end + view_range)
+            half_rage = view_range / 2
+            center = start + half_rage
+            zoom_out = "{}:{}-{}".format(chromosome, center - half_rage * 3, center + half_rage * 3)
+            step = end - start
+        else:
+            chromosome = ''
+            start = ''
+            end = ''
+            figure_path = '/static/img/region_ctcf_30_50.png'
 
-        tracks.append(img_code)
-        if len(content) == 0:
-            content.append(" ".join(img_content))
+        if chromosome:
+            region = "{}:{}-{}".format(chromosome, start, end)
+        else:
+            region = ''
+            prev_query_str = None
+            next_query_str = None
+            zoom_out = None
+            content = None
+            tracks = figure_path
+            step = None
+            start = start
+            end = end
 
-        print "END"
-        content = " ".join(content)
-        content = content.replace('"', '\\"')
-        content = content.replace('|', '"')
-        view_range = end - start
-        prev_query_str = "{}:{}-{}".format(chromosome, start - view_range, end - view_range)
-        next_query_str = "{}:{}-{}".format(chromosome, start + view_range, end + view_range)
-        half_rage = view_range / 2
-        center = start + half_rage
-        zoom_out = "{}:{}-{}".format(chromosome, center - half_rage * 3, center + half_rage * 3)
-        step = end - start
-    else:
-        chromosome = ''
-        start = ''
-        end = ''
-        figure_path = '/static/img/region_ctcf_30_50.png'
+        data = {}
+        data['region'] = region
+        data['tracks'] = tracks
+        data['next'] = next_query_str
+        data['previous'] = prev_query_str
+        data['out'] = zoom_out
+        data['step'] = step
+        data['content'] = content
+        data['start'] = start
+        data['end'] = end
+        json_data = json.dumps(data)
 
-    if chromosome:
-        region = "{}:{}-{}".format(chromosome, start, end)
-    else:
-        region = ''
-        prev_query_str = None
-        next_query_str = None
-        zoom_out = None
-        content = None
-        tracks = figure_path
-        step = None
-        start = start
-        end = end
-    
-    data = {}
-    data['region'] = region
-    data['tracks'] = tracks
-    data['next'] = next_query_str
-    data['previous'] = prev_query_str
-    data['out'] = zoom_out
-    data['step'] = step
-    data['content'] = content
-    data['start'] = start
-    data['end'] = end
-    json_data = json.dumps(data)
+        return json_data
 
-    return json_data
+    @app.route('/get_image', methods=['GET'])
+    def get_image():
+        query = request.args.get('region', None)
+        img_id = request.args.get('id', None)
+        try:
+            img_id = int(img_id)
+        except ValueError:
+            sys.stderr.write('track id not a number')
+            return None
+        if query:
+            query = query.strip()
+            chromosome, start, end = get_region(query)
 
-@app.route('/get_image', methods=['GET'])
-def get_image():
-    query = request.args.get('region', None)
-    img_id = request.args.get('id', None)
-    try:
-        img_id = int(img_id)
-    except ValueError:
-        sys.stderr.write('track id not a number')
+            outfile = "{}/{}_{}_{}_{}.png".format(img_root,
+                                                  chromosome,
+                                                  start,
+                                                  end,
+                                                  img_id)
+            if not exists(outfile):
+                trp_list[img_id].plot(outfile, chromosome, start, end)
+
+            return send_file(os.getcwd() + "/" + outfile, mimetype='image/png')
+
         return None
-    if query:
-        query = query.strip()
-        chromosome, start, end = get_region(query)
 
-        outfile = "{}/{}_{}_{}_{}.png".format(img_root,
-                                              chromosome,
-                                              start,
-                                              end,
-                                              img_id)
-        if not exists(outfile):
-            trp_list[img_id].plot(outfile, chromosome, start, end)
-
-        return send_file(os.getcwd() + "/" + outfile, mimetype='image/png')
-
-    return None
+    # run the app
+    app.run(host='0.0.0.0', debug=debug, use_reloader=False, port=port, processes=numProc)
