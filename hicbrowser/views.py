@@ -15,8 +15,8 @@ import hicbrowser.tracks2json
 
 from ConfigParser import SafeConfigParser
 
-hicexplorer.trackPlot.DEFAULT_WIDTH_RATIOS = (1, 0.00)
-hicexplorer.trackPlot.DEFAULT_MARGINS = {'left': 0, 'right': 1, 'bottom': 0, 'top': 1}
+hicexplorer.trackPlot.DEFAULT_WIDTH_RATIOS = (0.89, 0.11)
+hicexplorer.trackPlot.DEFAULT_MARGINS = {'left': 0.02, 'right': 0.98, 'bottom': 0, 'top': 1}
 
 config = SafeConfigParser()
 config.readfp(open(sys.argv[1], 'r'))
@@ -29,7 +29,7 @@ else:
 
 if 'debug' in config._sections and config.get('general', 'debug') == 'yes':
     app.debug = True
-
+app.debug = True
 track_file = config.get("browser", "tracks")
 print track_file
 trp_list = []
@@ -37,7 +37,7 @@ for track in track_file.split(" "):
     track_list = hicbrowser.utilities.parse_tracks(track)
     for temp_file_name in track_list:
         print temp_file_name
-        trp_list.append(hicexplorer.trackPlot.PlotTracks(temp_file_name, fig_width=20, dpi=70))
+        trp_list.append(hicexplorer.trackPlot.PlotTracks(temp_file_name, fig_width=40, dpi=70))
         os.unlink(temp_file_name)
 
 img_root = config.get('browser', 'images folder')
@@ -59,6 +59,7 @@ gene2pos = {}
 track_file = config.get('general', 'tracks')
 tads = hicbrowser.tracks2json.SetTracks(track_file, fig_width=40)
 
+# line used when printing the TADs instead of through json
 #tads = hicexplorer.trackPlot.PlotTracks(track_file, fig_width=40, dpi=70)
 
 tad_img_root = config.get('general', 'images folder')
@@ -224,11 +225,23 @@ def browser(query):
 
         start, end, resolution = snap_to_resolution(start, end)
 
+        ### split tracks
         # split the interval into three parts
-        split_range_length = (end - start) / 3
-        ranges = [(start + x * split_range_length, start + (x + 1) * split_range_length) for x in range(3)]
         tracks = []
         content = []
+        print "EST"
+        """
+        # this commented code, splits each track into 'split_number' tiles that could be quicker to
+        # generate. For this to take effect the varibles at the top of this file had to be set
+        # as follows:
+
+        # hicexplorer.trackPlot.DEFAULT_WIDTH_RATIOS = (1, 0)
+        # hicexplorer.trackPlot.DEFAULT_MARGINS = {'left': 0, 'right': 1, 'bottom': 0, 'top': 1}
+
+        # the downside of this approach is that the track labels are missing.
+        split_number = 3
+        split_range_length = (end - start) / split_number
+        ranges = [(start + x * split_range_length, start + (x + 1) * split_range_length) for x in range(split_number)]
         for _range in ranges:
             img_code = []
             img_content = []
@@ -242,7 +255,22 @@ def browser(query):
             tracks.append(img_code)
             if len(content) == 0:
                 content.append(" ".join(img_content))
+        ###
+        """
+        img_code = []
+        img_content = []
+        for trp_idx in range(len(trp_list)):
+            figure_path = "/get_image?region={}:{}-{}&id={}".format(chromosome, start, end, trp_idx)
+            img_code.append(figure_path)
 
+            figure_content_path = "/get_image?region={}:|+start+|-|+end+|&id={}".format(chromosome, trp_idx)
+            img_content.append(figure_content_path)
+
+        tracks.append(img_code)
+        if len(content) == 0:
+            content.append(" ".join(img_content))
+
+        print "END"
         content = " ".join(content)
         content = content.replace('"', '\\"')
         content = content.replace('|', '"')
@@ -252,9 +280,7 @@ def browser(query):
         half_rage = view_range / 2
         center = start + half_rage
         zoom_out = "{}:{}-{}".format(chromosome, center - half_rage * 3, center + half_rage * 3)
-        step = ranges[0][1] - ranges[0][0]
-        end = ranges[-1][1]
-        start = ranges[0][0]
+        step = end - start
     else:
         chromosome = ''
         start = ''
@@ -273,7 +299,7 @@ def browser(query):
         step = None
         start = start
         end = end
-
+    print "))0000"
     data = {}
     data['region'] = region
     data['tracks'] = tracks
@@ -285,7 +311,7 @@ def browser(query):
     data['start'] = start
     data['end'] = end
     json_data = json.dumps(data)
-
+    print json_data
     return json_data
 
 
