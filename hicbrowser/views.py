@@ -299,7 +299,7 @@ def browser(query):
         step = None
         start = start
         end = end
-    print "))0000"
+
     data = {}
     data['region'] = region
     data['tracks'] = tracks
@@ -311,7 +311,7 @@ def browser(query):
     data['start'] = start
     data['end'] = end
     json_data = json.dumps(data)
-    print json_data
+
     return json_data
 
 
