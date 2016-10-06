@@ -110,18 +110,17 @@ def main(config_file, port, numProc, debug=False):
     config.readfp(open(config_file, 'r'))
 
     if 'static_folder' in config._sections['general']:
-        print "setting static folder to {}".format(config.get('general', 'static_folder'))
+        print "setting static folder to {}\n".format(config.get('general', 'static_folder'))
         app = Flask(__name__, static_folder=config.get('general', 'static_folder'), static_url_path="/static")
     else:
         app = Flask(__name__)
 
     track_file = config.get("browser", "tracks")
-    print track_file
     trp_list = []
     for track in track_file.split(" "):
         track_list = hicbrowser.utilities.parse_tracks(track)
-        for temp_file_name in track_list:
-            print temp_file_name
+        for temp_file_name, section_name in track_list:
+            print "\n{}".format(section_name)
             trp_list.append(hicexplorer.trackPlot.PlotTracks(temp_file_name, fig_width=40, dpi=70))
             os.unlink(temp_file_name)
 
