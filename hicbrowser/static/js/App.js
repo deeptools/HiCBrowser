@@ -226,15 +226,13 @@ this["Templates"]["gene"] = Handlebars.template({"1":function(container,depth0,h
     + alias4(((helper = (helper = helpers.end || (depth0 != null ? depth0.end : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"end","hash":{},"data":data}) : helper)))
     + ")\n            </small>\n        </h1>\n        <div style=\"width: 900px;\" id=\""
     + alias4(((helper = (helper = helpers.feature_viewer || (depth0 != null ? depth0.feature_viewer : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"feature_viewer","hash":{},"data":data}) : helper)))
-    + "\"></div>\n        <a href=\"/#/browser/"
+    + "\"></div>\n        <ul class=\"nav nav-pills\"><li class=\"active\"><a href=\"/#/browser/"
     + alias4(((helper = (helper = helpers.chromosome || (depth0 != null ? depth0.chromosome : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"chromosome","hash":{},"data":data}) : helper)))
     + ":"
     + alias4(((helper = (helper = helpers.start || (depth0 != null ? depth0.start : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"start","hash":{},"data":data}) : helper)))
     + "-"
     + alias4(((helper = (helper = helpers.end || (depth0 != null ? depth0.end : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"end","hash":{},"data":data}) : helper)))
-    + "\">\n            <img class=\"img-responsive\" src=\""
-    + alias4(((helper = (helper = helpers.img || (depth0 != null ? depth0.img : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"img","hash":{},"data":data}) : helper)))
-    + "\" alt=\"\" data-toggle=\"tooltip\" title=\"Click image to explore region in browser\">\n        </a>\n";
+    + "\">\nExplore region in browser</a></li></ul>\n";
 },"3":function(container,depth0,helpers,partials,data) {
     var helper;
 
@@ -290,7 +288,7 @@ this["Templates"]["search"] = Handlebars.template({"compiler":[7,">= 4.0.0"],"ma
     + alias4(((helper = (helper = helpers.zoomout_id || (depth0 != null ? depth0.zoomout_id : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"zoomout_id","hash":{},"data":data}) : helper)))
     + "\" href=\""
     + alias4(((helper = (helper = helpers.out || (depth0 != null ? depth0.out : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"out","hash":{},"data":data}) : helper)))
-    + "\" role=\"button\" class=\"btn btn-primary\">\n                        <span class=\"glyphicon glyphicon-zoom-out\" data-toggle=\"tooltip\" placement=\"bottom\" title=\"Zoom-out\"></span>\n                    </a>\n                </div>\n            \n            </div>\n        </div>\n    </div>\n    \n</div>";
+    + "\" role=\"button\" class=\"btn btn-primary\">\n                        <span class=\"glyphicon glyphicon-zoom-out\" data-toggle=\"tooltip\" placement=\"bottom\" title=\"Zoom-out\"></span>\n                    </a>\n                </div>\n            \n            </div>\n        </div>\n    </div>\n  <span style=\"color:gray;\">Note: Nothing will happen in case of typo. Check the browser for examples of valid gene names as they may be an id. We are working to make this bettert. Report problems or suggestions to ramirez at ie-freiburg.mpg.de</span>  \n</div>";
 },"useData":true});
 
 if (typeof exports === 'object' && exports) {module.exports = this["Templates"];}
