@@ -252,7 +252,7 @@ this["Templates"]["gene"] = Handlebars.template({"1":function(container,depth0,h
 },"useData":true});
 
 this["Templates"]["index"] = Handlebars.template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
-    return "<hr>\n<div class=\"row\">\n    <div class=\"col-md-6\">\n        <p>HiCBrowser is simple web browser to visualize <strong>Hi-C</strong> and other genomic tracks. \n        <p>It is based on <strong>HiCExplorer</strong>, a set of programs that enable you to process, normalize, analyze and visualize Hi-C data.</p>\n    </div>\n    <div class=\"col-md-6\">\n        <!-- build:src /static/img/vis.png -->\n        <img class=\"img-responsive\" src=\"../static/img/vis.png\" alt=\"\">\n        <!-- /build -->\n    </div>\n</div>\n<br>\n<br>";
+    return "<hr>\n<div class=\"row\">\n    <div class=\"col-md-6\">\n        <p>HiCBrowser is simple web browser to visualize <strong>Hi-C</strong> and other genomic tracks. \n        <p>It is based on <strong><a href=\"http://hicexplorer.readthedocs.io/en/latest/\">HiCExplorer</a></strong>, a set of programs that enable you to process, normalize, analyze and visualize Hi-C data.</p>\n    </div>\n    <div class=\"col-md-6\">\n        <!-- build:src /static/img/vis.png -->\n        <img class=\"img-responsive\" src=\"../static/img/vis.png\" alt=\"\">\n        <!-- /build -->\n    </div>\n</div>\n<br>\n<br>";
 },"useData":true});
 
 this["Templates"]["loading"] = Handlebars.template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
@@ -276,13 +276,9 @@ this["Templates"]["search"] = Handlebars.template({"compiler":[7,">= 4.0.0"],"ma
     + alias4(((helper = (helper = helpers.browser_btn || (depth0 != null ? depth0.browser_btn : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"browser_btn","hash":{},"data":data}) : helper)))
     + "\" role=\"presentation\"><a href=\"#\">Browse Region</a></li>\n</ul>\n\n<br>\n\n<div class=\"jumbotron\">\n    \n    <div>\n        <div class=\"input-group input-group-lg\">\n            <input id=\""
     + alias4(((helper = (helper = helpers.gene_search_input || (depth0 != null ? depth0.gene_search_input : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"gene_search_input","hash":{},"data":data}) : helper)))
-    + "\" type=\"text\" class=\"  search-query form-control\" placeholder=\"Type a gene name here ...\" />\n            <span class=\"input-group-btn\">\n                <button id=\"search\" class=\"btn btn-primary\" type=\"button\" data-toggle=\"tooltip\" placement=\"bottom\" title=\"Search!\">\n                    <span class=\"glyphicon glyphicon-search\"></span>\n                </button>\n            </span>\n        </div>\n        <small><a data-id=\""
-    + alias4(((helper = (helper = helpers.gene_example || (depth0 != null ? depth0.gene_example : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"gene_example","hash":{},"data":data}) : helper)))
-    + "\" href=\"#\"> <span class=\"glyphicon glyphicon-star\" aria-hidden=\"true\"></span> example</a></small>\n    </div>\n    \n    <div style=\"display:none\">\n        <div class=\"input-group input-group-lg\">\n            <input id=\""
+    + "\" type=\"text\" class=\"  search-query form-control\" placeholder=\"Type a gene name here ...\" />\n            <span class=\"input-group-btn\">\n                <button id=\"search\" class=\"btn btn-primary\" type=\"button\" data-toggle=\"tooltip\" placement=\"bottom\" title=\"Search!\">\n                    <span class=\"glyphicon glyphicon-search\"></span>\n                </button>\n            </span>\n        </div>\n    </div>\n    \n    <div style=\"display:none\">\n        <div class=\"input-group input-group-lg\">\n            <input id=\""
     + alias4(((helper = (helper = helpers.browser_search_input || (depth0 != null ? depth0.browser_search_input : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"browser_search_input","hash":{},"data":data}) : helper)))
-    + "\" type=\"text\" class=\"  search-query form-control\" placeholder=\"Type the region that you want to see ...\" />\n            <span class=\"input-group-btn\">\n                <button id=\"search\" class=\"btn btn-primary\" type=\"button\" data-toggle=\"tooltip\" placement=\"bottom\" title=\"Search!\">\n                    <span class=\"glyphicon glyphicon-search\"></span>\n                </button>\n            </span>\n        </div>\n\n        <small><a data-id=\""
-    + alias4(((helper = (helper = helpers.browser_example || (depth0 != null ? depth0.browser_example : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"browser_example","hash":{},"data":data}) : helper)))
-    + "\" href=\"#\"> <span class=\"glyphicon glyphicon-star\" aria-hidden=\"true\"></span> example</a></small>\n        <br>\n\n        <div class=\"row\">\n            <div class=\"col-md-2 col-md-offset-5\">\n\n                <div id=\"control-buttons\"  class=\"btn-group\" role=\"group\" aria-label=\"...\">\n                    <a data-id=\""
+    + "\" type=\"text\" class=\"  search-query form-control\" placeholder=\"E.g. 3:10000000-1500000 ...\" />\n            <span class=\"input-group-btn\">\n                <button id=\"search\" class=\"btn btn-primary\" type=\"button\" data-toggle=\"tooltip\" placement=\"bottom\" title=\"Search!\">\n                    <span class=\"glyphicon glyphicon-search\"></span>\n                </button>\n            </span>\n        </div>\n\n         <br>\n\n        <div class=\"row\">\n            <div class=\"col-md-2 col-md-offset-5\">\n\n                <div id=\"control-buttons\"  class=\"btn-group\" role=\"group\" aria-label=\"...\">\n                    <a data-id=\""
     + alias4(((helper = (helper = helpers.prev_id || (depth0 != null ? depth0.prev_id : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"prev_id","hash":{},"data":data}) : helper)))
     + "\" href=\""
     + alias4(((helper = (helper = helpers.previous || (depth0 != null ? depth0.previous : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"previous","hash":{},"data":data}) : helper)))
@@ -631,8 +627,6 @@ module.exports = Backbone.View.extend({
         render.browser_search_input = browser_search_input;
         render.gene_btn = gene_btn;
         render.browser_btn = browser_btn;
-        render.browser_example = browser_example;
-        render.gene_example = gene_example;
 
 
         var tpl = templates.search(render);
@@ -683,11 +677,7 @@ module.exports = Backbone.View.extend({
 
         var id = $(e.currentTarget).data('id');
 
-        if(id === gene_example){
-            App.router.navigate('/gene/sak', {trigger: true});
-        }else if(id === browser_example){
-            App.router.navigate('/browser/3L:21452610-21582843', {trigger: true});
-        }else if(!_.isUndefined(_links)){
+        if(!_.isUndefined(_links)){
             if(id === prev_id){
                 App.router.navigate('/browser/' + _links.previous, {trigger: true});
             }else if(id === next_id){
