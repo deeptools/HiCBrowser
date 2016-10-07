@@ -104,17 +104,61 @@ def snap_to_resolution(start, end):
     return start, end, current_resolution
 
 
-def main(config_file, port, numProc, debug=False):
+def check_static_img_folders():
+    """
+    check folders for gene and browser files in the current path
+    The images and other files will be stored under images/genes and images/browser
+    """
+    dir_path = os.getcwd()
+    # genes file is images/gene
+    if not os.path.isdir(dir_path + '/images'):
+        try:
+            os.makedirs(dir_path + '/images')
+        except:
+            sys.exit("Images folder does not exists and can not be created.\n"
+                     "Check that the user has permission to create the folder under\n"
+                     "the current directory. The path for the folder is:\n"
+                     "{}".format(dir_path + '/images/'))
+
+    if not os.path.isdir(dir_path + '/images/genes'):
+        os.makedirs(dir_path + '/images/genes')
+
+    # path for browser images is images/browser
+    if not os.path.isdir(dir_path + '/images/browser'):
+        os.makedirs(dir_path + '/images/browser')
+
+    return dir_path + '/images'
+
+
+def main(config_file, port, numProc, template_folder=None,  debug=False):
 
     config = SafeConfigParser()
     config.readfp(open(config_file, 'r'))
 
-    if 'static_folder' in config._sections['general']:
-        print "setting static folder to {}\n".format(config.get('general', 'static_folder'))
-        app = Flask(__name__, static_folder=config.get('general', 'static_folder'), static_url_path="/static")
-    else:
-        app = Flask(__name__)
+    kwargs = {}
+    if template_folder is not None:
+        sys.stderr.write("setting template folder to\n {}\n".format(template_folder))
+        kwargs['template_folder'] = template_folder
 
+    app = Flask(__name__, **kwargs)
+
+    from flask import Blueprint
+    img_path = check_static_img_folders()
+
+    # register an static path for images using Blueprint
+    images_static = Blueprint('site', __name__,
+                            static_url_path='/images',
+                            static_folder=img_path)
+    app.register_blueprint(images_static)
+
+    # setup up the tracks. It works as follows
+    # the config.ini file is read and split into individual tracks
+    # that are saved on a temporary file.
+    # then, hicexplorer.trackPlot object is initialized with this track and
+    # store on a list (trp_list). If the tracks were not to be splited in
+    # individual files, trackPlot will plot everything togeher. By splitting
+    # them we take advantage of multiprocessing to generate each image on
+    # a different core. Naturally, if using only one core then nothing is gained.
     track_file = config.get("browser", "tracks")
     trp_list = []
     for track in track_file.split(" "):
@@ -124,7 +168,8 @@ def main(config_file, port, numProc, debug=False):
             trp_list.append(hicexplorer.trackPlot.PlotTracks(temp_file_name, fig_width=40, dpi=70))
             os.unlink(temp_file_name)
 
-    img_root = config.get('browser', 'images folder')
+    tad_img_root = img_path + '/genes'
+    img_root = img_path + '/browser'
 
     # initialize TAD interval tree
     # using the 'TAD intervals' file in the config file
@@ -145,7 +190,6 @@ def main(config_file, port, numProc, debug=False):
 
     #tads = hicexplorer.trackPlot.PlotTracks(track_file, fig_width=40, dpi=70)
 
-    tad_img_root = config.get('general', 'images folder')
 
     with open(genes, 'r') as fh:
         for line in fh.readlines():
@@ -185,14 +229,12 @@ def main(config_file, port, numProc, debug=False):
                         sys.stderr.write("Saving json file: {}\n".format(outfile))
                         fh.write(tads.get_json_interval_values(chromosome, start, end))
 
-                data = {}
-                data['name'] = gene_name
-                data['img'] = outfile
-                data['chromosome'] = chromosome
-                data['start'] = start
-                data['end'] = end
+                data = {'name': gene_name,
+                        'img': outfile,
+                        'chromosome': chromosome,
+                        'start': start,
+                        'end': end}
 
-                d = {}
                 with open(outfile) as tracks:
                         d = json.load(tracks)
 
@@ -291,16 +333,15 @@ def main(config_file, port, numProc, debug=False):
             start = start
             end = end
 
-        data = {}
-        data['region'] = region
-        data['tracks'] = tracks
-        data['next'] = next_query_str
-        data['previous'] = prev_query_str
-        data['out'] = zoom_out
-        data['step'] = step
-        data['content'] = content
-        data['start'] = start
-        data['end'] = end
+        data = {'region': region,
+                'tracks': tracks,
+                'next': next_query_str,
+                'previous': prev_query_str,
+                'out': zoom_out,
+                'step': step,
+                'content': content,
+                'start': start,
+                'end': end}
         json_data = json.dumps(data)
 
         return json_data
@@ -323,10 +364,13 @@ def main(config_file, port, numProc, debug=False):
                                                   start,
                                                   end,
                                                   img_id)
+            # if the figure does no exists, then
+            # hicexplorer.trackPlot is called (trp_list[img_id] contains
+            # an instance of hicexplorer.trackPlot
             if not exists(outfile):
                 trp_list[img_id].plot(outfile, chromosome, start, end)
 
-            return send_file(os.getcwd() + "/" + outfile, mimetype='image/png')
+            return send_file(outfile, mimetype='image/png')
 
         return None
 

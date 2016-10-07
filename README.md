@@ -25,7 +25,7 @@ python setup.py install -f
 
 HiCBrowser works using [**HiCExplorer**](http://hicexplorer.readthedocs.io/en/latest/) in the background. Thus, you need to [install HiCExplorer](http://hicexplorer.readthedocs.io/en/latest/content/installation.html) first.
 
-Set your $PYTHONPATH bash variable to directory containing HiCExplorer and HiCBrowser, as follows :
+If HiCExplorer and or HiCBrowser is not properly installed (by running setup.py) it may be required to set the $PYTHONPATH. Specially for development it is quite convenient not to install the packages:
 
 
 ```python
@@ -41,9 +41,10 @@ HiCBrowser needs three config files.
 + **gene tracks** : To visualize TADs near given gene. (eg. [region_tracks.ini](./region_tracks.ini))
 + **browser config file** : To providing information about directories to save images and the two tracks above. (eg. [browserConfig.ini](./browserConfig.ini))
 
-We have provided example for each of these files with the package, as shown above.
+We have provided example for each of these files with the package, as shown above. For a full documentation of what types of data can be plotted in the region tracks 
+and for extended examples please look at the [documentation of the plotTADs](http://hicexplorer.readthedocs.io/en/latest/content/tools/hicPlotTADs.html) 
+function of [HiCExplorer](http://hicexplorer.readthedocs.io/en/latest/)  
 
-To save the images for genes and regions, create two folders. eg. *genes_images* and *regions_images* and provide the path to these folders in the browserConfig.ini files (see sample file in the package).
 
 ### Run
 
