@@ -1,5 +1,5 @@
 module.exports = function(grunt) {
-    
+
     // Project configuration.
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
@@ -57,6 +57,31 @@ module.exports = function(grunt) {
                 }
             }
         },
+        'http-server': {
+
+            'dev': {
+
+                // the server root directory
+                //root: <path>,
+
+                // the server port
+                // can also be written as a function, e.g.
+                // port: function() { return 8282; }
+                port: 8282,
+
+                // the host ip address
+                // If specified to, for example, "127.0.0.1" the server will
+                // only be available on that ip.
+                // Specify "0.0.0.0" to be available everywhere
+                host: "0.0.0.0",
+
+                // Tell grunt task to open the browser
+                openBrowser : true,
+                root : "../"
+
+            }
+
+        },
         watch: {
             scripts: {
                 files: ['index.js', 'styl/*.styl', 'templates/*.hbs'],
@@ -64,10 +89,11 @@ module.exports = function(grunt) {
             },
         }
     });
-    
+
     //Tasks
     grunt.registerTask('dist', ['jshint', 'handlebars', 'stylus', 'browserify', 'processhtml', 'uglify']);
-    
+    grunt.registerTask('serve', ['http-server']);
+
     // Load the plugins
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-browserify');
@@ -76,13 +102,6 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-handlebars');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-uglify');
-    
-    /*grunt.loadNpmTasks('grunt-browserify');
-    grunt.loadNpmTasks('grunt-contrib-handlebars');
-    grunt.loadNpmTasks('grunt-contrib-stylus');
-    grunt.loadNpmTasks('grunt-contrib-clean');
-    grunt.loadNpmTasks('grunt-contrib-copy');
-    grunt.loadNpmTasks('grunt-simple-mocha');
-    grunt.loadNpmTasks('grunt-contrib-uglify');*/
-    
+    grunt.loadNpmTasks('grunt-http-server');
+
 };
