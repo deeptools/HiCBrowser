@@ -6,7 +6,7 @@
 <br>
 
 <div class="jumbotron">
-    
+
     <div>
         <div class="input-group input-group-lg">
             <input id="{{gene_search_input}}" type="text" class="  search-query form-control" placeholder="Type a gene name here ..." />
@@ -16,9 +16,12 @@
                 </button>
             </span>
         </div>
-        <small><a data-id="{{gene_example}}" href="#"> <span class="glyphicon glyphicon-star" aria-hidden="true"></span> example</a></small>
+
+        {{#if gene_example}}
+        <small><a data-id="{{gene_example_id}}" href="#"> <span class="glyphicon glyphicon-star" aria-hidden="true"></span> example</a></small>
+        {{/if}}
     </div>
-    
+
     <div style="display:none">
         <div class="input-group input-group-lg">
             <input id="{{browser_search_input}}" type="text" class="  search-query form-control" placeholder="Type the region that you want to see ..." />
@@ -29,7 +32,9 @@
             </span>
         </div>
 
-        <small><a data-id="{{browser_example}}" href="#"> <span class="glyphicon glyphicon-star" aria-hidden="true"></span> example</a></small>
+        {{#if browser_example}}
+        <small><a data-id="{{browser_example_id}}" href="#"> <span class="glyphicon glyphicon-star" aria-hidden="true"></span> example</a></small>
+        {{/if}}
         <br>
 
         <div class="row">
@@ -46,9 +51,9 @@
                         <span class="glyphicon glyphicon-zoom-out" data-toggle="tooltip" placement="bottom" title="Zoom-out"></span>
                     </a>
                 </div>
-            
+
             </div>
         </div>
     </div>
-    
+
 </div>
