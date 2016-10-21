@@ -12,6 +12,13 @@ var Search = require('./js/views/search');
 var Index = require('./js/views/index');
 var GeneView = require('./js/views/gene');
 var BrowserView = require('./js/views/browser');
+var Intro = require('./js/views/intro-header');
+
+function initViews(){
+  // Render initial views
+  App.views.intro.render(App.config);
+  App.views.search.render(App.config);
+}
 
 App = {};
 
@@ -24,17 +31,26 @@ App.init = function(){
     App.views.index = new Index({el:'#content'});
     App.views.gene = new GeneView({el:'#content'});
     App.views.browser = new BrowserView({el:'#content'});
-
-    App.views.search.render();
+    App.views.intro = new Intro({el:'.intro-header'});
 
     // Models
     App.models = {};
     App.models.Gene = require('./js/models/gene');
     App.models.Browser = require('./js/models/browser');
+    App.models.Config = require('./js/models/config');
+
+    // Init config with defaults
+    App.config = new App.models.Config();
+
+    // See if there is a config file defined.
+    // If not, load app with defaults
+    App.config.fetch({
+      success: initViews,
+      error: initViews
+    });
 
     //Router
     App.router = require('./js/router');
-
 
     // listen to ajax
     $(document).ajaxStart(function() {
@@ -52,27 +68,38 @@ App.init = function(){
 };
 
 App.init();
+
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./js/models/browser":2,"./js/models/gene":3,"./js/router":4,"./js/views/browser":6,"./js/views/gene":7,"./js/views/index":8,"./js/views/loading":9,"./js/views/search":10,"backbone":14,"bootstrap":16,"jquery":76}],2:[function(require,module,exports){
+},{"./js/models/browser":2,"./js/models/config":3,"./js/models/gene":4,"./js/router":5,"./js/views/browser":7,"./js/views/gene":8,"./js/views/index":9,"./js/views/intro-header":10,"./js/views/loading":11,"./js/views/search":12,"backbone":16,"bootstrap":18,"jquery":78}],2:[function(require,module,exports){
 module.exports = Backbone.Model.extend({
     urlRoot: '/browser'
 });
 },{}],3:[function(require,module,exports){
 module.exports = Backbone.Model.extend({
+    defaults: {
+        browser_example: '',
+        gene_example: '',
+        icon: '/static/img/circose.png'
+    },
+    urlRoot: '/static/json/config.json'
+});
+
+},{}],4:[function(require,module,exports){
+module.exports = Backbone.Model.extend({
     urlRoot: '/gene'
 });
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 var _ = require('underscore');
 
 var AppRouter = Backbone.Router.extend({
     routes: {
-
+        
         "gene": 'getGene',
         "gene/:id": 'getGeneId',
-
+        
         "browser" : 'getBrowser',
         "browser/:id" : 'getBrowserId',
-
+        
         "*actions": "defaultRoute"
         // Backbone will try to match the route above first
     }
@@ -86,14 +113,14 @@ function setIndex(){
 var _current = {};
 
 function _renderGene(gene){
-
+    
     App.views.search.showGeneView(gene.id);
     App.views.gene.render(gene);
     App.views.gene.setVisible();
 }
 
 function _renderBrowser(browser){
-
+    
     App.views.search.showBrowserView(browser);
     App.views.browser.render(browser);
     App.views.browser.setVisible();
@@ -103,40 +130,40 @@ function _renderBrowser(browser){
 var app_router = new AppRouter();
 
 app_router.on('route:getGene', function(){
-
+    
     if(!_.isUndefined(_current.gene)){
         App.router.navigate('/gene/' + _current.gene.id, {trigger: false});
         _renderGene(_current.gene);
         return;
     }
-
+    
     App.views.search.showGeneView();
     setIndex();
 });
 
 app_router.on('route:getGeneId', function (id) {
-
+    
     if(!_.isUndefined(_current.gene) && _current.gene.id === id){
         _renderGene(_current.gene);
         return;
     }
-
+    
     var gene = new App.models.Gene({id:id});
-
+    
     gene.fetch({
         success: function(gene){
-
+            
             gene = gene.toJSON();
             _current.gene = gene;
             _renderGene(gene);
-
+            
         },
         error: function(gene, res){
-
+            
             var text = ( res.responseText === 'unknown gene' ) ? 'No results for ' + id : res.responseText;
-
+            
             var error = { error : text};
-
+            
             //search.showGeneView(id);
             //geneView.render(error);
         }
@@ -144,26 +171,26 @@ app_router.on('route:getGeneId', function (id) {
 });
 
 app_router.on('route:getBrowser', function(){
-
+    
     if(!_.isUndefined(_current.browser)){
         App.router.navigate('/browser/' + _current.browser.id, {trigger: false});
         _renderBrowser(_current.browser);
         return;
     }
-
+    
     App.views.search.showBrowserView();
     setIndex();
 });
 
 app_router.on('route:getBrowserId', function (id) {
-
+    
     if(!_.isUndefined(_current.browser) && _current.browser.id === id){
         _renderBrowser(_current.browser);
         return;
     }
-
+    
     var browser = new App.models.Browser({id:id});
-
+    
     browser.fetch({
         success: function(browser){
             browser = browser.toJSON();
@@ -171,11 +198,11 @@ app_router.on('route:getBrowserId', function (id) {
             _renderBrowser(browser);
         },
         error: function(browser, res){
-
+            
             /*var text = ( res.responseText === 'unknown gene' ) ? 'No results for ' + id : res.responseText;
-
+            
             var error = { error : text};
-
+            
             index.setId(gene.name);
             index.slideUp();
             geneView.render(error);*/
@@ -189,7 +216,7 @@ app_router.on('route:defaultRoute', setIndex);
 Backbone.history.start();
 
 module.exports = app_router;
-},{"underscore":81}],5:[function(require,module,exports){
+},{"underscore":83}],6:[function(require,module,exports){
 (function (global){
 var glob = ('undefined' === typeof window) ? global : window,
 
@@ -226,13 +253,15 @@ this["Templates"]["gene"] = Handlebars.template({"1":function(container,depth0,h
     + alias4(((helper = (helper = helpers.end || (depth0 != null ? depth0.end : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"end","hash":{},"data":data}) : helper)))
     + ")\n            </small>\n        </h1>\n        <div style=\"width: 900px;\" id=\""
     + alias4(((helper = (helper = helpers.feature_viewer || (depth0 != null ? depth0.feature_viewer : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"feature_viewer","hash":{},"data":data}) : helper)))
-    + "\"></div>\n        <ul class=\"nav nav-pills\"><li class=\"active\"><a href=\"/#/browser/"
+    + "\"></div>\n        <a href=\"/#/browser/"
     + alias4(((helper = (helper = helpers.chromosome || (depth0 != null ? depth0.chromosome : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"chromosome","hash":{},"data":data}) : helper)))
     + ":"
     + alias4(((helper = (helper = helpers.start || (depth0 != null ? depth0.start : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"start","hash":{},"data":data}) : helper)))
     + "-"
     + alias4(((helper = (helper = helpers.end || (depth0 != null ? depth0.end : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"end","hash":{},"data":data}) : helper)))
-    + "\">\nExplore region in browser</a></li></ul>\n";
+    + "\">\n            <img class=\"img-responsive\" src=\""
+    + alias4(((helper = (helper = helpers.img || (depth0 != null ? depth0.img : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"img","hash":{},"data":data}) : helper)))
+    + "\" alt=\"\" data-toggle=\"tooltip\" title=\"Click image to explore region in browser\">\n        </a>\n";
 },"3":function(container,depth0,helpers,partials,data) {
     var helper;
 
@@ -250,7 +279,15 @@ this["Templates"]["gene"] = Handlebars.template({"1":function(container,depth0,h
 },"useData":true});
 
 this["Templates"]["index"] = Handlebars.template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
-    return "<hr>\n<div class=\"row\">\n    <div class=\"col-md-6\">\n        <p>HiCBrowser is simple web browser to visualize <strong>Hi-C</strong> and other genomic tracks. \n        <p>It is based on <strong><a href=\"http://hicexplorer.readthedocs.io/en/latest/\">HiCExplorer</a></strong>, a set of programs that enable you to process, normalize, analyze and visualize Hi-C data.</p>\n    </div>\n    <div class=\"col-md-6\">\n        <!-- build:src /static/img/vis.png -->\n        <img class=\"img-responsive\" src=\"../static/img/vis.png\" alt=\"\">\n        <!-- /build -->\n    </div>\n</div>\n<br>\n<br>";
+    return "<hr>\n<div class=\"row\">\n    <div class=\"col-md-6\">\n        <p>HiCBrowser is a simple web browser to visualize <strong>Hi-C</strong> and other genomic tracks. \n        <p>It is based on <strong>HiCExplorer</strong>, a set of programs that enable you to process, normalize, analyze and visualize Hi-C data.</p>\n    </div>\n    <div class=\"col-md-6\">\n        <!-- build:src /static/img/vis.png -->\n        <img class=\"img-responsive\" src=\"../static/img/vis.png\" alt=\"\">\n        <!-- /build -->\n    </div>\n</div>\n<br>\n<br>\n";
+},"useData":true});
+
+this["Templates"]["introHeader"] = Handlebars.template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
+    var helper;
+
+  return "<div class=\"container\">\n    <div class=\"row\">\n        <div class=\"col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1\">\n            <div class=\"site-heading\">\n                <div class=\"search-box\">\n                    <div class=\"row\">\n                        <div class=\"col-md-2\">\n                            <div class=\"fly\">\n                                <img src=\""
+    + container.escapeExpression(((helper = (helper = helpers.icon || (depth0 != null ? depth0.icon : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0 != null ? depth0 : {},{"name":"icon","hash":{},"data":data}) : helper)))
+    + "\">\n                            </div>\n                        </div>\n                        <div class=\"col-md-9 col-md-offset-1\">\n                            <h1>HiCBrowser</h1>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n</div>\n";
 },"useData":true});
 
 this["Templates"]["loading"] = Handlebars.template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
@@ -261,8 +298,20 @@ this["Templates"]["loading"] = Handlebars.template({"compiler":[7,">= 4.0.0"],"m
     + "\" class=\"modal fade bs-example-modal-sm\" style=\"color: #fff\" tabindex=\"-1\" role=\"dialog\">\n    <div class=\"modal-dialog modal-sm\">\n        <div class=\"modal-content\">\n            <div class=\"search-box\" style=\"width:100%\">\n                <!-- build:src /static/img/loading.gif -->\n                    <img src=\"../static/img/loading.gif\">\n                <!-- /build -->\n                <h1>Loading ...</h1>\n            </div>\n        </div>\n    </div>\n</div>";
 },"useData":true});
 
-this["Templates"]["search"] = Handlebars.template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
-    var helper, alias1=depth0 != null ? depth0 : {}, alias2=helpers.helperMissing, alias3="function", alias4=container.escapeExpression;
+this["Templates"]["search"] = Handlebars.template({"1":function(container,depth0,helpers,partials,data) {
+    var helper;
+
+  return "        <small><a data-id=\""
+    + container.escapeExpression(((helper = (helper = helpers.gene_example_id || (depth0 != null ? depth0.gene_example_id : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0 != null ? depth0 : {},{"name":"gene_example_id","hash":{},"data":data}) : helper)))
+    + "\" href=\"#\"> <span class=\"glyphicon glyphicon-star\" aria-hidden=\"true\"></span> example</a></small>\n";
+},"3":function(container,depth0,helpers,partials,data) {
+    var helper;
+
+  return "        <small><a data-id=\""
+    + container.escapeExpression(((helper = (helper = helpers.browser_example_id || (depth0 != null ? depth0.browser_example_id : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0 != null ? depth0 : {},{"name":"browser_example_id","hash":{},"data":data}) : helper)))
+    + "\" href=\"#\"> <span class=\"glyphicon glyphicon-star\" aria-hidden=\"true\"></span> example</a></small>\n";
+},"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
+    var stack1, helper, alias1=depth0 != null ? depth0 : {}, alias2=helpers.helperMissing, alias3="function", alias4=container.escapeExpression;
 
   return "<ul class=\"nav nav-pills\">\n    <li id=\""
     + alias4(((helper = (helper = helpers.gene_btn || (depth0 != null ? depth0.gene_btn : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"gene_btn","hash":{},"data":data}) : helper)))
@@ -272,11 +321,15 @@ this["Templates"]["search"] = Handlebars.template({"compiler":[7,">= 4.0.0"],"ma
     + alias4(((helper = (helper = helpers.browser_btn || (depth0 != null ? depth0.browser_btn : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"browser_btn","hash":{},"data":data}) : helper)))
     + "\" data-id=\""
     + alias4(((helper = (helper = helpers.browser_btn || (depth0 != null ? depth0.browser_btn : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"browser_btn","hash":{},"data":data}) : helper)))
-    + "\" role=\"presentation\"><a href=\"#\">Browse Region</a></li>\n</ul>\n\n<br>\n\n<div class=\"jumbotron\">\n    \n    <div>\n        <div class=\"input-group input-group-lg\">\n            <input id=\""
+    + "\" role=\"presentation\"><a href=\"#\">Browse Region</a></li>\n</ul>\n\n<br>\n\n<div class=\"jumbotron\">\n\n    <div>\n        <div class=\"input-group input-group-lg\">\n            <input id=\""
     + alias4(((helper = (helper = helpers.gene_search_input || (depth0 != null ? depth0.gene_search_input : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"gene_search_input","hash":{},"data":data}) : helper)))
-    + "\" type=\"text\" class=\"  search-query form-control\" placeholder=\"Type a gene name here ...\" />\n            <span class=\"input-group-btn\">\n                <button id=\"search\" class=\"btn btn-primary\" type=\"button\" data-toggle=\"tooltip\" placement=\"bottom\" title=\"Search!\">\n                    <span class=\"glyphicon glyphicon-search\"></span>\n                </button>\n            </span>\n        </div>\n    </div>\n    \n    <div style=\"display:none\">\n        <div class=\"input-group input-group-lg\">\n            <input id=\""
+    + "\" type=\"text\" class=\"  search-query form-control\" placeholder=\"Type a gene name here ...\" />\n            <span class=\"input-group-btn\">\n                <button id=\"search\" class=\"btn btn-primary\" type=\"button\" data-toggle=\"tooltip\" placement=\"bottom\" title=\"Search!\">\n                    <span class=\"glyphicon glyphicon-search\"></span>\n                </button>\n            </span>\n        </div>\n\n"
+    + ((stack1 = helpers["if"].call(alias1,(depth0 != null ? depth0.gene_example : depth0),{"name":"if","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
+    + "    </div>\n\n    <div style=\"display:none\">\n        <div class=\"input-group input-group-lg\">\n            <input id=\""
     + alias4(((helper = (helper = helpers.browser_search_input || (depth0 != null ? depth0.browser_search_input : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"browser_search_input","hash":{},"data":data}) : helper)))
-    + "\" type=\"text\" class=\"  search-query form-control\" placeholder=\"E.g. 3:10000000-1500000 ...\" />\n            <span class=\"input-group-btn\">\n                <button id=\"search\" class=\"btn btn-primary\" type=\"button\" data-toggle=\"tooltip\" placement=\"bottom\" title=\"Search!\">\n                    <span class=\"glyphicon glyphicon-search\"></span>\n                </button>\n            </span>\n        </div>\n\n         <br>\n\n        <div class=\"row\">\n            <div class=\"col-md-2 col-md-offset-5\">\n\n                <div id=\"control-buttons\"  class=\"btn-group\" role=\"group\" aria-label=\"...\">\n                    <a data-id=\""
+    + "\" type=\"text\" class=\"  search-query form-control\" placeholder=\"Type the region that you want to see ...\" />\n            <span class=\"input-group-btn\">\n                <button id=\"search\" class=\"btn btn-primary\" type=\"button\" data-toggle=\"tooltip\" placement=\"bottom\" title=\"Search!\">\n                    <span class=\"glyphicon glyphicon-search\"></span>\n                </button>\n            </span>\n        </div>\n\n"
+    + ((stack1 = helpers["if"].call(alias1,(depth0 != null ? depth0.browser_example : depth0),{"name":"if","hash":{},"fn":container.program(3, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
+    + "        <br>\n\n        <div class=\"row\">\n            <div class=\"col-md-2 col-md-offset-5\">\n\n                <div id=\"control-buttons\"  class=\"btn-group\" role=\"group\" aria-label=\"...\">\n                    <a data-id=\""
     + alias4(((helper = (helper = helpers.prev_id || (depth0 != null ? depth0.prev_id : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"prev_id","hash":{},"data":data}) : helper)))
     + "\" href=\""
     + alias4(((helper = (helper = helpers.previous || (depth0 != null ? depth0.previous : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"previous","hash":{},"data":data}) : helper)))
@@ -288,12 +341,12 @@ this["Templates"]["search"] = Handlebars.template({"compiler":[7,">= 4.0.0"],"ma
     + alias4(((helper = (helper = helpers.zoomout_id || (depth0 != null ? depth0.zoomout_id : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"zoomout_id","hash":{},"data":data}) : helper)))
     + "\" href=\""
     + alias4(((helper = (helper = helpers.out || (depth0 != null ? depth0.out : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"out","hash":{},"data":data}) : helper)))
-    + "\" role=\"button\" class=\"btn btn-primary\">\n                        <span class=\"glyphicon glyphicon-zoom-out\" data-toggle=\"tooltip\" placement=\"bottom\" title=\"Zoom-out\"></span>\n                    </a>\n                </div>\n            \n            </div>\n        </div>\n    </div>\n  <span style=\"color:gray;\">Note: Nothing will happen in case of typo. Check the browser for examples of valid gene names as they may be an id. We are working to make this bettert. Report problems or suggestions to ramirez at ie-freiburg.mpg.de</span>  \n</div>";
+    + "\" role=\"button\" class=\"btn btn-primary\">\n                        <span class=\"glyphicon glyphicon-zoom-out\" data-toggle=\"tooltip\" placement=\"bottom\" title=\"Zoom-out\"></span>\n                    </a>\n                </div>\n\n            </div>\n        </div>\n    </div>\n\n</div>\n";
 },"useData":true});
 
 if (typeof exports === 'object' && exports) {module.exports = this["Templates"];}
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"handlebars":64}],6:[function(require,module,exports){
+},{"handlebars":66}],7:[function(require,module,exports){
 var _ = require('underscore');
 
 var templates = require('../templates');
@@ -311,9 +364,9 @@ function _getParameterByName(name, url) {
 }
 
 function _onload(e){
-
+    
     var img = e.target;
-
+    
     var imgWrapper = img.parentNode;
     imgWrapper.className += imgWrapper.className ? ' loaded' : 'loaded';
 }
@@ -321,17 +374,17 @@ function _onload(e){
 function _onerror(e){
     var img = e.target;
     img.src = '/static/img/not_found.png';
-
+    
     var imgWrapper = img.parentNode;
     imgWrapper.className += imgWrapper.className ? ' loaded' : 'loaded';
 }
 
 function _load_images(imgDefer, n, index){
-
+    
     var i = index || 0, j = 0;
     while( i < imgDefer.length && j < n){
         if(imgDefer[i].getAttribute('data-original')) {
-
+            
             imgDefer[i].onload = _onload;
             imgDefer[i].onerror = _onerror;
             imgDefer[i].setAttribute('src', imgDefer[i].getAttribute('data-original'));
@@ -339,7 +392,7 @@ function _load_images(imgDefer, n, index){
         }
         i++;
     }
-
+    
     if(i < imgDefer.length -1 ){
         setTimeout(_load_images, 600, imgDefer, n, i);
     }
@@ -347,43 +400,43 @@ function _load_images(imgDefer, n, index){
 
 
 module.exports = Backbone.View.extend({
-
+    
     initialize: function(options){
         this.options = options;
     },
-
+    
     render: function(render){
-
+        
         if(render.region === _browser.region){
             return;
         }
-
+        
         render.tracks = _.sortBy(_.flatten(render.tracks), function(url){
             return + _getParameterByName('id', url);
         });
-
+        
         $(this.options.el).css({opacity: 0.0, visibility: 'hidden'});
-
-
+        
+        
         var tpl = templates.browser(render);
-
+        
         if( ! _.isUndefined($div) ) $div.remove();
-
+        
         $div = $('<div></div>')
             .hide()
             .append(tpl);
-
+        
         $(this.el).append($div);
-
+        
         _load_images(document.getElementsByTagName('img'), 6);
     },
-
+    
     setVisible: function(){
         $div.show().siblings().hide();
         $(this.el).css({opacity: 0.0, visibility: 'visible'}).animate({opacity: 1.0}, 800);
     }
 });
-},{"../templates":5,"underscore":81}],7:[function(require,module,exports){
+},{"../templates":6,"underscore":83}],8:[function(require,module,exports){
 var _ = require('underscore');
 var d3 = require('d3');
 var FeatureViewer = require('feature-viewer');
@@ -402,22 +455,22 @@ function rgbToHex(r, g, b) {
 }
 
 function parseData(data){
-
+    
     var parsed = {};
-
+    
     parsed.tracks = _.compact(_.map(data.tracks, function(track, i){
-
+        
         var feats;
-
+        
         if(track.file_type === 'boundaries'){
-
+            
             parsed.extent = d3.extent(track.x_values);
-
+            
             feats =  _.map(track.x_values, function(d, j){
                 return { x: d, y: track.y_values[j]};
             });
-
-
+            
+            
             return {
                 type: 'line',
                 name: track.section_name,
@@ -427,24 +480,24 @@ function parseData(data){
                 data: feats,
                 interpolation: 'linear'
             };
-
+            
         }else if(track.file_type === 'bed'){
-
+            
             feats = _.map(track.intervals, function(d, j){
-
+                
                 var feat = {
-                    x: d.bed[1],
+                    x: d.bed[1], 
                     y: d.bed[2]
                 };
-
+                
                 if(track.title === 'genes')
                     feat.description = d.bed[3];
-
+                
                 if(!_.isUndefined(d.bed[8])) feat.color = rgbToHex.apply(null, d.bed[8]);
-
+                
                 return feat;
             });
-
+            
             return {
                 type: 'rect',
                 name: track.title,
@@ -452,75 +505,75 @@ function parseData(data){
                 color: 'steelblue'
             };
         }
-
+        
     }));
-
+    
     return parsed;
-
+    
 }
 
 module.exports = Backbone.View.extend({
-
+    
     initialize: function(options){
         this.options = options;
     },
-
+    
     render: function(render){
-
+        
         render = _.isUndefined(render) ? {} : render;
         render.feature_viewer = _feature_viewer_id;
-
+        
         if(render.id === _gene.id){
             return;
         }
-
+        
         $(this.el).css({opacity: 0.0, visibility: 'hidden'});
-
+        
         var tpl = templates.gene(render);
-
-        if( ! _.isUndefined($div) ) $div.remove();
-
-
+        
+        if( ! _.isUndefined($div) ) $div.remove();  
+        
+        
         $div = $('<div></div>')
             .hide()
             .append(tpl);
-
+        
         $(this.el).append($div);
-
+        
         this.renderViewer(render.tracks);
-
+        
         // Select all elements with data-toggle="tooltips" in the document
-        $('[data-toggle="tooltip"]').tooltip();
+        $('[data-toggle="tooltip"]').tooltip(); 
     },
-
+    
     setVisible: function(){
         $div.show().siblings().hide();
         $(this.el).css({opacity: 0.0, visibility: 'visible'}).animate({opacity: 1.0}, 800);
     },
-
+    
     renderViewer: function(tracks){
-
+        
         data = parseData(tracks);
-
-
+        
+        
         var ft = new FeatureViewer(
             data.extent[1],
-            "#"+_feature_viewer_id,
+            "#"+_feature_viewer_id, 
             {
                 showAxis: false,
                 showSequence: false,
                 brushActive: true,
                 toolbar:false,
                 bubbleHelp:false,
-                zoomMax:10,
+                zoomMax:10, 
                 offset: {start: data.extent[0], end: data.extent[1]}
             });
 
-
+        
         _.each(data.tracks, ft.addFeature);
     }
 });
-},{"../templates":5,"d3":30,"feature-viewer":31,"underscore":81}],8:[function(require,module,exports){
+},{"../templates":6,"d3":32,"feature-viewer":33,"underscore":83}],9:[function(require,module,exports){
 var _ = require('underscore');
 
 var templates = require('../templates');
@@ -528,43 +581,41 @@ var templates = require('../templates');
 var _data = {}, $div;
 
 module.exports = Backbone.View.extend({
-
+    
     initialize: function(options){
         this.options = options;
     },
-
+    
     render: function(render){
-
+        
         render = _.isUndefined(render) ? {} : render;
-
+        
         $(this.el).css({opacity: 0.0, visibility: 'hidden'});
-
+        
         var tpl = templates.index(render);
-
+        
         $div = $('<div></div>')
             .hide()
             .append(tpl);
-
+        
         $(this.el).append($div);
-
+        
         this.rendered = true;
     },
-
+    
     // Returns true if the view element is in the DOM
     rendered: false,
-
+    
     setVisible: function(){
         $div.show().siblings().hide();
         $(this.el).css({opacity: 0.0, visibility: 'visible'}).animate({opacity: 1.0}, 800);
     }
-
+    
 });
-},{"../templates":5,"underscore":81}],9:[function(require,module,exports){
+},{"../templates":6,"underscore":83}],10:[function(require,module,exports){
 var _ = require('underscore');
 
 var templates = require('../templates');
-
-var _id = _.uniqueId('loading_');
 
 module.exports = Backbone.View.extend({
 
@@ -572,15 +623,34 @@ module.exports = Backbone.View.extend({
         this.options = options;
     },
 
-    render: function(render){
+    render: function(data){
+        var tpl = templates.introHeader(data.attributes);
+        $(this.options.el).append(tpl);
+    }
+});
 
+},{"../templates":6,"underscore":83}],11:[function(require,module,exports){
+var _ = require('underscore');
+
+var templates = require('../templates');
+
+var _id = _.uniqueId('loading_');
+
+module.exports = Backbone.View.extend({
+    
+    initialize: function(options){
+        this.options = options;
+    },
+    
+    render: function(render){
+        
         render = _.isUndefined(render) ? {} : render;
         render.id = _id;
-
-        var tpl = templates.loading(render);
+        
+        var tpl = templates.loading(render);    
         $(this.options.el).append(tpl);
     },
-
+    
     show: function(){
         $('#' + _id).modal({show:true, backdrop: 'static', keyboard: false});
     },
@@ -588,12 +658,12 @@ module.exports = Backbone.View.extend({
         $('#' + _id).modal('hide');
     }
 });
-},{"../templates":5,"underscore":81}],10:[function(require,module,exports){
+},{"../templates":6,"underscore":83}],12:[function(require,module,exports){
 var _ = require('underscore');
 var templates = require('../templates');
 
 
-var prev_id = _.uniqueId('prev_id_'), next_id = _.uniqueId('next_id_') ,  zoomout_id = _.uniqueId('zoomout_id_'), browser_search_input = _.uniqueId('search_input_'), gene_search_input = _.uniqueId('search_input_'), search_btn = _.uniqueId('search_btn_'), gene_btn = _.uniqueId('gene_btn_'), browser_btn = _.uniqueId('browser_btn_'), gene_example = _.uniqueId('gene_example_'), browser_example = _.uniqueId('browser_example_');
+var prev_id = _.uniqueId('prev_id_'), next_id = _.uniqueId('next_id_') ,  zoomout_id = _.uniqueId('zoomout_id_'), browser_search_input = _.uniqueId('search_input_'), gene_search_input = _.uniqueId('search_input_'), search_btn = _.uniqueId('search_btn_'), gene_btn = _.uniqueId('gene_btn_'), browser_btn = _.uniqueId('browser_btn_'), gene_example_id = _.uniqueId('gene_example_'), browser_example_id = _.uniqueId('browser_example_');
 
 var _show_gene = true, _links;
 
@@ -614,20 +684,22 @@ module.exports = Backbone.View.extend({
         'click a' : 'linkClick'
     },
 
-    render: function(render){
+    render: function(data){
 
-        render = _.isUndefined(render) ? {} : render;
+        data = _.isUndefined(data) ? {} : data.attributes;
 
-        render.prev_id = prev_id;
-        render.next_id = next_id;
-        render.zoomout_id = zoomout_id;
-        render.gene_search_input = gene_search_input;
-        render.browser_search_input = browser_search_input;
-        render.gene_btn = gene_btn;
-        render.browser_btn = browser_btn;
+        data.prev_id = prev_id;
+        data.next_id = next_id;
+        data.zoomout_id = zoomout_id;
+        data.gene_search_input = gene_search_input;
+        data.browser_search_input = browser_search_input;
+        data.gene_btn = gene_btn;
+        data.browser_btn = browser_btn;
+        data.browser_example_id = browser_example_id;
+        data.gene_example_id = gene_example_id;
 
 
-        var tpl = templates.search(render);
+        var tpl = templates.search(data);
         $(this.options.el).html(tpl);
     },
 
@@ -675,7 +747,11 @@ module.exports = Backbone.View.extend({
 
         var id = $(e.currentTarget).data('id');
 
-        if(!_.isUndefined(_links)){
+        if(id === gene_example_id){
+            App.router.navigate('/gene/' + App.config.attributes.gene_example, {trigger: true});
+        }else if(id === browser_example_id){
+            App.router.navigate('/browser/' + App.config.attributes.browser_example, {trigger: true});
+        }else if(!_.isUndefined(_links)){
             if(id === prev_id){
                 App.router.navigate('/browser/' + _links.previous, {trigger: true});
             }else if(id === next_id){
@@ -713,7 +789,8 @@ module.exports = Backbone.View.extend({
         $( '#' + browser_search_input ).parent().parent().css({opacity: 0.0, display: 'block'}).animate({opacity: 1.0}, 800);
     }
 });
-},{"../templates":5,"underscore":81}],11:[function(require,module,exports){
+
+},{"../templates":6,"underscore":83}],13:[function(require,module,exports){
 (function (process,__filename){
 /** vim: et:ts=4:sw=4:sts=4
  * @license amdefine 1.0.0 Copyright (c) 2011-2015, The Dojo Foundation All Rights Reserved.
@@ -1018,7 +1095,7 @@ function amdefine(module, requireFn) {
 module.exports = amdefine;
 
 }).call(this,require('_process'),"/node_modules/amdefine/amdefine.js")
-},{"_process":80,"path":79}],12:[function(require,module,exports){
+},{"_process":82,"path":81}],14:[function(require,module,exports){
 /**
  * Standalone extraction of Backbone.Events, no external dependency required.
  * Degrades nicely when Backone/underscore are already available in the current
@@ -1296,10 +1373,10 @@ module.exports = amdefine;
   }
 })(this);
 
-},{}],13:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 module.exports = require('./backbone-events-standalone');
 
-},{"./backbone-events-standalone":12}],14:[function(require,module,exports){
+},{"./backbone-events-standalone":14}],16:[function(require,module,exports){
 (function (global){
 //     Backbone.js 1.3.3
 
@@ -3223,7 +3300,7 @@ module.exports = require('./backbone-events-standalone');
 });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"jquery":76,"underscore":81}],15:[function(require,module,exports){
+},{"jquery":78,"underscore":83}],17:[function(require,module,exports){
 var events = require("backbone-events-standalone");
 
 events.onAll = function(callback,context){
@@ -3246,7 +3323,7 @@ events.mixin = function(proto) {
 
 module.exports = events;
 
-},{"backbone-events-standalone":13}],16:[function(require,module,exports){
+},{"backbone-events-standalone":15}],18:[function(require,module,exports){
 // This file is autogenerated via the `commonjs` Grunt task. You can require() this file in a CommonJS environment.
 require('../../js/transition.js')
 require('../../js/alert.js')
@@ -3260,12 +3337,12 @@ require('../../js/popover.js')
 require('../../js/scrollspy.js')
 require('../../js/tab.js')
 require('../../js/affix.js')
-},{"../../js/affix.js":17,"../../js/alert.js":18,"../../js/button.js":19,"../../js/carousel.js":20,"../../js/collapse.js":21,"../../js/dropdown.js":22,"../../js/modal.js":23,"../../js/popover.js":24,"../../js/scrollspy.js":25,"../../js/tab.js":26,"../../js/tooltip.js":27,"../../js/transition.js":28}],17:[function(require,module,exports){
+},{"../../js/affix.js":19,"../../js/alert.js":20,"../../js/button.js":21,"../../js/carousel.js":22,"../../js/collapse.js":23,"../../js/dropdown.js":24,"../../js/modal.js":25,"../../js/popover.js":26,"../../js/scrollspy.js":27,"../../js/tab.js":28,"../../js/tooltip.js":29,"../../js/transition.js":30}],19:[function(require,module,exports){
 /* ========================================================================
- * Bootstrap: affix.js v3.3.6
+ * Bootstrap: affix.js v3.3.7
  * http://getbootstrap.com/javascript/#affix
  * ========================================================================
- * Copyright 2011-2015 Twitter, Inc.
+ * Copyright 2011-2016 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  * ======================================================================== */
 
@@ -3291,7 +3368,7 @@ require('../../js/affix.js')
     this.checkPosition()
   }
 
-  Affix.VERSION  = '3.3.6'
+  Affix.VERSION  = '3.3.7'
 
   Affix.RESET    = 'affix affix-top affix-bottom'
 
@@ -3424,12 +3501,12 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],18:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 /* ========================================================================
- * Bootstrap: alert.js v3.3.6
+ * Bootstrap: alert.js v3.3.7
  * http://getbootstrap.com/javascript/#alerts
  * ========================================================================
- * Copyright 2011-2015 Twitter, Inc.
+ * Copyright 2011-2016 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  * ======================================================================== */
 
@@ -3445,7 +3522,7 @@ require('../../js/affix.js')
     $(el).on('click', dismiss, this.close)
   }
 
-  Alert.VERSION = '3.3.6'
+  Alert.VERSION = '3.3.7'
 
   Alert.TRANSITION_DURATION = 150
 
@@ -3458,7 +3535,7 @@ require('../../js/affix.js')
       selector = selector && selector.replace(/.*(?=#[^\s]*$)/, '') // strip for ie7
     }
 
-    var $parent = $(selector)
+    var $parent = $(selector === '#' ? [] : selector)
 
     if (e) e.preventDefault()
 
@@ -3520,12 +3597,12 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],19:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 /* ========================================================================
- * Bootstrap: button.js v3.3.6
+ * Bootstrap: button.js v3.3.7
  * http://getbootstrap.com/javascript/#buttons
  * ========================================================================
- * Copyright 2011-2015 Twitter, Inc.
+ * Copyright 2011-2016 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  * ======================================================================== */
 
@@ -3542,7 +3619,7 @@ require('../../js/affix.js')
     this.isLoading = false
   }
 
-  Button.VERSION  = '3.3.6'
+  Button.VERSION  = '3.3.7'
 
   Button.DEFAULTS = {
     loadingText: 'loading...'
@@ -3564,10 +3641,10 @@ require('../../js/affix.js')
 
       if (state == 'loadingText') {
         this.isLoading = true
-        $el.addClass(d).attr(d, d)
+        $el.addClass(d).attr(d, d).prop(d, true)
       } else if (this.isLoading) {
         this.isLoading = false
-        $el.removeClass(d).removeAttr(d)
+        $el.removeClass(d).removeAttr(d).prop(d, false)
       }
     }, this), 0)
   }
@@ -3631,10 +3708,15 @@ require('../../js/affix.js')
 
   $(document)
     .on('click.bs.button.data-api', '[data-toggle^="button"]', function (e) {
-      var $btn = $(e.target)
-      if (!$btn.hasClass('btn')) $btn = $btn.closest('.btn')
+      var $btn = $(e.target).closest('.btn')
       Plugin.call($btn, 'toggle')
-      if (!($(e.target).is('input[type="radio"]') || $(e.target).is('input[type="checkbox"]'))) e.preventDefault()
+      if (!($(e.target).is('input[type="radio"], input[type="checkbox"]'))) {
+        // Prevent double click on radios, and the double selections (so cancellation) on checkboxes
+        e.preventDefault()
+        // The target component still receive the focus
+        if ($btn.is('input,button')) $btn.trigger('focus')
+        else $btn.find('input:visible,button:visible').first().trigger('focus')
+      }
     })
     .on('focus.bs.button.data-api blur.bs.button.data-api', '[data-toggle^="button"]', function (e) {
       $(e.target).closest('.btn').toggleClass('focus', /^focus(in)?$/.test(e.type))
@@ -3642,12 +3724,12 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],20:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 /* ========================================================================
- * Bootstrap: carousel.js v3.3.6
+ * Bootstrap: carousel.js v3.3.7
  * http://getbootstrap.com/javascript/#carousel
  * ========================================================================
- * Copyright 2011-2015 Twitter, Inc.
+ * Copyright 2011-2016 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  * ======================================================================== */
 
@@ -3675,7 +3757,7 @@ require('../../js/affix.js')
       .on('mouseleave.bs.carousel', $.proxy(this.cycle, this))
   }
 
-  Carousel.VERSION  = '3.3.6'
+  Carousel.VERSION  = '3.3.7'
 
   Carousel.TRANSITION_DURATION = 600
 
@@ -3881,15 +3963,16 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],21:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 /* ========================================================================
- * Bootstrap: collapse.js v3.3.6
+ * Bootstrap: collapse.js v3.3.7
  * http://getbootstrap.com/javascript/#collapse
  * ========================================================================
- * Copyright 2011-2015 Twitter, Inc.
+ * Copyright 2011-2016 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  * ======================================================================== */
 
+/* jshint latedef: false */
 
 +function ($) {
   'use strict';
@@ -3913,7 +3996,7 @@ require('../../js/affix.js')
     if (this.options.toggle) this.toggle()
   }
 
-  Collapse.VERSION  = '3.3.6'
+  Collapse.VERSION  = '3.3.7'
 
   Collapse.TRANSITION_DURATION = 350
 
@@ -4094,12 +4177,12 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],22:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 /* ========================================================================
- * Bootstrap: dropdown.js v3.3.6
+ * Bootstrap: dropdown.js v3.3.7
  * http://getbootstrap.com/javascript/#dropdowns
  * ========================================================================
- * Copyright 2011-2015 Twitter, Inc.
+ * Copyright 2011-2016 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  * ======================================================================== */
 
@@ -4116,7 +4199,7 @@ require('../../js/affix.js')
     $(element).on('click.bs.dropdown', this.toggle)
   }
 
-  Dropdown.VERSION = '3.3.6'
+  Dropdown.VERSION = '3.3.7'
 
   function getParent($this) {
     var selector = $this.attr('data-target')
@@ -4261,12 +4344,12 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],23:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 /* ========================================================================
- * Bootstrap: modal.js v3.3.6
+ * Bootstrap: modal.js v3.3.7
  * http://getbootstrap.com/javascript/#modals
  * ========================================================================
- * Copyright 2011-2015 Twitter, Inc.
+ * Copyright 2011-2016 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  * ======================================================================== */
 
@@ -4297,7 +4380,7 @@ require('../../js/affix.js')
     }
   }
 
-  Modal.VERSION  = '3.3.6'
+  Modal.VERSION  = '3.3.7'
 
   Modal.TRANSITION_DURATION = 300
   Modal.BACKDROP_TRANSITION_DURATION = 150
@@ -4404,7 +4487,9 @@ require('../../js/affix.js')
     $(document)
       .off('focusin.bs.modal') // guard against infinite focus loop
       .on('focusin.bs.modal', $.proxy(function (e) {
-        if (this.$element[0] !== e.target && !this.$element.has(e.target).length) {
+        if (document !== e.target &&
+            this.$element[0] !== e.target &&
+            !this.$element.has(e.target).length) {
           this.$element.trigger('focus')
         }
       }, this))
@@ -4600,12 +4685,12 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],24:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 /* ========================================================================
- * Bootstrap: popover.js v3.3.6
+ * Bootstrap: popover.js v3.3.7
  * http://getbootstrap.com/javascript/#popovers
  * ========================================================================
- * Copyright 2011-2015 Twitter, Inc.
+ * Copyright 2011-2016 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  * ======================================================================== */
 
@@ -4622,7 +4707,7 @@ require('../../js/affix.js')
 
   if (!$.fn.tooltip) throw new Error('Popover requires tooltip.js')
 
-  Popover.VERSION  = '3.3.6'
+  Popover.VERSION  = '3.3.7'
 
   Popover.DEFAULTS = $.extend({}, $.fn.tooltip.Constructor.DEFAULTS, {
     placement: 'right',
@@ -4710,12 +4795,12 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],25:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 /* ========================================================================
- * Bootstrap: scrollspy.js v3.3.6
+ * Bootstrap: scrollspy.js v3.3.7
  * http://getbootstrap.com/javascript/#scrollspy
  * ========================================================================
- * Copyright 2011-2015 Twitter, Inc.
+ * Copyright 2011-2016 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  * ======================================================================== */
 
@@ -4741,7 +4826,7 @@ require('../../js/affix.js')
     this.process()
   }
 
-  ScrollSpy.VERSION  = '3.3.6'
+  ScrollSpy.VERSION  = '3.3.7'
 
   ScrollSpy.DEFAULTS = {
     offset: 10
@@ -4884,12 +4969,12 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],26:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 /* ========================================================================
- * Bootstrap: tab.js v3.3.6
+ * Bootstrap: tab.js v3.3.7
  * http://getbootstrap.com/javascript/#tabs
  * ========================================================================
- * Copyright 2011-2015 Twitter, Inc.
+ * Copyright 2011-2016 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  * ======================================================================== */
 
@@ -4906,7 +4991,7 @@ require('../../js/affix.js')
     // jscs:enable requireDollarBeforejQueryAssignment
   }
 
-  Tab.VERSION = '3.3.6'
+  Tab.VERSION = '3.3.7'
 
   Tab.TRANSITION_DURATION = 150
 
@@ -5041,13 +5126,13 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],27:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 /* ========================================================================
- * Bootstrap: tooltip.js v3.3.6
+ * Bootstrap: tooltip.js v3.3.7
  * http://getbootstrap.com/javascript/#tooltip
  * Inspired by the original jQuery.tipsy by Jason Frame
  * ========================================================================
- * Copyright 2011-2015 Twitter, Inc.
+ * Copyright 2011-2016 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  * ======================================================================== */
 
@@ -5070,7 +5155,7 @@ require('../../js/affix.js')
     this.init('tooltip', element, options)
   }
 
-  Tooltip.VERSION  = '3.3.6'
+  Tooltip.VERSION  = '3.3.7'
 
   Tooltip.TRANSITION_DURATION = 150
 
@@ -5361,9 +5446,11 @@ require('../../js/affix.js')
 
     function complete() {
       if (that.hoverState != 'in') $tip.detach()
-      that.$element
-        .removeAttr('aria-describedby')
-        .trigger('hidden.bs.' + that.type)
+      if (that.$element) { // TODO: Check whether guarding this code with this `if` is really necessary.
+        that.$element
+          .removeAttr('aria-describedby')
+          .trigger('hidden.bs.' + that.type)
+      }
       callback && callback()
     }
 
@@ -5406,7 +5493,10 @@ require('../../js/affix.js')
       // width and height are missing in IE8, so compute them manually; see https://github.com/twbs/bootstrap/issues/14093
       elRect = $.extend({}, elRect, { width: elRect.right - elRect.left, height: elRect.bottom - elRect.top })
     }
-    var elOffset  = isBody ? { top: 0, left: 0 } : $element.offset()
+    var isSvg = window.SVGElement && el instanceof window.SVGElement
+    // Avoid using $.offset() on SVGs since it gives incorrect results in jQuery 3.
+    // See https://github.com/twbs/bootstrap/issues/20280
+    var elOffset  = isBody ? { top: 0, left: 0 } : (isSvg ? null : $element.offset())
     var scroll    = { scroll: isBody ? document.documentElement.scrollTop || document.body.scrollTop : $element.scrollTop() }
     var outerDims = isBody ? { width: $(window).width(), height: $(window).height() } : null
 
@@ -5522,6 +5612,7 @@ require('../../js/affix.js')
       that.$tip = null
       that.$arrow = null
       that.$viewport = null
+      that.$element = null
     })
   }
 
@@ -5557,12 +5648,12 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],28:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 /* ========================================================================
- * Bootstrap: transition.js v3.3.6
+ * Bootstrap: transition.js v3.3.7
  * http://getbootstrap.com/javascript/#transitions
  * ========================================================================
- * Copyright 2011-2015 Twitter, Inc.
+ * Copyright 2011-2016 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  * ======================================================================== */
 
@@ -5618,12 +5709,12 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],29:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 
-},{}],30:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 !function() {
   var d3 = {
-    version: "3.5.16"
+    version: "3.5.17"
   };
   var d3_arraySlice = [].slice, d3_array = function(list) {
     return d3_arraySlice.call(list);
@@ -6805,7 +6896,7 @@ require('../../js/affix.js')
           svg.remove();
         }
       }
-      if (d3_mouse_bug44083) point.x = e.pageX, point.y = e.pageY; else point.x = e.clientX,
+      if (d3_mouse_bug44083) point.x = e.pageX, point.y = e.pageY; else point.x = e.clientX, 
       point.y = e.clientY;
       point = point.matrixTransform(container.getScreenCTM().inverse());
       return [ point.x, point.y ];
@@ -7180,7 +7271,7 @@ require('../../js/affix.js')
     }
     function mousewheeled() {
       var dispatch = event.of(this, arguments);
-      if (mousewheelTimer) clearTimeout(mousewheelTimer); else d3_selection_interrupt.call(this),
+      if (mousewheelTimer) clearTimeout(mousewheelTimer); else d3_selection_interrupt.call(this), 
       translate0 = location(center0 = center || d3.mouse(this)), zoomstarted(dispatch);
       mousewheelTimer = setTimeout(function() {
         mousewheelTimer = null;
@@ -7549,7 +7640,7 @@ require('../../js/affix.js')
   d3.xhr = d3_xhrType(d3_identity);
   function d3_xhrType(response) {
     return function(url, mimeType, callback) {
-      if (arguments.length === 2 && typeof mimeType === "function") callback = mimeType,
+      if (arguments.length === 2 && typeof mimeType === "function") callback = mimeType, 
       mimeType = null;
       return d3_xhr(url, mimeType, response, callback);
     };
@@ -8390,7 +8481,7 @@ require('../../js/affix.js')
     return n ? (date.y = d3_time_expandYear(+n[0]), i + n[0].length) : -1;
   }
   function d3_time_parseZone(date, string, i) {
-    return /^[+-]\d{4}$/.test(string = string.slice(i, i + 5)) ? (date.Z = -string,
+    return /^[+-]\d{4}$/.test(string = string.slice(i, i + 5)) ? (date.Z = -string, 
     i + 5) : -1;
   }
   function d3_time_expandYear(d) {
@@ -8583,7 +8674,7 @@ require('../../js/affix.js')
     var λ00, φ00, λ0, cosφ0, sinφ0;
     d3_geo_area.point = function(λ, φ) {
       d3_geo_area.point = nextPoint;
-      λ0 = (λ00 = λ) * d3_radians, cosφ0 = Math.cos(φ = (φ00 = φ) * d3_radians / 2 + π / 4),
+      λ0 = (λ00 = λ) * d3_radians, cosφ0 = Math.cos(φ = (φ00 = φ) * d3_radians / 2 + π / 4), 
       sinφ0 = Math.sin(φ);
     };
     function nextPoint(λ, φ) {
@@ -9148,7 +9239,7 @@ require('../../js/affix.js')
         λ0 = λ, sinφ0 = sinφ, cosφ0 = cosφ, point0 = point;
       }
     }
-    return (polarAngle < -ε || polarAngle < ε && d3_geo_areaRingSum < 0) ^ winding & 1;
+    return (polarAngle < -ε || polarAngle < ε && d3_geo_areaRingSum < -ε) ^ winding & 1;
   }
   function d3_geo_clipCircle(radius) {
     var cr = Math.cos(radius), smallRadius = cr > 0, notHemisphere = abs(cr) > ε, interpolate = d3_geo_circleInterpolate(radius, 6 * d3_radians);
@@ -10412,7 +10503,7 @@ require('../../js/affix.js')
       return _ ? center([ -_[1], _[0] ]) : (_ = center(), [ _[1], -_[0] ]);
     };
     projection.rotate = function(_) {
-      return _ ? rotate([ _[0], _[1], _.length > 2 ? _[2] + 90 : 90 ]) : (_ = rotate(),
+      return _ ? rotate([ _[0], _[1], _.length > 2 ? _[2] + 90 : 90 ]) : (_ = rotate(), 
       [ _[0], _[1], _[2] - 90 ]);
     };
     return rotate([ 0, 0, 90 ]);
@@ -11266,7 +11357,7 @@ require('../../js/affix.js')
     };
     quadtree.extent = function(_) {
       if (!arguments.length) return x1 == null ? null : [ [ x1, y1 ], [ x2, y2 ] ];
-      if (_ == null) x1 = y1 = x2 = y2 = null; else x1 = +_[0][0], y1 = +_[0][1], x2 = +_[1][0],
+      if (_ == null) x1 = y1 = x2 = y2 = null; else x1 = +_[0][0], y1 = +_[0][1], x2 = +_[1][0], 
       y2 = +_[1][1];
       return quadtree;
     };
@@ -12991,7 +13082,7 @@ require('../../js/affix.js')
         return d3_layout_treemapPad(node, x);
       }
       var type;
-      pad = (padding = x) == null ? d3_layout_treemapPadNull : (type = typeof x) === "function" ? padFunction : type === "number" ? (x = [ x, x, x, x ],
+      pad = (padding = x) == null ? d3_layout_treemapPadNull : (type = typeof x) === "function" ? padFunction : type === "number" ? (x = [ x, x, x, x ], 
       padConstant) : padConstant;
       return treemap;
     };
@@ -13394,7 +13485,7 @@ require('../../js/affix.js')
     };
     scale.rangePoints = function(x, padding) {
       if (arguments.length < 2) padding = 0;
-      var start = x[0], stop = x[1], step = domain.length < 2 ? (start = (start + stop) / 2,
+      var start = x[0], stop = x[1], step = domain.length < 2 ? (start = (start + stop) / 2, 
       0) : (stop - start) / (domain.length - 1 + padding);
       range = steps(start + step * padding / 2, step);
       rangeBand = 0;
@@ -13406,7 +13497,7 @@ require('../../js/affix.js')
     };
     scale.rangeRoundPoints = function(x, padding) {
       if (arguments.length < 2) padding = 0;
-      var start = x[0], stop = x[1], step = domain.length < 2 ? (start = stop = Math.round((start + stop) / 2),
+      var start = x[0], stop = x[1], step = domain.length < 2 ? (start = stop = Math.round((start + stop) / 2), 
       0) : (stop - start) / (domain.length - 1 + padding) | 0;
       range = steps(start + Math.round(step * padding / 2 + (stop - start - (domain.length - 1 + padding) * step) / 2), step);
       rangeBand = 0;
@@ -13834,7 +13925,7 @@ require('../../js/affix.js')
     return points.length < 4 ? d3_svg_lineLinear(points) : points[1] + d3_svg_lineHermite(points.slice(1, -1), d3_svg_lineCardinalTangents(points, tension));
   }
   function d3_svg_lineCardinalClosed(points, tension) {
-    return points.length < 3 ? d3_svg_lineLinearClosed(points) : points[0] + d3_svg_lineHermite((points.push(points[0]),
+    return points.length < 3 ? d3_svg_lineLinearClosed(points) : points[0] + d3_svg_lineHermite((points.push(points[0]), 
     points), d3_svg_lineCardinalTangents([ points[points.length - 2] ].concat(points, [ points[1] ]), tension));
   }
   function d3_svg_lineCardinal(points, tension) {
@@ -14607,7 +14698,7 @@ require('../../js/affix.js')
         var g = d3.select(this);
         var scale0 = this.__chart__ || scale, scale1 = this.__chart__ = scale.copy();
         var ticks = tickValues == null ? scale1.ticks ? scale1.ticks.apply(scale1, tickArguments_) : scale1.domain() : tickValues, tickFormat = tickFormat_ == null ? scale1.tickFormat ? scale1.tickFormat.apply(scale1, tickArguments_) : d3_identity : tickFormat_, tick = g.selectAll(".tick").data(ticks, scale1), tickEnter = tick.enter().insert("g", ".domain").attr("class", "tick").style("opacity", ε), tickExit = d3.transition(tick.exit()).style("opacity", ε).remove(), tickUpdate = d3.transition(tick.order()).style("opacity", 1), tickSpacing = Math.max(innerTickSize, 0) + tickPadding, tickTransform;
-        var range = d3_scaleRange(scale1), path = g.selectAll(".domain").data([ 0 ]), pathUpdate = (path.enter().append("path").attr("class", "domain"),
+        var range = d3_scaleRange(scale1), path = g.selectAll(".domain").data([ 0 ]), pathUpdate = (path.enter().append("path").attr("class", "domain"), 
         d3.transition(path));
         tickEnter.append("line");
         tickEnter.append("text");
@@ -15175,7 +15266,7 @@ require('../../js/affix.js')
   });
   if (typeof define === "function" && define.amd) this.d3 = d3, define(d3); else if (typeof module === "object" && module.exports) module.exports = d3; else this.d3 = d3;
 }();
-},{}],31:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 (function (global){
 /*
  * feature-viewer
@@ -15195,7 +15286,7 @@ require("bootstrap/js/tooltip.js");
 require("bootstrap/js/popover.js");
 
 var FeatureViewer = require("../src/feature-viewer.js");
-
+ 
 //Optionnal : usage with nextprot
 Nextprot = require("nextprot/src/nextprot-core.js");
 NXUtils = require("nextprot/src/nextprot-utils.js")["NXUtils"];
@@ -15209,7 +15300,7 @@ nxFeatureViewer = require("../src/fv.nextprot.js");
 require("biojs-events").mixin(FeatureViewer.prototype);
 module.exports = FeatureViewer;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../src/feature-viewer.js":33,"../src/fv.nextprot.js":34,"biojs-events":15,"bootstrap/js/popover.js":24,"bootstrap/js/tooltip.js":27,"d3":32,"jquery":76,"nextprot/src/nextprot-core.js":77,"nextprot/src/nextprot-utils.js":78}],32:[function(require,module,exports){
+},{"../src/feature-viewer.js":35,"../src/fv.nextprot.js":36,"biojs-events":17,"bootstrap/js/popover.js":26,"bootstrap/js/tooltip.js":29,"d3":34,"jquery":78,"nextprot/src/nextprot-core.js":79,"nextprot/src/nextprot-utils.js":80}],34:[function(require,module,exports){
 !function() {
   var d3 = {
     version: "3.5.6"
@@ -16394,7 +16485,7 @@ module.exports = FeatureViewer;
           svg.remove();
         }
       }
-      if (d3_mouse_bug44083) point.x = e.pageX, point.y = e.pageY; else point.x = e.clientX,
+      if (d3_mouse_bug44083) point.x = e.pageX, point.y = e.pageY; else point.x = e.clientX, 
       point.y = e.clientY;
       point = point.matrixTransform(container.getScreenCTM().inverse());
       return [ point.x, point.y ];
@@ -16764,7 +16855,7 @@ module.exports = FeatureViewer;
     }
     function mousewheeled() {
       var dispatch = event.of(this, arguments);
-      if (mousewheelTimer) clearTimeout(mousewheelTimer); else d3_selection_interrupt.call(this),
+      if (mousewheelTimer) clearTimeout(mousewheelTimer); else d3_selection_interrupt.call(this), 
       translate0 = location(center0 = center || d3.mouse(this)), zoomstarted(dispatch);
       mousewheelTimer = setTimeout(function() {
         mousewheelTimer = null;
@@ -17134,7 +17225,7 @@ module.exports = FeatureViewer;
   d3.xhr = d3_xhrType(d3_identity);
   function d3_xhrType(response) {
     return function(url, mimeType, callback) {
-      if (arguments.length === 2 && typeof mimeType === "function") callback = mimeType,
+      if (arguments.length === 2 && typeof mimeType === "function") callback = mimeType, 
       mimeType = null;
       return d3_xhr(url, mimeType, response, callback);
     };
@@ -17972,7 +18063,7 @@ module.exports = FeatureViewer;
     return n ? (date.y = d3_time_expandYear(+n[0]), i + n[0].length) : -1;
   }
   function d3_time_parseZone(date, string, i) {
-    return /^[+-]\d{4}$/.test(string = string.slice(i, i + 5)) ? (date.Z = -string,
+    return /^[+-]\d{4}$/.test(string = string.slice(i, i + 5)) ? (date.Z = -string, 
     i + 5) : -1;
   }
   function d3_time_expandYear(d) {
@@ -18165,7 +18256,7 @@ module.exports = FeatureViewer;
     var λ00, φ00, λ0, cosφ0, sinφ0;
     d3_geo_area.point = function(λ, φ) {
       d3_geo_area.point = nextPoint;
-      λ0 = (λ00 = λ) * d3_radians, cosφ0 = Math.cos(φ = (φ00 = φ) * d3_radians / 2 + π / 4),
+      λ0 = (λ00 = λ) * d3_radians, cosφ0 = Math.cos(φ = (φ00 = φ) * d3_radians / 2 + π / 4), 
       sinφ0 = Math.sin(φ);
     };
     function nextPoint(λ, φ) {
@@ -19994,7 +20085,7 @@ module.exports = FeatureViewer;
       return _ ? center([ -_[1], _[0] ]) : (_ = center(), [ _[1], -_[0] ]);
     };
     projection.rotate = function(_) {
-      return _ ? rotate([ _[0], _[1], _.length > 2 ? _[2] + 90 : 90 ]) : (_ = rotate(),
+      return _ ? rotate([ _[0], _[1], _.length > 2 ? _[2] + 90 : 90 ]) : (_ = rotate(), 
       [ _[0], _[1], _[2] - 90 ]);
     };
     return rotate([ 0, 0, 90 ]);
@@ -20848,7 +20939,7 @@ module.exports = FeatureViewer;
     };
     quadtree.extent = function(_) {
       if (!arguments.length) return x1 == null ? null : [ [ x1, y1 ], [ x2, y2 ] ];
-      if (_ == null) x1 = y1 = x2 = y2 = null; else x1 = +_[0][0], y1 = +_[0][1], x2 = +_[1][0],
+      if (_ == null) x1 = y1 = x2 = y2 = null; else x1 = +_[0][0], y1 = +_[0][1], x2 = +_[1][0], 
       y2 = +_[1][1];
       return quadtree;
     };
@@ -22552,7 +22643,7 @@ module.exports = FeatureViewer;
         return d3_layout_treemapPad(node, x);
       }
       var type;
-      pad = (padding = x) == null ? d3_layout_treemapPadNull : (type = typeof x) === "function" ? padFunction : type === "number" ? (x = [ x, x, x, x ],
+      pad = (padding = x) == null ? d3_layout_treemapPadNull : (type = typeof x) === "function" ? padFunction : type === "number" ? (x = [ x, x, x, x ], 
       padConstant) : padConstant;
       return treemap;
     };
@@ -22852,7 +22943,7 @@ module.exports = FeatureViewer;
     scale.tickFormat = function(n, format) {
       if (!arguments.length) return d3_scale_logFormat;
       if (arguments.length < 2) format = d3_scale_logFormat; else if (typeof format !== "function") format = d3.format(format);
-      var k = Math.max(.1, n / scale.ticks().length), f = positive ? (e = 1e-12, Math.ceil) : (e = -1e-12,
+      var k = Math.max(.1, n / scale.ticks().length), f = positive ? (e = 1e-12, Math.ceil) : (e = -1e-12, 
       Math.floor), e;
       return function(d) {
         return d / pow(f(log(d) + e)) <= k ? format(d) : "";
@@ -22952,7 +23043,7 @@ module.exports = FeatureViewer;
     };
     scale.rangePoints = function(x, padding) {
       if (arguments.length < 2) padding = 0;
-      var start = x[0], stop = x[1], step = domain.length < 2 ? (start = (start + stop) / 2,
+      var start = x[0], stop = x[1], step = domain.length < 2 ? (start = (start + stop) / 2, 
       0) : (stop - start) / (domain.length - 1 + padding);
       range = steps(start + step * padding / 2, step);
       rangeBand = 0;
@@ -22964,7 +23055,7 @@ module.exports = FeatureViewer;
     };
     scale.rangeRoundPoints = function(x, padding) {
       if (arguments.length < 2) padding = 0;
-      var start = x[0], stop = x[1], step = domain.length < 2 ? (start = stop = Math.round((start + stop) / 2),
+      var start = x[0], stop = x[1], step = domain.length < 2 ? (start = stop = Math.round((start + stop) / 2), 
       0) : (stop - start) / (domain.length - 1 + padding) | 0;
       range = steps(start + Math.round(step * padding / 2 + (stop - start - (domain.length - 1 + padding) * step) / 2), step);
       rangeBand = 0;
@@ -23387,7 +23478,7 @@ module.exports = FeatureViewer;
     return points.length < 4 ? d3_svg_lineLinear(points) : points[1] + d3_svg_lineHermite(points.slice(1, -1), d3_svg_lineCardinalTangents(points, tension));
   }
   function d3_svg_lineCardinalClosed(points, tension) {
-    return points.length < 3 ? d3_svg_lineLinear(points) : points[0] + d3_svg_lineHermite((points.push(points[0]),
+    return points.length < 3 ? d3_svg_lineLinear(points) : points[0] + d3_svg_lineHermite((points.push(points[0]), 
     points), d3_svg_lineCardinalTangents([ points[points.length - 2] ].concat(points, [ points[1] ]), tension));
   }
   function d3_svg_lineCardinal(points, tension) {
@@ -24145,7 +24236,7 @@ module.exports = FeatureViewer;
         var g = d3.select(this);
         var scale0 = this.__chart__ || scale, scale1 = this.__chart__ = scale.copy();
         var ticks = tickValues == null ? scale1.ticks ? scale1.ticks.apply(scale1, tickArguments_) : scale1.domain() : tickValues, tickFormat = tickFormat_ == null ? scale1.tickFormat ? scale1.tickFormat.apply(scale1, tickArguments_) : d3_identity : tickFormat_, tick = g.selectAll(".tick").data(ticks, scale1), tickEnter = tick.enter().insert("g", ".domain").attr("class", "tick").style("opacity", ε), tickExit = d3.transition(tick.exit()).style("opacity", ε).remove(), tickUpdate = d3.transition(tick.order()).style("opacity", 1), tickSpacing = Math.max(innerTickSize, 0) + tickPadding, tickTransform;
-        var range = d3_scaleRange(scale1), path = g.selectAll(".domain").data([ 0 ]), pathUpdate = (path.enter().append("path").attr("class", "domain"),
+        var range = d3_scaleRange(scale1), path = g.selectAll(".domain").data([ 0 ]), pathUpdate = (path.enter().append("path").attr("class", "domain"), 
         d3.transition(path));
         tickEnter.append("line");
         tickEnter.append("text");
@@ -24714,7 +24805,7 @@ module.exports = FeatureViewer;
   if (typeof define === "function" && define.amd) define(d3); else if (typeof module === "object" && module.exports) module.exports = d3;
   this.d3 = d3;
 }();
-},{}],33:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 var FeatureViewer = (function () {
 
     function FeatureViewer(sequence, div, options) {
@@ -24722,7 +24813,8 @@ var FeatureViewer = (function () {
         var self = this;
         // if (!div) var div = window;
         this.events = {
-            FEATURE_SELECTED_EVENT: "feature-viewer-position-selected"
+          FEATURE_SELECTED_EVENT: "feature-viewer-position-selected",
+          ZOOM_EVENT: "feature-viewer-zoom-altered"
         };
 
         // if (!div) var div = window;
@@ -24739,7 +24831,13 @@ var FeatureViewer = (function () {
             verticalLine: false
         };
         var offset = {start:1,end:fvLength};
-        if (options && options.offset) offset = options.offset;
+        if (options && options.offset) {
+            offset = options.offset;
+            if (offset.start < 1) {
+                offset.start = 1;
+                console.warn("WARNING ! offset.start should be > 0. Thus, it has been reset to 1.");
+            }
+        }
         var pathLevel = 0;
         var svg;
         var svgContainer;
@@ -24752,7 +24850,7 @@ var FeatureViewer = (function () {
         var seqShift = 0;
         var zoom = false;
         var zoomMax = 50;
-        var current_extend = {
+        var current_extend = { 
                     length : offset.end - offset.start,
                     start : offset.start,
                     end : offset.end
@@ -24793,9 +24891,9 @@ var FeatureViewer = (function () {
         var scalingPosition = d3.scale.linear()
             .domain([0, width])
             .range([offset.start, offset.end]);
-
-
-
+        
+        
+        
 
         function updateLineTooltip(mouse,pD){
             var xP = mouse-110;
@@ -24811,7 +24909,7 @@ var FeatureViewer = (function () {
             }
             return elemHover;
         }
-
+        
         d3.helper = {};
 
         d3.helper.tooltip = function (object) {
@@ -24851,7 +24949,7 @@ var FeatureViewer = (function () {
                         'text-align': 'center',
                         position: 'absolute',
                         'z-index': 45,
-                        'box-shadow': '0 1px 2px 0 #656565'
+                        'box-shadow': '0 1px 2px 0 #656565' 
                     });
                     if (object.type === "path") {
                         var first_line = '<p style="margin:2px;color:white">start : <span style="color:orangered">' + pD[0].x + '</span></p>';
@@ -24884,7 +24982,7 @@ var FeatureViewer = (function () {
                     }
                 })
                     .on('mousemove.tooltip', function (pD, pI) {
-
+                    
                         if (object.type === "line") {
                             var absoluteMousePos = d3.mouse(bodyNode);
                             var elemHover = updateLineTooltip(absoluteMousePos[0],pD);
@@ -24898,7 +24996,7 @@ var FeatureViewer = (function () {
                             }
                             tooltipDiv.html(first_line + second_line);
 //                            $('#tLineX').text(elemHover.x);
-//                            $('#tLineC').text(elemHover.y);
+//                            $('#tLineC').text(elemHover.y);  
                         }
                         // Move tooltip
                         // IE 11 sometimes fires mousemove before mouseover
@@ -25053,6 +25151,10 @@ var FeatureViewer = (function () {
             //$(document).on(self.events.FEATURE_SELECTED_EVENT, listener);
         };
 
+      this.onZoom = function (listener) {
+            svgElement.addEventListener(self.events.ZOOM_EVENT, listener);
+        };
+
         function addLevel(array) {
             var leveling = [];
             array.forEach(function (d) {
@@ -25113,7 +25215,7 @@ var FeatureViewer = (function () {
                 return -d.y * 10 + pathLevel;
             });
         var lineGen = d3.svg.line()
-
+          
 //          .interpolate("cardinal")
           .x(function(d) {
             return scaling(d.x);
@@ -25138,7 +25240,7 @@ var FeatureViewer = (function () {
             .scale(scaling)
             .tickFormat(d3.format("d"))
             .orient("bottom");
-
+        
         function shadeBlendConvert(p, from, to) {
             if(typeof(p)!="number"||p<-1||p>1||typeof(from)!="string"||(from[0]!='r'&&from[0]!='#')||(typeof(to)!="string"&&typeof(to)!="undefined"))return null; //ErrorCheck
             if(!this.sbcRip)this.sbcRip=function(d){
@@ -25172,7 +25274,8 @@ var FeatureViewer = (function () {
         }
 
         function updateSVGHeight(position) {
-            svg.attr("height", position + 60 + "px")
+            svg.attr("height", position + 60 + "px");
+            svg.select("clippath rect").attr("height", position + 60 + "px");
         }
 
         var yAxisScale = d3.scale.ordinal()
@@ -25289,7 +25392,7 @@ var FeatureViewer = (function () {
                     }
                     var maxValue = Math.max.apply(Math,object.data[i].map(function(o){return Math.abs(o.y);}));
                     level = maxValue > level ? maxValue : level;
-
+                    
 
                     object.data[i] = [object.data[i].map(function (d) {
                         return {
@@ -25399,8 +25502,9 @@ var FeatureViewer = (function () {
             },
             rectangle: function (object, position) {
                 //var rectShift = 20;
-                var rectHeight =(object.height) ? object.height : 12;
-
+                if (!object.height) object.height = 12;
+                var rectHeight = object.height;
+                
                 var rectShift = rectHeight + rectHeight/3;
                 var lineShift = rectHeight/2 - 6;
 //                var lineShift = rectHeight/2 - 6;
@@ -25409,7 +25513,7 @@ var FeatureViewer = (function () {
                     .attr("class", "rectangle")
                     .attr("clip-path", "url(#clip)")
                     .attr("transform", "translate(0," + position + ")");
-
+                
                 var dataline=[];
                 for (var i = 0; i < level; i++) {
                     dataline.push([{
@@ -25472,7 +25576,7 @@ var FeatureViewer = (function () {
                     .style("z-index", "15")
                     .style("visibility", function (d) {
                         if (d.description) {
-                            return (scaling(d.y) - scaling(d.x)) > d.description.length * 8 ? "visible" : "hidden";
+                            return (scaling(d.y) - scaling(d.x)) > d.description.length * 8 && rectHeight > 11 ? "visible" : "hidden";
                         } else return "hidden";
                     })
                     .call(d3.helper.tooltip(object));
@@ -25493,8 +25597,8 @@ var FeatureViewer = (function () {
                 //    .call(d3.helper.tooltip(object));
 
                 forcePropagation(rectsProGroup);
-                var uniqueShift = level < 2 ? rectHeight-15 > 0 ? rectHeight-15 : 0 : 0;
-                Yposition += (level - 1) * (rectShift + lineShift + 1) + uniqueShift;
+                var uniqueShift = rectHeight > 12 ? rectHeight - 6 : 0;
+                Yposition += level < 2 ? uniqueShift : (level-1) * rectShift + uniqueShift;
             },
             unique: function (object, position) {
                 var rectsPro = svgContainer.append("g")
@@ -25509,7 +25613,7 @@ var FeatureViewer = (function () {
                         x: fvLength,
                         y: 0
                     }]);
-
+                
                 rectsPro.selectAll(".line" + object.className)
                     .data(dataline)
                     .enter()
@@ -25557,7 +25661,7 @@ var FeatureViewer = (function () {
                         x: fvLength,
                         y: 0
                     }]);
-
+                
                 pathsDB.selectAll(".line" + object.className)
                     .data(dataline)
                     .enter()
@@ -25602,7 +25706,7 @@ var FeatureViewer = (function () {
                         x: fvLength,
                         y: 0
                     }]);
-
+                
                 histog.selectAll(".line" + object.className)
                     .data(dataline)
                     .enter()
@@ -25628,7 +25732,7 @@ var FeatureViewer = (function () {
 //                    .style("shape-rendering", "crispEdges")
                     .call(d3.helper.tooltip(object));
                 })
-
+                
                 forcePropagation(histog);
             },
             multipleRect: function (object, position, level) {
@@ -25757,7 +25861,7 @@ var FeatureViewer = (function () {
                 svgContainer.selectAll("." + object.className + "Text")
                     .style("visibility", function (d) {
                         if (d.description) {
-                            return (scaling(d.y) - scaling(d.x)) > d.description.length * 8 ? "visible" : "hidden";
+                            return (scaling(d.y) - scaling(d.x)) > d.description.length * 8 && object.height > 11 ? "visible" : "hidden";
                         } else return "hidden";
                     });
             },
@@ -25840,7 +25944,7 @@ var FeatureViewer = (function () {
                 else {
                     transit = svgContainer.selectAll("." + object.className);
                 }
-
+                
                 transit
                     .attr("d", lineGen.y(function (d) {
                         return lineYscale(-d.y) * 10 + object.shift;
@@ -25861,7 +25965,6 @@ var FeatureViewer = (function () {
                 }
                 transit
                     .attr("x", function (d, i) {
-//                        console.log(scaling(i+1+start));
                         return scaling(i + start)
                     });
             }
@@ -25879,15 +25982,18 @@ var FeatureViewer = (function () {
                 .selectAll("rect")
                 .attr('height', Yposition + 50);
         }
-
-        // Show peptide selected in brush
-        //function brushmove() {
-        //    var extent = brush.extent();
-        //    rectsPep2.classed("selected", function (d) {
-        //        is_brushed = extent[0] <= d.x && d.x <= extent[1] && extent[0] <= d.y && d.y <= extent[1];
-        //        return is_brushed;
-        //    });
-        //}
+        
+        this.zoom = function(start, end){
+            var zoomInside = current_extend.start<start && current_extend.end>end;
+            if (!zoomInside) {
+                svgContainer.selectAll(".seqGroup").remove();
+            }
+            brush.extent([start,end]);
+            brushend();
+        }
+        this.resetZoom = function(start, end){
+            resetAll();
+        }
 
         function brushend() {
             d3.select(div).selectAll('div.selectedRect').remove();
@@ -25909,10 +26015,10 @@ var FeatureViewer = (function () {
                 current_extend.length = extentLength;
                 var zoomScale = (fvLength / extentLength).toFixed(1);
                 $(div + " .zoomUnit").text(zoomScale.toString());
-
-//                scaling.range([5,width-5]);
+                
+//                scaling.range([5,width-5]); 
                 if (SVGOptions.showSequence && !(intLength) && seq && svgContainer.selectAll(".AA").empty()) {
-                    current_extend = {
+                    current_extend = { 
                     length : extentLength,
                     start : start,
                     end : end
@@ -25923,14 +26029,25 @@ var FeatureViewer = (function () {
 
                 //modify scale
 //                scaling.range([5,width-5]);
-//                console.log(extent);
                 scaling.domain(extent);
                 scalingPosition.range(extent);
                 var currentShift = seqShift ? seqShift : offset.start;
-
+                
 
                 transition_data(features, currentShift);
                 reset_axis();
+
+                if (CustomEvent) {
+                  svgElement.dispatchEvent(new CustomEvent(
+                    self.events.ZOOM_EVENT,
+                    {detail: { start: start, end: end, zoom: zoomScale }}
+                    ));
+                }
+                if (self.trigger) self.trigger(self.events.ZOOM_EVENT, {
+                            start: start,
+                            end: end,
+                            zoom: zoomScale
+                        });
 
                 //rectsPep2.classed("selected", false);
                 d3.select(div).selectAll(".brush").call(brush.clear());
@@ -25939,34 +26056,37 @@ var FeatureViewer = (function () {
                 //resetAll();
             }
         }
-        $(window).resize(function() {updateWindow()});
+//        
+        var resizeCallback = function(){
+            updateWindow();
+        }
+        $(window).on("resize", resizeCallback);
+        
         function updateWindow(){
 //            var new_width = $(div).width() - margin.left - margin.right - 17;
 //            var width_larger = (width < new_width);
             width = $(div).width() - margin.left - margin.right - 17;
             d3.select(div+" svg")
                 .attr("width", width + margin.left + margin.right);
-//            console.log(d3.select(div+" clippath>rect").attr("width"));
             d3.select(div+" clippath>rect").attr("width", width);
             if (SVGOptions.brushActive) {
                 d3.select(div+" .background").attr("width", width);
             }
             d3.select(div).selectAll(".brush").call(brush.clear());
-
+            
 //            var currentSeqLength = svgContainer.selectAll(".AA").size();
             var seq = displaySequence(current_extend.length);
             if (SVGOptions.showSequence && !(intLength)){
                 if (seq === false && !svgContainer.selectAll(".AA").empty()) {svgContainer.selectAll(".seqGroup").remove();}
                 else if (seq === true && svgContainer.selectAll(".AA").empty()) {fillSVG.sequence(sequence.substring(current_extend.start-1, current_extend.end), 20, current_extend.start-1);}
             }
-
-//            console.log(current_extend);
+            
             scaling.range([5,width-5]);
             scalingPosition.domain([0, width]);
-
+            
             transition_data(features, current_extend.start);
             reset_axis();
-
+            
         }
 
         // If brush is too small, reset view as origin
@@ -25978,7 +26098,7 @@ var FeatureViewer = (function () {
             scaling.domain([offset.start, offset.end]);
             scalingPosition.range([offset.start, offset.end]);
             var seq = displaySequence(offset.end - offset.start);
-
+            
             if (SVGOptions.showSequence && !(intLength)){
                 if (seq === false && !svgContainer.selectAll(".AA").empty()) svgContainer.selectAll(".seqGroup").remove();
                 else if (current_extend.length !== fvLength && seq === true && !svgContainer.selectAll(".AA").empty()) {
@@ -25987,15 +26107,27 @@ var FeatureViewer = (function () {
                 }
             }
 
-            current_extend={
+            current_extend={ 
                     length : offset.end-offset.start,
                     start : offset.start,
                     end : offset.end
                 };
             seqShift=0;
-
+            
             transition_data(features, offset.start);
             reset_axis();
+
+            // Fire Event
+            if (CustomEvent) {
+              svgElement.dispatchEvent(new CustomEvent(self.events.ZOOM_EVENT,
+                { detail: { start: 1, end: sequence.length, zoom: 1 }}));
+            };
+            if (self.trigger) self.trigger(self.events.ZOOM_EVENT, {
+                            start: 1,
+                            end: sequence.length,
+                            zoom: 1
+                        });
+
             d3.select(div).selectAll(".brush").call(brush.clear());
         }
 
@@ -26114,7 +26246,7 @@ var FeatureViewer = (function () {
 
             if (!$.fn.popover) {
                 options.bubbleHelp = false;
-                console.warn("The bubble help requires tooltip and popover bootrstrap js libraries. The feature viewer will continue to work, but without the info bubble");
+                console.warn("The bubble help requires tooltip and popover bootstrap js libraries. The feature viewer will continue to work, but without the info bubble");
             }
 
             // Create SVG
@@ -26126,9 +26258,7 @@ var FeatureViewer = (function () {
             }
 
             if (options.toolbar === true) {
-                //console.log($(div + " .svgHeader").length);
                 var headerOptions = $(div + " .svgHeader").length ? d3.select(div + " .svgHeader") : d3.select(div).append("div").attr("class", "svgHeader");
-                //console.log(headerOptions);
 
                 if (!$(div + ' .header-zoom').length) {
                     var headerZoom = headerOptions
@@ -26271,8 +26401,10 @@ var FeatureViewer = (function () {
                 .attr("in", "SourceGraphic");
 
             svgContainer.on('mousemove', function () {
-                var absoluteMousePos = SVGOptions.brushActive ? d3.mouse(d3.select(".background").node()) : d3.mouse(svgContainer.node());;
-                $(div + " #zoomPosition").text(Math.round(scalingPosition(absoluteMousePos[0])));
+                var absoluteMousePos = SVGOptions.brushActive ? d3.mouse(d3.select(".background").node()) : d3.mouse(svgContainer.node());;          
+                var pos = Math.round(scalingPosition(absoluteMousePos[0]));
+                pos += sequence[pos-1] || "";
+                $(div + " #zoomPosition").text(pos);
             });
 
             if (options.showSequence && !(intLength)) {
@@ -26324,7 +26456,18 @@ var FeatureViewer = (function () {
             if (SVGOptions.verticalLine) d3.selectAll(".Vline").style("height", (Yposition + 50) + "px");
             if (d3.selectAll(".element")[0].length > 1500) animation = false;
 
-
+        }
+        
+        this.clearInstance = function (){
+            $(window).off("resize", resizeCallback);
+            svg = null;
+            svgElement = null;
+            svgContainer = null;
+            yAxisSVGgroup = null;
+            yAxisSVG = null;
+            features = null;
+            sbcRip = null;
+            d3.helper = {};
         }
 
     }
@@ -26334,7 +26477,7 @@ var FeatureViewer = (function () {
 if ( typeof module === "object" && typeof module.exports === "object" ) {
     module.exports = FeatureViewer;
 }
-},{}],34:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 
 var nxClient;
 
@@ -26384,7 +26527,7 @@ function mergeData(oneData, metaData, viewer) {
 }
 
 function getFeaturesByview(nx, list, entry) {
-
+    
     var data = [];
     for (var feat in list) {
         switch (list[feat]) {
@@ -26418,14 +26561,14 @@ function addNxFeature(featuresName, featuresStyle) {
                 console.log("Argh, broken: " + err.message);
                 console.log("Error at line : " + err.stack);
             });
-
+        
     });
 }
 
 if ( typeof module === "object" && typeof module.exports === "object" ) {
     module.exports = nxFeatureViewer;
 }
-},{}],35:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -26492,7 +26635,7 @@ exports['default'] = inst;
 module.exports = exports['default'];
 
 
-},{"./handlebars.runtime":36,"./handlebars/compiler/ast":38,"./handlebars/compiler/base":39,"./handlebars/compiler/compiler":41,"./handlebars/compiler/javascript-compiler":43,"./handlebars/compiler/visitor":46,"./handlebars/no-conflict":60}],36:[function(require,module,exports){
+},{"./handlebars.runtime":38,"./handlebars/compiler/ast":40,"./handlebars/compiler/base":41,"./handlebars/compiler/compiler":43,"./handlebars/compiler/javascript-compiler":45,"./handlebars/compiler/visitor":48,"./handlebars/no-conflict":62}],38:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -26560,7 +26703,7 @@ exports['default'] = inst;
 module.exports = exports['default'];
 
 
-},{"./handlebars/base":37,"./handlebars/exception":50,"./handlebars/no-conflict":60,"./handlebars/runtime":61,"./handlebars/safe-string":62,"./handlebars/utils":63}],37:[function(require,module,exports){
+},{"./handlebars/base":39,"./handlebars/exception":52,"./handlebars/no-conflict":62,"./handlebars/runtime":63,"./handlebars/safe-string":64,"./handlebars/utils":65}],39:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -26666,7 +26809,7 @@ exports.createFrame = _utils.createFrame;
 exports.logger = _logger2['default'];
 
 
-},{"./decorators":48,"./exception":50,"./helpers":51,"./logger":59,"./utils":63}],38:[function(require,module,exports){
+},{"./decorators":50,"./exception":52,"./helpers":53,"./logger":61,"./utils":65}],40:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -26699,7 +26842,7 @@ exports['default'] = AST;
 module.exports = exports['default'];
 
 
-},{}],39:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -26749,7 +26892,7 @@ function parse(input, options) {
 }
 
 
-},{"../utils":63,"./helpers":42,"./parser":44,"./whitespace-control":47}],40:[function(require,module,exports){
+},{"../utils":65,"./helpers":44,"./parser":46,"./whitespace-control":49}],42:[function(require,module,exports){
 /* global define */
 'use strict';
 
@@ -26917,7 +27060,7 @@ exports['default'] = CodeGen;
 module.exports = exports['default'];
 
 
-},{"../utils":63,"source-map":65}],41:[function(require,module,exports){
+},{"../utils":65,"source-map":67}],43:[function(require,module,exports){
 /* eslint-disable new-cap */
 
 'use strict';
@@ -27491,7 +27634,7 @@ function transformLiteralToPath(sexpr) {
 }
 
 
-},{"../exception":50,"../utils":63,"./ast":38}],42:[function(require,module,exports){
+},{"../exception":52,"../utils":65,"./ast":40}],44:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -27723,7 +27866,7 @@ function preparePartialBlock(open, program, close, locInfo) {
 }
 
 
-},{"../exception":50}],43:[function(require,module,exports){
+},{"../exception":52}],45:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -28851,7 +28994,7 @@ exports['default'] = JavaScriptCompiler;
 module.exports = exports['default'];
 
 
-},{"../base":37,"../exception":50,"../utils":63,"./code-gen":40}],44:[function(require,module,exports){
+},{"../base":39,"../exception":52,"../utils":65,"./code-gen":42}],46:[function(require,module,exports){
 /* istanbul ignore next */
 /* Jison generated parser */
 "use strict";
@@ -29591,7 +29734,7 @@ var handlebars = (function () {
 exports['default'] = handlebars;
 
 
-},{}],45:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 /* eslint-disable new-cap */
 'use strict';
 
@@ -29779,7 +29922,7 @@ PrintVisitor.prototype.HashPair = function (pair) {
 /* eslint-enable new-cap */
 
 
-},{"./visitor":46}],46:[function(require,module,exports){
+},{"./visitor":48}],48:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -29921,7 +30064,7 @@ exports['default'] = Visitor;
 module.exports = exports['default'];
 
 
-},{"../exception":50}],47:[function(require,module,exports){
+},{"../exception":52}],49:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -30144,7 +30287,7 @@ exports['default'] = WhitespaceControl;
 module.exports = exports['default'];
 
 
-},{"./visitor":46}],48:[function(require,module,exports){
+},{"./visitor":48}],50:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -30162,7 +30305,7 @@ function registerDefaultDecorators(instance) {
 }
 
 
-},{"./decorators/inline":49}],49:[function(require,module,exports){
+},{"./decorators/inline":51}],51:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -30193,7 +30336,7 @@ exports['default'] = function (instance) {
 module.exports = exports['default'];
 
 
-},{"../utils":63}],50:[function(require,module,exports){
+},{"../utils":65}],52:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -30235,7 +30378,7 @@ exports['default'] = Exception;
 module.exports = exports['default'];
 
 
-},{}],51:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -30283,7 +30426,7 @@ function registerDefaultHelpers(instance) {
 }
 
 
-},{"./helpers/block-helper-missing":52,"./helpers/each":53,"./helpers/helper-missing":54,"./helpers/if":55,"./helpers/log":56,"./helpers/lookup":57,"./helpers/with":58}],52:[function(require,module,exports){
+},{"./helpers/block-helper-missing":54,"./helpers/each":55,"./helpers/helper-missing":56,"./helpers/if":57,"./helpers/log":58,"./helpers/lookup":59,"./helpers/with":60}],54:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -30324,7 +30467,7 @@ exports['default'] = function (instance) {
 module.exports = exports['default'];
 
 
-},{"../utils":63}],53:[function(require,module,exports){
+},{"../utils":65}],55:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -30420,7 +30563,7 @@ exports['default'] = function (instance) {
 module.exports = exports['default'];
 
 
-},{"../exception":50,"../utils":63}],54:[function(require,module,exports){
+},{"../exception":52,"../utils":65}],56:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -30447,7 +30590,7 @@ exports['default'] = function (instance) {
 module.exports = exports['default'];
 
 
-},{"../exception":50}],55:[function(require,module,exports){
+},{"../exception":52}],57:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -30478,7 +30621,7 @@ exports['default'] = function (instance) {
 module.exports = exports['default'];
 
 
-},{"../utils":63}],56:[function(require,module,exports){
+},{"../utils":65}],58:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -30506,7 +30649,7 @@ exports['default'] = function (instance) {
 module.exports = exports['default'];
 
 
-},{}],57:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -30520,7 +30663,7 @@ exports['default'] = function (instance) {
 module.exports = exports['default'];
 
 
-},{}],58:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -30555,7 +30698,7 @@ exports['default'] = function (instance) {
 module.exports = exports['default'];
 
 
-},{"../utils":63}],59:[function(require,module,exports){
+},{"../utils":65}],61:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -30604,7 +30747,7 @@ exports['default'] = logger;
 module.exports = exports['default'];
 
 
-},{"./utils":63}],60:[function(require,module,exports){
+},{"./utils":65}],62:[function(require,module,exports){
 (function (global){
 /* global window */
 'use strict';
@@ -30628,7 +30771,7 @@ module.exports = exports['default'];
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],61:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -30922,7 +31065,7 @@ function executeDecorators(fn, prog, container, depths, data, blockParams) {
 }
 
 
-},{"./base":37,"./exception":50,"./utils":63}],62:[function(require,module,exports){
+},{"./base":39,"./exception":52,"./utils":65}],64:[function(require,module,exports){
 // Build out our basic SafeString type
 'use strict';
 
@@ -30939,7 +31082,7 @@ exports['default'] = SafeString;
 module.exports = exports['default'];
 
 
-},{}],63:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -31065,7 +31208,7 @@ function appendContextPath(contextPath, id) {
 }
 
 
-},{}],64:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 // USAGE:
 // var handlebars = require('handlebars');
 /* eslint-disable no-var */
@@ -31092,7 +31235,7 @@ if (typeof require !== 'undefined' && require.extensions) {
   require.extensions['.hbs'] = extension;
 }
 
-},{"../dist/cjs/handlebars":35,"../dist/cjs/handlebars/compiler/printer":45,"fs":29}],65:[function(require,module,exports){
+},{"../dist/cjs/handlebars":37,"../dist/cjs/handlebars/compiler/printer":47,"fs":31}],67:[function(require,module,exports){
 /*
  * Copyright 2009-2011 Mozilla Foundation and contributors
  * Licensed under the New BSD license. See LICENSE.txt or:
@@ -31102,7 +31245,7 @@ exports.SourceMapGenerator = require('./source-map/source-map-generator').Source
 exports.SourceMapConsumer = require('./source-map/source-map-consumer').SourceMapConsumer;
 exports.SourceNode = require('./source-map/source-node').SourceNode;
 
-},{"./source-map/source-map-consumer":72,"./source-map/source-map-generator":73,"./source-map/source-node":74}],66:[function(require,module,exports){
+},{"./source-map/source-map-consumer":74,"./source-map/source-map-generator":75,"./source-map/source-node":76}],68:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -31211,7 +31354,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./util":75,"amdefine":11}],67:[function(require,module,exports){
+},{"./util":77,"amdefine":13}],69:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -31359,7 +31502,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./base64":68,"amdefine":11}],68:[function(require,module,exports){
+},{"./base64":70,"amdefine":13}],70:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -31434,7 +31577,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"amdefine":11}],69:[function(require,module,exports){
+},{"amdefine":13}],71:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -31553,7 +31696,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"amdefine":11}],70:[function(require,module,exports){
+},{"amdefine":13}],72:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2014 Mozilla Foundation and contributors
@@ -31641,7 +31784,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./util":75,"amdefine":11}],71:[function(require,module,exports){
+},{"./util":77,"amdefine":13}],73:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -31763,7 +31906,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"amdefine":11}],72:[function(require,module,exports){
+},{"amdefine":13}],74:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -32842,7 +32985,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./array-set":66,"./base64-vlq":67,"./binary-search":69,"./quick-sort":71,"./util":75,"amdefine":11}],73:[function(require,module,exports){
+},{"./array-set":68,"./base64-vlq":69,"./binary-search":71,"./quick-sort":73,"./util":77,"amdefine":13}],75:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -33243,7 +33386,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./array-set":66,"./base64-vlq":67,"./mapping-list":70,"./util":75,"amdefine":11}],74:[function(require,module,exports){
+},{"./array-set":68,"./base64-vlq":69,"./mapping-list":72,"./util":77,"amdefine":13}],76:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -33659,7 +33802,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./source-map-generator":73,"./util":75,"amdefine":11}],75:[function(require,module,exports){
+},{"./source-map-generator":75,"./util":77,"amdefine":13}],77:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -34031,9 +34174,9 @@ define(function (require, exports, module) {
 
 });
 
-},{"amdefine":11}],76:[function(require,module,exports){
+},{"amdefine":13}],78:[function(require,module,exports){
 /*!
- * jQuery JavaScript Library v2.2.3
+ * jQuery JavaScript Library v2.2.4
  * http://jquery.com/
  *
  * Includes Sizzle.js
@@ -34043,7 +34186,7 @@ define(function (require, exports, module) {
  * Released under the MIT license
  * http://jquery.org/license
  *
- * Date: 2016-04-05T19:26Z
+ * Date: 2016-05-20T17:23Z
  */
 
 (function( global, factory ) {
@@ -34099,7 +34242,7 @@ var support = {};
 
 
 var
-	version = "2.2.3",
+	version = "2.2.4",
 
 	// Define a local copy of jQuery
 	jQuery = function( selector, context ) {
@@ -39040,13 +39183,14 @@ jQuery.Event.prototype = {
 	isDefaultPrevented: returnFalse,
 	isPropagationStopped: returnFalse,
 	isImmediatePropagationStopped: returnFalse,
+	isSimulated: false,
 
 	preventDefault: function() {
 		var e = this.originalEvent;
 
 		this.isDefaultPrevented = returnTrue;
 
-		if ( e ) {
+		if ( e && !this.isSimulated ) {
 			e.preventDefault();
 		}
 	},
@@ -39055,7 +39199,7 @@ jQuery.Event.prototype = {
 
 		this.isPropagationStopped = returnTrue;
 
-		if ( e ) {
+		if ( e && !this.isSimulated ) {
 			e.stopPropagation();
 		}
 	},
@@ -39064,7 +39208,7 @@ jQuery.Event.prototype = {
 
 		this.isImmediatePropagationStopped = returnTrue;
 
-		if ( e ) {
+		if ( e && !this.isSimulated ) {
 			e.stopImmediatePropagation();
 		}
 
@@ -39994,19 +40138,6 @@ function getWidthOrHeight( elem, name, extra ) {
 		val = name === "width" ? elem.offsetWidth : elem.offsetHeight,
 		styles = getStyles( elem ),
 		isBorderBox = jQuery.css( elem, "boxSizing", false, styles ) === "border-box";
-
-	// Support: IE11 only
-	// In IE 11 fullscreen elements inside of an iframe have
-	// 100x too small dimensions (gh-1764).
-	if ( document.msFullscreenElement && window.top !== window ) {
-
-		// Support: IE11 only
-		// Running getBoundingClientRect on a disconnected node
-		// in IE throws an error.
-		if ( elem.getClientRects().length ) {
-			val = Math.round( elem.getBoundingClientRect()[ name ] * 100 );
-		}
-	}
 
 	// Some non-html elements return undefined for offsetWidth, so check for null/undefined
 	// svg - https://bugzilla.mozilla.org/show_bug.cgi?id=649285
@@ -41898,6 +42029,7 @@ jQuery.extend( jQuery.event, {
 	},
 
 	// Piggyback on a donor event to simulate a different one
+	// Used only for `focus(in | out)` events
 	simulate: function( type, elem, event ) {
 		var e = jQuery.extend(
 			new jQuery.Event(),
@@ -41905,27 +42037,10 @@ jQuery.extend( jQuery.event, {
 			{
 				type: type,
 				isSimulated: true
-
-				// Previously, `originalEvent: {}` was set here, so stopPropagation call
-				// would not be triggered on donor event, since in our own
-				// jQuery.event.stopPropagation function we had a check for existence of
-				// originalEvent.stopPropagation method, so, consequently it would be a noop.
-				//
-				// But now, this "simulate" function is used only for events
-				// for which stopPropagation() is noop, so there is no need for that anymore.
-				//
-				// For the 1.x branch though, guard for "click" and "submit"
-				// events is still used, but was moved to jQuery.event.stopPropagation function
-				// because `originalEvent` should point to the original event for the constancy
-				// with other events and for more focused logic
 			}
 		);
 
 		jQuery.event.trigger( e, null, elem );
-
-		if ( e.isDefaultPrevented() ) {
-			event.preventDefault();
-		}
 	}
 
 } );
@@ -43875,7 +43990,7 @@ if ( !noGlobal ) {
 return jQuery;
 }));
 
-},{}],77:[function(require,module,exports){
+},{}],79:[function(require,module,exports){
 /**
  * A neXtProt js client
  */
@@ -44139,7 +44254,7 @@ return jQuery;
 
 }(this));
 
-},{}],78:[function(require,module,exports){
+},{}],80:[function(require,module,exports){
 //Utility methods
 var NXUtils = {
 
@@ -44213,8 +44328,8 @@ var NXUtils = {
         else return a.name > b.name;
     },
     sortByAlphabet: function(a,b) {
-        var a = typeof a === "string" ? a : a.name ? a.name : null;
-        var b = typeof b === "string" ? b : b.name ? b.name : null;
+        var a = typeof a === "string" ? a : a.name ? a.name : null;        
+        var b = typeof b === "string" ? b : b.name ? b.name : null;        
         if (a < b) return -1;
         if (a > b) return 1;
         return 0;
@@ -44595,7 +44710,7 @@ if ( typeof module === "object" && typeof module.exports === "object" ) {
         NXViewerUtils : NXViewerUtils
     }
 }
-},{}],79:[function(require,module,exports){
+},{}],81:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -44823,16 +44938,105 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require('_process'))
-},{"_process":80}],80:[function(require,module,exports){
+},{"_process":82}],82:[function(require,module,exports){
 // shim for using process in browser
-
 var process = module.exports = {};
+
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
+
+var cachedSetTimeout;
+var cachedClearTimeout;
+
+function defaultSetTimout() {
+    throw new Error('setTimeout has not been defined');
+}
+function defaultClearTimeout () {
+    throw new Error('clearTimeout has not been defined');
+}
+(function () {
+    try {
+        if (typeof setTimeout === 'function') {
+            cachedSetTimeout = setTimeout;
+        } else {
+            cachedSetTimeout = defaultSetTimout;
+        }
+    } catch (e) {
+        cachedSetTimeout = defaultSetTimout;
+    }
+    try {
+        if (typeof clearTimeout === 'function') {
+            cachedClearTimeout = clearTimeout;
+        } else {
+            cachedClearTimeout = defaultClearTimeout;
+        }
+    } catch (e) {
+        cachedClearTimeout = defaultClearTimeout;
+    }
+} ())
+function runTimeout(fun) {
+    if (cachedSetTimeout === setTimeout) {
+        //normal enviroments in sane situations
+        return setTimeout(fun, 0);
+    }
+    // if setTimeout wasn't available but was latter defined
+    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+        cachedSetTimeout = setTimeout;
+        return setTimeout(fun, 0);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedSetTimeout(fun, 0);
+    } catch(e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+            return cachedSetTimeout.call(null, fun, 0);
+        } catch(e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+            return cachedSetTimeout.call(this, fun, 0);
+        }
+    }
+
+
+}
+function runClearTimeout(marker) {
+    if (cachedClearTimeout === clearTimeout) {
+        //normal enviroments in sane situations
+        return clearTimeout(marker);
+    }
+    // if clearTimeout wasn't available but was latter defined
+    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+        cachedClearTimeout = clearTimeout;
+        return clearTimeout(marker);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedClearTimeout(marker);
+    } catch (e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+            return cachedClearTimeout.call(null, marker);
+        } catch (e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+            return cachedClearTimeout.call(this, marker);
+        }
+    }
+
+
+
+}
 var queue = [];
 var draining = false;
 var currentQueue;
 var queueIndex = -1;
 
 function cleanUpNextTick() {
+    if (!draining || !currentQueue) {
+        return;
+    }
     draining = false;
     if (currentQueue.length) {
         queue = currentQueue.concat(queue);
@@ -44848,7 +45052,7 @@ function drainQueue() {
     if (draining) {
         return;
     }
-    var timeout = setTimeout(cleanUpNextTick);
+    var timeout = runTimeout(cleanUpNextTick);
     draining = true;
 
     var len = queue.length;
@@ -44865,7 +45069,7 @@ function drainQueue() {
     }
     currentQueue = null;
     draining = false;
-    clearTimeout(timeout);
+    runClearTimeout(timeout);
 }
 
 process.nextTick = function (fun) {
@@ -44877,7 +45081,7 @@ process.nextTick = function (fun) {
     }
     queue.push(new Item(fun, args));
     if (queue.length === 1 && !draining) {
-        setTimeout(drainQueue, 0);
+        runTimeout(drainQueue);
     }
 };
 
@@ -44916,7 +45120,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],81:[function(require,module,exports){
+},{}],83:[function(require,module,exports){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
 //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
