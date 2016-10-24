@@ -53,7 +53,6 @@ App.init = function(){
     // listen to ajax
     $(document).ajaxStart(function() {
         App.views.loading.show();
-
     }).ajaxStop(function() {
         setTimeout(App.views.loading.hide, 800);
     });

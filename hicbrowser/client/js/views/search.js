@@ -2,7 +2,16 @@ var _ = require('underscore');
 var templates = require('../templates');
 
 
-var prev_id = _.uniqueId('prev_id_'), next_id = _.uniqueId('next_id_') ,  zoomout_id = _.uniqueId('zoomout_id_'), browser_search_input = _.uniqueId('search_input_'), gene_search_input = _.uniqueId('search_input_'), search_btn = _.uniqueId('search_btn_'), gene_btn = _.uniqueId('gene_btn_'), browser_btn = _.uniqueId('browser_btn_'), gene_example_id = _.uniqueId('gene_example_'), browser_example_id = _.uniqueId('browser_example_');
+var prev_id = _.uniqueId('prev_id_'),
+    next_id = _.uniqueId('next_id_') ,
+    zoomout_id = _.uniqueId('zoomout_id_'),
+    browser_search_input = _.uniqueId('search_input_'),
+    gene_search_input = _.uniqueId('search_input_'),
+    search_btn = _.uniqueId('search_btn_'),
+    gene_btn = _.uniqueId('gene_btn_'),
+    browser_btn = _.uniqueId('browser_btn_'),
+    gene_example_id = _.uniqueId('gene_example_'),
+    browser_example_id = _.uniqueId('browser_example_');
 
 var _show_gene = true, _links;
 
@@ -42,6 +51,12 @@ module.exports = Backbone.View.extend({
         $(this.options.el).html(tpl);
     },
 
+    renderError: function(error){
+
+      $('#error').html(error).show();
+
+    },
+
     update : function(obj){
 
         if(_.isUndefined(obj.name)){
@@ -54,6 +69,8 @@ module.exports = Backbone.View.extend({
 
     search: function(){
         var val = (_show_gene) ? $( '#' + gene_search_input).val() : $( '#' + browser_search_input).val();
+
+        $('#error').hide();
 
         if(val.length > 0){
             var url = (_show_gene) ? '/gene/' + val : '/browser/' + val;
