@@ -71,7 +71,7 @@ app_router.on('route:getGeneId', function (id) {
 
             var text = 'Your search - <em>' + id + ' - </em> did not match any gene.  Check the browser for examples of valid gene names as they may be an id.';
             App.views.search.renderError(text);
-            App.views.search.render();
+            setIndex();
         }
     });
 });
@@ -106,7 +106,7 @@ app_router.on('route:getBrowserId', function (id) {
 
             if(tracks.length === 0){
               App.views.search.renderError(errorMsg);
-              App.views.intro.render();
+              setIndex();
             }else {
 
               // Check if first image exists, if not, show error
@@ -118,13 +118,14 @@ app_router.on('route:getBrowserId', function (id) {
                 },
                 error: function(){
                   App.views.search.renderError(errorMsg);
-                  App.views.intro.render();
+                  setIndex();
                 }
               });
             }
         },
         error: function(browser, res){
           App.views.search.renderError(errorMsg);
+          setIndex();
         }
     });
 });
