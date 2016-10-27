@@ -100,8 +100,8 @@ app_router.on('route:getBrowserId', function (id) {
     browser.fetch({
         success: function(browser){
             browser = browser.toJSON();
-
-            var tracks = _.flatten(render.tracks);
+            
+            var tracks = _.flatten(browser.tracks);
 
             if(tracks.length === 0){
               App.views.search.renderError(errorMsg);
