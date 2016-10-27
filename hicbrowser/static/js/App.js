@@ -161,6 +161,7 @@ app_router.on('route:getGeneId', function (id) {
 
             var text = 'Your search - <em>' + id + ' - </em> did not match any gene.  Check the browser for examples of valid gene names as they may be an id.';
             App.views.search.renderError(text);
+            App.views.search.render();
         }
     });
 });
@@ -190,11 +191,12 @@ app_router.on('route:getBrowserId', function (id) {
     browser.fetch({
         success: function(browser){
             browser = browser.toJSON();
-            
+
             var tracks = _.flatten(browser.tracks);
 
             if(tracks.length === 0){
               App.views.search.renderError(errorMsg);
+              App.views.search.render();
             }else {
 
               // Check if first image exists, if not, show error
@@ -204,7 +206,10 @@ app_router.on('route:getBrowserId', function (id) {
                   _current.browser = browser;
                   _renderBrowser(browser);
                 },
-                error: function(){  App.views.search.renderError(errorMsg); }
+                error: function(){
+                  App.views.search.renderError(errorMsg);
+                  App.views.search.render();
+                }
               });
             }
         },
@@ -346,7 +351,7 @@ this["Templates"]["search"] = Handlebars.template({"1":function(container,depth0
     + alias4(((helper = (helper = helpers.zoomout_id || (depth0 != null ? depth0.zoomout_id : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"zoomout_id","hash":{},"data":data}) : helper)))
     + "\" href=\""
     + alias4(((helper = (helper = helpers.out || (depth0 != null ? depth0.out : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"out","hash":{},"data":data}) : helper)))
-    + "\" role=\"button\" class=\"btn btn-primary\">\n                        <span class=\"glyphicon glyphicon-zoom-out\" data-toggle=\"tooltip\" placement=\"bottom\" title=\"Zoom-out\"></span>\n                    </a>\n                </div>\n\n            </div>\n        </div>\n    </div>\n\n</div>\n\n<div id=\"error\" class=\"bg-danger\" style=\"text-align:center\"></div>\n";
+    + "\" role=\"button\" class=\"btn btn-primary\">\n                        <span class=\"glyphicon glyphicon-zoom-out\" data-toggle=\"tooltip\" placement=\"bottom\" title=\"Zoom-out\"></span>\n                    </a>\n                </div>\n\n            </div>\n        </div>\n    </div>\n\n</div>\n\n<div id=\"error\" class=\"bg-danger\" style=\"text-align:center\"></div>\n<br>\n";
 },"useData":true});
 
 if (typeof exports === 'object' && exports) {module.exports = this["Templates"];}
@@ -586,37 +591,40 @@ var templates = require('../templates');
 var _data = {}, $div;
 
 module.exports = Backbone.View.extend({
-    
+
     initialize: function(options){
         this.options = options;
     },
-    
+
     render: function(render){
-        
+
         render = _.isUndefined(render) ? {} : render;
-        
+
         $(this.el).css({opacity: 0.0, visibility: 'hidden'});
-        
+
         var tpl = templates.index(render);
-        
+
         $div = $('<div></div>')
             .hide()
             .append(tpl);
-        
-        $(this.el).append($div);
-        
+
+        $(this.el)
+            .empty()
+            .append($div);
+
         this.rendered = true;
     },
-    
+
     // Returns true if the view element is in the DOM
     rendered: false,
-    
+
     setVisible: function(){
         $div.show().siblings().hide();
         $(this.el).css({opacity: 0.0, visibility: 'visible'}).animate({opacity: 1.0}, 800);
     }
-    
+
 });
+
 },{"../templates":6,"underscore":83}],10:[function(require,module,exports){
 var _ = require('underscore');
 
