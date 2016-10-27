@@ -106,7 +106,7 @@ app_router.on('route:getBrowserId', function (id) {
 
             if(tracks.length === 0){
               App.views.search.renderError(errorMsg);
-              App.views.search.render();
+              App.views.intro.render();
             }else {
 
               // Check if first image exists, if not, show error
@@ -118,7 +118,7 @@ app_router.on('route:getBrowserId', function (id) {
                 },
                 error: function(){
                   App.views.search.renderError(errorMsg);
-                  App.views.search.render();
+                  App.views.intro.render();
                 }
               });
             }
