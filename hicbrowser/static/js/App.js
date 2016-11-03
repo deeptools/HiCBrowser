@@ -238,7 +238,7 @@ this["Templates"] = this["Templates"] || {};
 this["Templates"]["browser"] = Handlebars.template({"1":function(container,depth0,helpers,partials,data) {
     var alias1=container.lambda, alias2=container.escapeExpression;
 
-  return "            <div class=\"col-xs-4 img_wrapper\">\n                <img class=\"lazy\" data-original=\""
+  return "            <div class=\"col-xs-12 img_wrapper\">\n                <img class=\"lazy\" data-original=\""
     + alias2(alias1(depth0, depth0))
     + "\">\n                <!--<img src=\""
     + alias2(alias1(depth0, depth0))

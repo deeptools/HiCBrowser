@@ -33,6 +33,15 @@ If HiCExplorer and or HiCBrowser is not properly installed (by running setup.py)
 export PYTHONPATH=/path/to/HiCExplorer:/path/to/HiCBrowser
 ```
 
+### Test run
+
+The folder `example_browser` contains all data and config files to run the browser. This is _Drosophila melanogaster_ data only for chromosome X. To start the example server simply type:
+
+```r
+cd example_browser
+bash run_server.sh
+```
+
 ### Prepare files
 
 HiCBrowser needs three config files.
@@ -53,11 +62,10 @@ To run the browser, simply run **runBrowser** command, as shown below.
         
 
 ```r
-# -c = browser config file
-# -p = localhost port to run the server
-# -np = number of processors
+# --config = browser config file
+# --port = localhost port to run the server
 
-runBrowser -c browserConfig.ini -p 8888 -np 10 
+runBrowser --config browserConfig.ini --port 8888 --numProcessors 10 
 ```
 
 ## Help
