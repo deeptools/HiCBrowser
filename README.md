@@ -35,7 +35,7 @@ export PYTHONPATH=/path/to/HiCExplorer:/path/to/HiCBrowser
 
 ### Test run
 
-The folder `example_browser` contains all data and config files to run the browser. Simply type:
+The folder `example_browser` contains all data and config files to run the browser. This is _Drosophila melanogaster_ data only for chromosome X. To start the example server simply type:
 
 ```r
 cd example_browser
