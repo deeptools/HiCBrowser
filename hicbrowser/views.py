@@ -190,8 +190,8 @@ def main(config_file, port, numProc, template_folder=None,  debug=False):
 
     #tads = hicexplorer.trackPlot.PlotTracks(track_file, fig_width=40, dpi=70)
 
-
-    with open(genes, 'r') as fh:
+    from hicexplorer.trackPlot import opener
+    with opener(genes) as fh:
         for line in fh.readlines():
             if line.startswith('browser') or line.startswith('track') or line.startswith('#'):
                 continue
