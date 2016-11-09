@@ -1,18 +1,21 @@
 <div class="col-lg-12">
-    
+
     {{#if name}}
         <h1 class="page-header">
             {{name}}
-            <small> 
+            <small>
                  chromosome {{chromosome}} (start: {{start}}, end: {{end}})
             </small>
         </h1>
         <div style="width: 900px;" id="{{feature_viewer}}"></div>
-        <a href="/#/browser/{{chromosome}}:{{start}}-{{end}}">
-            <img class="img-responsive" src="{{img}}" alt="" data-toggle="tooltip" title="Click image to explore region in browser">
-        </a>
+
+        <ul class="nav nav-pills">
+          <li class="active">
+            <a href="/#/browser/{{chromosome}}:{{start}}-{{end}}">Explore region in browser</a>
+          </li>
+        </ul>
     {{/if}}
-    
+
     {{#if error}}
         <div style="height:55%">
             <div class="alert alert-danger" role="alert">

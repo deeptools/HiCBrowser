@@ -7,7 +7,7 @@ this["Templates"] = this["Templates"] || {};
 this["Templates"]["browser"] = Handlebars.template({"1":function(container,depth0,helpers,partials,data) {
     var alias1=container.lambda, alias2=container.escapeExpression;
 
-  return "            <div class=\"col-xs-4 img_wrapper\">\n                <img class=\"lazy\" data-original=\""
+  return "            <div class=\"col-xs-12 img_wrapper\">\n                <img class=\"lazy\" data-original=\""
     + alias2(alias1(depth0, depth0))
     + "\">\n                <!--<img src=\""
     + alias2(alias1(depth0, depth0))
@@ -17,7 +17,7 @@ this["Templates"]["browser"] = Handlebars.template({"1":function(container,depth
 
   return "<div class=\"container-fixed\">\n    <div class=\"row\">\n"
     + ((stack1 = helpers.each.call(depth0 != null ? depth0 : {},(depth0 != null ? depth0.tracks : depth0),{"name":"each","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
-    + "    </div>\n</div>";
+    + "    </div>\n</div>\n";
 },"useData":true});
 
 this["Templates"]["gene"] = Handlebars.template({"1":function(container,depth0,helpers,partials,data) {
@@ -25,7 +25,7 @@ this["Templates"]["gene"] = Handlebars.template({"1":function(container,depth0,h
 
   return "        <h1 class=\"page-header\">\n            "
     + alias4(((helper = (helper = helpers.name || (depth0 != null ? depth0.name : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"name","hash":{},"data":data}) : helper)))
-    + "\n            <small> \n                 chromosome "
+    + "\n            <small>\n                 chromosome "
     + alias4(((helper = (helper = helpers.chromosome || (depth0 != null ? depth0.chromosome : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"chromosome","hash":{},"data":data}) : helper)))
     + " (start: "
     + alias4(((helper = (helper = helpers.start || (depth0 != null ? depth0.start : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"start","hash":{},"data":data}) : helper)))
@@ -33,15 +33,13 @@ this["Templates"]["gene"] = Handlebars.template({"1":function(container,depth0,h
     + alias4(((helper = (helper = helpers.end || (depth0 != null ? depth0.end : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"end","hash":{},"data":data}) : helper)))
     + ")\n            </small>\n        </h1>\n        <div style=\"width: 900px;\" id=\""
     + alias4(((helper = (helper = helpers.feature_viewer || (depth0 != null ? depth0.feature_viewer : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"feature_viewer","hash":{},"data":data}) : helper)))
-    + "\"></div>\n        <a href=\"/#/browser/"
+    + "\"></div>\n\n        <ul class=\"nav nav-pills\">\n          <li class=\"active\">\n            <a href=\"/#/browser/"
     + alias4(((helper = (helper = helpers.chromosome || (depth0 != null ? depth0.chromosome : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"chromosome","hash":{},"data":data}) : helper)))
     + ":"
     + alias4(((helper = (helper = helpers.start || (depth0 != null ? depth0.start : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"start","hash":{},"data":data}) : helper)))
     + "-"
     + alias4(((helper = (helper = helpers.end || (depth0 != null ? depth0.end : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"end","hash":{},"data":data}) : helper)))
-    + "\">\n            <img class=\"img-responsive\" src=\""
-    + alias4(((helper = (helper = helpers.img || (depth0 != null ? depth0.img : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"img","hash":{},"data":data}) : helper)))
-    + "\" alt=\"\" data-toggle=\"tooltip\" title=\"Click image to explore region in browser\">\n        </a>\n";
+    + "\">Explore region in browser</a>\n          </li>\n        </ul>\n";
 },"3":function(container,depth0,helpers,partials,data) {
     var helper;
 
@@ -51,11 +49,11 @@ this["Templates"]["gene"] = Handlebars.template({"1":function(container,depth0,h
 },"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
     var stack1, alias1=depth0 != null ? depth0 : {};
 
-  return "<div class=\"col-lg-12\">\n    \n"
+  return "<div class=\"col-lg-12\">\n\n"
     + ((stack1 = helpers["if"].call(alias1,(depth0 != null ? depth0.name : depth0),{"name":"if","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
-    + "    \n"
+    + "\n"
     + ((stack1 = helpers["if"].call(alias1,(depth0 != null ? depth0.error : depth0),{"name":"if","hash":{},"fn":container.program(3, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
-    + "    <hr>\n</div>";
+    + "    <hr>\n</div>\n";
 },"useData":true});
 
 this["Templates"]["index"] = Handlebars.template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
