@@ -14,59 +14,49 @@ var GeneView = require('./js/views/gene');
 var BrowserView = require('./js/views/browser');
 var Intro = require('./js/views/intro-header');
 
-function initViews(){
-  // Render initial views
-  App.views.intro.render(App.config);
-  App.views.search.render(App.config);
-}
-
 App = {};
 
-App.init = function(){
+//Views
+App.views = {};
+App.views.loading = new Loading({el:'body'});
+App.views.search = new Search({el:'#search'});
+App.views.index = new Index({el:'#content'});
+App.views.gene = new GeneView({el:'#content'});
+App.views.browser = new BrowserView({el:'#content'});
+App.views.intro = new Intro({el:'.intro-header'});
 
-    //Views
-    App.views = {};
-    App.views.loading = new Loading({el:'body'});
-    App.views.search = new Search({el:'#search'});
-    App.views.index = new Index({el:'#content'});
-    App.views.gene = new GeneView({el:'#content'});
-    App.views.browser = new BrowserView({el:'#content'});
-    App.views.intro = new Intro({el:'.intro-header'});
+// Models
+App.models = {};
+App.models.Gene = require('./js/models/gene');
+App.models.Browser = require('./js/models/browser');
+App.models.Config = require('./js/models/config');
 
-    // Models
-    App.models = {};
-    App.models.Gene = require('./js/models/gene');
-    App.models.Browser = require('./js/models/browser');
-    App.models.Config = require('./js/models/config');
+//Router
+App.router = require('./js/router');
 
-    // Init config with defaults
+// listen to ajax
+$(document).ajaxStart(function() {
+    App.views.loading.show();
+}).ajaxStop(function() {
+    setTimeout(App.views.loading.hide, 800);
+});
+
+App.init = function(config){
+
+    // Init config
     App.config = new App.models.Config();
-
-    // See if there is a config file defined.
-    // If not, load app with defaults
-    App.config.fetch({
-      success: initViews,
-      error: initViews
-    });
-
-    //Router
-    App.router = require('./js/router');
-
-    // listen to ajax
-    $(document).ajaxStart(function() {
-        App.views.loading.show();
-    }).ajaxStop(function() {
-        setTimeout(App.views.loading.hide, 800);
-    });
+    App.config.set(config);
 
     // Render loading
     App.views.loading.render();
 
     // Select all elements with data-toggle="tooltips" in the document
     $('[data-toggle="tooltip"]').tooltip();
-};
 
-App.init();
+    // Render initial views
+    App.views.intro.render(App.config);
+    App.views.search.render(App.config);
+};
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./js/models/browser":2,"./js/models/config":3,"./js/models/gene":4,"./js/router":5,"./js/views/browser":7,"./js/views/gene":8,"./js/views/index":9,"./js/views/intro-header":10,"./js/views/loading":11,"./js/views/search":12,"backbone":16,"bootstrap":18,"jquery":78}],2:[function(require,module,exports){
