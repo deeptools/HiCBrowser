@@ -56,7 +56,7 @@ def parse_tracks(tracks_file):
         if vlines:
             _temp.write("\n")
             _temp.write(vlines)
-        tracks_names.append(_temp.name)
+        tracks_names.append((_temp.name, section_name))
         _temp.close()
 
     return tracks_names
