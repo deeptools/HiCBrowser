@@ -20,6 +20,12 @@ def parse_arguments(args=None):
                         type=int,
                         default=8000)
 
+    parser.add_argument('--htmlFolder',
+                        help='File where the template index.html file is located. The default is'
+                             'fine unless the contents wants to be personalized. The full path '
+                             'has to be given.',
+                        default=None)
+
     parser.add_argument('--numProcessors', '-np',
                         help='Number of processors to use.',
                         type=int,
@@ -38,4 +44,5 @@ def parse_arguments(args=None):
 
 def main():
     args = parse_arguments().parse_args()
-    views.main(config_file=args.config, port=args.port, numProc=args.numProcessors, debug=args.debug)
+    views.main(config_file=args.config, port=args.port, numProc=args.numProcessors,
+               template_folder=args.htmlFolder, debug=args.debug)
