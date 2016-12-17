@@ -128,6 +128,7 @@ def check_static_img_folders():
 
     return dir_path + '/images'
 
+app = Flask(__name__)
 
 def main(config_file, port, numProc, template_folder=None,  debug=False):
 
@@ -139,7 +140,7 @@ def main(config_file, port, numProc, template_folder=None,  debug=False):
         sys.stderr.write("setting template folder to\n {}\n".format(template_folder))
         kwargs['template_folder'] = template_folder
 
-    app = Flask(__name__, **kwargs)
+    #app = Flask(__name__, **kwargs)
 
     from flask import Blueprint
     img_path = check_static_img_folders()
@@ -147,6 +148,7 @@ def main(config_file, port, numProc, template_folder=None,  debug=False):
     # register an static path for images using Blueprint
     images_static = Blueprint('site', __name__,
                               static_url_path='/images',
+                              template_folder=template_folder,
                               static_folder=img_path)
     app.register_blueprint(images_static)
 
@@ -372,4 +374,15 @@ def main(config_file, port, numProc, template_folder=None,  debug=False):
         return None
 
     # run the app
-    app.run(host='0.0.0.0', debug=debug, use_reloader=False, port=port, processes=numProc)
+    # app.run(host='0.0.0.0', debug=debug, use_reloader=False, port=port, processes=numProc)
+
+main(config_file='/data/browserConfig.ini', port=8080, template_folder=None, numProc=1, debug=True, create_app=False)
+
+if __name__ == "__main__":
+    # run the app
+    app.run(host='0.0.0.0', debug=True, use_reloader=False, port=8080, processes=2)
+
+
+
+
+
