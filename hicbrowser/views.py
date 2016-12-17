@@ -376,13 +376,9 @@ def main(config_file, port, numProc, template_folder=None,  debug=False):
     # run the app
     # app.run(host='0.0.0.0', debug=debug, use_reloader=False, port=port, processes=numProc)
 
-main(config_file='/data/browserConfig.ini', port=8080, template_folder=None, numProc=1, debug=True, create_app=False)
+main(config_file='/data/browserConfig.ini', port=8080, template_folder=None, numProc=1, debug=True)
 
 if __name__ == "__main__":
     # run the app
     app.run(host='0.0.0.0', debug=True, use_reloader=False, port=8080, processes=2)
-
-
-
-
 
