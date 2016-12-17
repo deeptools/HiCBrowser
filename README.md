@@ -1,6 +1,6 @@
 # HiCBrowser : A simple web browser to visualize Hi-C and other genomic tracks
-Fidel Ramirez,José Villaveces,Vivek Bhardwaj  
 
+Fidel Ramirez, José Villaveces, Vivek Bhardwaj  
 
 ## Installation
 
