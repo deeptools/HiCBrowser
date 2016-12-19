@@ -6,17 +6,24 @@ Fidel Ramirez, José Villaveces, Vivek Bhardwaj
 
 You can install HiCBrowser using pip :
 
-```r
+```
 pip install git+git//github.com/maxplanck-ie/HiCBrowse@master
 ```
 
 You can also download/clone this GitHub repository and run the setup.py script inside :
 
-
-```r
+```
 cd HiCBrowser
 python setup.py install -f
 ```
+
+If you have Docker installed on your computer you can also use our [Docker HiCBrowser Image](https://github.com/maxplanck-ie/docker-hicbrowser). You can start a production ready HiCBrowser instance with:
+
+```
+docker run --rm -i -t -p 80:80 bgruening/docker-hicbrowser
+```
+
+For more information about the Docker image please refer to https://github.com/maxplanck-ie/docker-hicbrowser#usage
 
 
 ## Usage
