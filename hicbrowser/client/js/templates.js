@@ -60,14 +60,6 @@ this["Templates"]["index"] = Handlebars.template({"compiler":[7,">= 4.0.0"],"mai
     return "<hr>\n<div class=\"row\">\n    <div class=\"col-md-6\">\n        <p>HiCBrowser is a simple web browser to visualize <strong>Hi-C</strong> and other genomic tracks. \n        <p>It is based on <strong>HiCExplorer</strong>, a set of programs that enable you to process, normalize, analyze and visualize Hi-C data.</p>\n    </div>\n    <div class=\"col-md-6\">\n        <!-- build:src /static/img/vis.png -->\n        <img class=\"img-responsive\" src=\"../static/img/vis.png\" alt=\"\">\n        <!-- /build -->\n    </div>\n</div>\n<br>\n<br>\n";
 },"useData":true});
 
-this["Templates"]["introHeader"] = Handlebars.template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
-    var helper;
-
-  return "<div class=\"container\">\n    <div class=\"row\">\n        <div class=\"col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1\">\n            <div class=\"site-heading\">\n                <div class=\"search-box\">\n                    <div class=\"row\">\n                        <div class=\"col-md-2\">\n                            <div class=\"fly\">\n                                <img src=\""
-    + container.escapeExpression(((helper = (helper = helpers.icon || (depth0 != null ? depth0.icon : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0 != null ? depth0 : {},{"name":"icon","hash":{},"data":data}) : helper)))
-    + "\">\n                            </div>\n                        </div>\n                        <div class=\"col-md-9 col-md-offset-1\">\n                            <h1>HiCBrowser</h1>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n</div>\n";
-},"useData":true});
-
 this["Templates"]["loading"] = Handlebars.template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
     var helper;
 

@@ -31,8 +31,7 @@ This project aims to visualize gene expression profiles in the context of mitoch
         // 3. Initialize application!
         App.init({
           browser_example: 'X:3800000-4340000',
-          gene_example: 'mof',
-          icon: '/static/img/fly.svg'
+          gene_example: 'mof'
         });
 
         // Alternatively use the default configuration:

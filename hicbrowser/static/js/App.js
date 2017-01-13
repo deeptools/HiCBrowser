@@ -12,7 +12,6 @@ var Search = require('./js/views/search');
 var Index = require('./js/views/index');
 var GeneView = require('./js/views/gene');
 var BrowserView = require('./js/views/browser');
-var Intro = require('./js/views/intro-header');
 
 App = {};
 
@@ -23,7 +22,6 @@ App.views.search = new Search({el:'#search'});
 App.views.index = new Index({el:'#content'});
 App.views.gene = new GeneView({el:'#content'});
 App.views.browser = new BrowserView({el:'#content'});
-App.views.intro = new Intro({el:'.intro-header'});
 
 // Models
 App.models = {};
@@ -54,12 +52,11 @@ App.init = function(config){
     $('[data-toggle="tooltip"]').tooltip();
 
     // Render initial views
-    App.views.intro.render(App.config);
     App.views.search.render(App.config);
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./js/models/browser":2,"./js/models/config":3,"./js/models/gene":4,"./js/router":5,"./js/views/browser":7,"./js/views/gene":8,"./js/views/index":9,"./js/views/intro-header":10,"./js/views/loading":11,"./js/views/search":12,"backbone":16,"bootstrap":18,"jquery":78}],2:[function(require,module,exports){
+},{"./js/models/browser":2,"./js/models/config":3,"./js/models/gene":4,"./js/router":5,"./js/views/browser":7,"./js/views/gene":8,"./js/views/index":9,"./js/views/loading":10,"./js/views/search":11,"backbone":15,"bootstrap":17,"jquery":77}],2:[function(require,module,exports){
 module.exports = Backbone.Model.extend({
     urlRoot: '/browser'
 });
@@ -217,7 +214,7 @@ Backbone.history.start();
 
 module.exports = app_router;
 
-},{"underscore":83}],6:[function(require,module,exports){
+},{"underscore":82}],6:[function(require,module,exports){
 (function (global){
 var glob = ('undefined' === typeof window) ? global : window,
 
@@ -281,14 +278,6 @@ this["Templates"]["index"] = Handlebars.template({"compiler":[7,">= 4.0.0"],"mai
     return "<hr>\n<div class=\"row\">\n    <div class=\"col-md-6\">\n        <p>HiCBrowser is a simple web browser to visualize <strong>Hi-C</strong> and other genomic tracks. \n        <p>It is based on <strong>HiCExplorer</strong>, a set of programs that enable you to process, normalize, analyze and visualize Hi-C data.</p>\n    </div>\n    <div class=\"col-md-6\">\n        <!-- build:src /static/img/vis.png -->\n        <img class=\"img-responsive\" src=\"../static/img/vis.png\" alt=\"\">\n        <!-- /build -->\n    </div>\n</div>\n<br>\n<br>\n";
 },"useData":true});
 
-this["Templates"]["introHeader"] = Handlebars.template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
-    var helper;
-
-  return "<div class=\"container\">\n    <div class=\"row\">\n        <div class=\"col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1\">\n            <div class=\"site-heading\">\n                <div class=\"search-box\">\n                    <div class=\"row\">\n                        <div class=\"col-md-2\">\n                            <div class=\"fly\">\n                                <img src=\""
-    + container.escapeExpression(((helper = (helper = helpers.icon || (depth0 != null ? depth0.icon : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0 != null ? depth0 : {},{"name":"icon","hash":{},"data":data}) : helper)))
-    + "\">\n                            </div>\n                        </div>\n                        <div class=\"col-md-9 col-md-offset-1\">\n                            <h1>HiCBrowser</h1>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n</div>\n";
-},"useData":true});
-
 this["Templates"]["loading"] = Handlebars.template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
     var helper;
 
@@ -345,7 +334,7 @@ this["Templates"]["search"] = Handlebars.template({"1":function(container,depth0
 
 if (typeof exports === 'object' && exports) {module.exports = this["Templates"];}
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"handlebars":66}],7:[function(require,module,exports){
+},{"handlebars":65}],7:[function(require,module,exports){
 var _ = require('underscore');
 
 var templates = require('../templates');
@@ -435,7 +424,7 @@ module.exports = Backbone.View.extend({
         $(this.el).css({opacity: 0.0, visibility: 'visible'}).animate({opacity: 1.0}, 800);
     }
 });
-},{"../templates":6,"underscore":83}],8:[function(require,module,exports){
+},{"../templates":6,"underscore":82}],8:[function(require,module,exports){
 var _ = require('underscore');
 var d3 = require('d3');
 var FeatureViewer = require('feature-viewer');
@@ -573,7 +562,7 @@ module.exports = Backbone.View.extend({
     }
 });
 
-},{"../templates":6,"d3":32,"feature-viewer":33,"underscore":83}],9:[function(require,module,exports){
+},{"../templates":6,"d3":31,"feature-viewer":32,"underscore":82}],9:[function(require,module,exports){
 var _ = require('underscore');
 
 var templates = require('../templates');
@@ -615,24 +604,7 @@ module.exports = Backbone.View.extend({
 
 });
 
-},{"../templates":6,"underscore":83}],10:[function(require,module,exports){
-var _ = require('underscore');
-
-var templates = require('../templates');
-
-module.exports = Backbone.View.extend({
-
-    initialize: function(options){
-        this.options = options;
-    },
-
-    render: function(data){
-        var tpl = templates.introHeader(data.attributes);
-        $(this.options.el).append(tpl);
-    }
-});
-
-},{"../templates":6,"underscore":83}],11:[function(require,module,exports){
+},{"../templates":6,"underscore":82}],10:[function(require,module,exports){
 var _ = require('underscore');
 
 var templates = require('../templates');
@@ -661,7 +633,7 @@ module.exports = Backbone.View.extend({
         $('#' + _id).modal('hide');
     }
 });
-},{"../templates":6,"underscore":83}],12:[function(require,module,exports){
+},{"../templates":6,"underscore":82}],11:[function(require,module,exports){
 var _ = require('underscore');
 var templates = require('../templates');
 
@@ -810,7 +782,7 @@ module.exports = Backbone.View.extend({
     }
 });
 
-},{"../templates":6,"underscore":83}],13:[function(require,module,exports){
+},{"../templates":6,"underscore":82}],12:[function(require,module,exports){
 (function (process,__filename){
 /** vim: et:ts=4:sw=4:sts=4
  * @license amdefine 1.0.1 Copyright (c) 2011-2016, The Dojo Foundation All Rights Reserved.
@@ -1115,7 +1087,7 @@ function amdefine(module, requireFn) {
 module.exports = amdefine;
 
 }).call(this,require('_process'),"/node_modules/amdefine/amdefine.js")
-},{"_process":82,"path":81}],14:[function(require,module,exports){
+},{"_process":81,"path":80}],13:[function(require,module,exports){
 /**
  * Standalone extraction of Backbone.Events, no external dependency required.
  * Degrades nicely when Backone/underscore are already available in the current
@@ -1393,10 +1365,10 @@ module.exports = amdefine;
   }
 })(this);
 
-},{}],15:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 module.exports = require('./backbone-events-standalone');
 
-},{"./backbone-events-standalone":14}],16:[function(require,module,exports){
+},{"./backbone-events-standalone":13}],15:[function(require,module,exports){
 (function (global){
 //     Backbone.js 1.3.3
 
@@ -3320,7 +3292,7 @@ module.exports = require('./backbone-events-standalone');
 });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"jquery":78,"underscore":83}],17:[function(require,module,exports){
+},{"jquery":77,"underscore":82}],16:[function(require,module,exports){
 var events = require("backbone-events-standalone");
 
 events.onAll = function(callback,context){
@@ -3343,7 +3315,7 @@ events.mixin = function(proto) {
 
 module.exports = events;
 
-},{"backbone-events-standalone":15}],18:[function(require,module,exports){
+},{"backbone-events-standalone":14}],17:[function(require,module,exports){
 // This file is autogenerated via the `commonjs` Grunt task. You can require() this file in a CommonJS environment.
 require('../../js/transition.js')
 require('../../js/alert.js')
@@ -3357,7 +3329,7 @@ require('../../js/popover.js')
 require('../../js/scrollspy.js')
 require('../../js/tab.js')
 require('../../js/affix.js')
-},{"../../js/affix.js":19,"../../js/alert.js":20,"../../js/button.js":21,"../../js/carousel.js":22,"../../js/collapse.js":23,"../../js/dropdown.js":24,"../../js/modal.js":25,"../../js/popover.js":26,"../../js/scrollspy.js":27,"../../js/tab.js":28,"../../js/tooltip.js":29,"../../js/transition.js":30}],19:[function(require,module,exports){
+},{"../../js/affix.js":18,"../../js/alert.js":19,"../../js/button.js":20,"../../js/carousel.js":21,"../../js/collapse.js":22,"../../js/dropdown.js":23,"../../js/modal.js":24,"../../js/popover.js":25,"../../js/scrollspy.js":26,"../../js/tab.js":27,"../../js/tooltip.js":28,"../../js/transition.js":29}],18:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: affix.js v3.3.7
  * http://getbootstrap.com/javascript/#affix
@@ -3521,7 +3493,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],20:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: alert.js v3.3.7
  * http://getbootstrap.com/javascript/#alerts
@@ -3617,7 +3589,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],21:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: button.js v3.3.7
  * http://getbootstrap.com/javascript/#buttons
@@ -3744,7 +3716,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],22:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: carousel.js v3.3.7
  * http://getbootstrap.com/javascript/#carousel
@@ -3983,7 +3955,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],23:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: collapse.js v3.3.7
  * http://getbootstrap.com/javascript/#collapse
@@ -4197,7 +4169,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],24:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: dropdown.js v3.3.7
  * http://getbootstrap.com/javascript/#dropdowns
@@ -4364,7 +4336,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],25:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: modal.js v3.3.7
  * http://getbootstrap.com/javascript/#modals
@@ -4705,7 +4677,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],26:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: popover.js v3.3.7
  * http://getbootstrap.com/javascript/#popovers
@@ -4815,7 +4787,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],27:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: scrollspy.js v3.3.7
  * http://getbootstrap.com/javascript/#scrollspy
@@ -4989,7 +4961,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],28:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: tab.js v3.3.7
  * http://getbootstrap.com/javascript/#tabs
@@ -5146,7 +5118,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],29:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: tooltip.js v3.3.7
  * http://getbootstrap.com/javascript/#tooltip
@@ -5668,7 +5640,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],30:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: transition.js v3.3.7
  * http://getbootstrap.com/javascript/#transitions
@@ -5729,9 +5701,9 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],31:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 
-},{}],32:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 !function() {
   var d3 = {
     version: "3.5.17"
@@ -15286,7 +15258,7 @@ require('../../js/affix.js')
   });
   if (typeof define === "function" && define.amd) this.d3 = d3, define(d3); else if (typeof module === "object" && module.exports) module.exports = d3; else this.d3 = d3;
 }();
-},{}],33:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 (function (global){
 /*
  * feature-viewer
@@ -15320,7 +15292,7 @@ nxFeatureViewer = require("../src/fv.nextprot.js");
 require("biojs-events").mixin(FeatureViewer.prototype);
 module.exports = FeatureViewer;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../src/feature-viewer.js":35,"../src/fv.nextprot.js":36,"biojs-events":17,"bootstrap/js/popover.js":26,"bootstrap/js/tooltip.js":29,"d3":34,"jquery":78,"nextprot/src/nextprot-core.js":79,"nextprot/src/nextprot-utils.js":80}],34:[function(require,module,exports){
+},{"../src/feature-viewer.js":34,"../src/fv.nextprot.js":35,"biojs-events":16,"bootstrap/js/popover.js":25,"bootstrap/js/tooltip.js":28,"d3":33,"jquery":77,"nextprot/src/nextprot-core.js":78,"nextprot/src/nextprot-utils.js":79}],33:[function(require,module,exports){
 !function() {
   var d3 = {
     version: "3.5.6"
@@ -24825,7 +24797,7 @@ module.exports = FeatureViewer;
   if (typeof define === "function" && define.amd) define(d3); else if (typeof module === "object" && module.exports) module.exports = d3;
   this.d3 = d3;
 }();
-},{}],35:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 var FeatureViewer = (function () {
 
     function FeatureViewer(sequence, div, options) {
@@ -26497,7 +26469,7 @@ var FeatureViewer = (function () {
 if ( typeof module === "object" && typeof module.exports === "object" ) {
     module.exports = FeatureViewer;
 }
-},{}],36:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 
 var nxClient;
 
@@ -26588,7 +26560,7 @@ function addNxFeature(featuresName, featuresStyle) {
 if ( typeof module === "object" && typeof module.exports === "object" ) {
     module.exports = nxFeatureViewer;
 }
-},{}],37:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -26655,7 +26627,7 @@ exports['default'] = inst;
 module.exports = exports['default'];
 
 
-},{"./handlebars.runtime":38,"./handlebars/compiler/ast":40,"./handlebars/compiler/base":41,"./handlebars/compiler/compiler":43,"./handlebars/compiler/javascript-compiler":45,"./handlebars/compiler/visitor":48,"./handlebars/no-conflict":62}],38:[function(require,module,exports){
+},{"./handlebars.runtime":37,"./handlebars/compiler/ast":39,"./handlebars/compiler/base":40,"./handlebars/compiler/compiler":42,"./handlebars/compiler/javascript-compiler":44,"./handlebars/compiler/visitor":47,"./handlebars/no-conflict":61}],37:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -26723,7 +26695,7 @@ exports['default'] = inst;
 module.exports = exports['default'];
 
 
-},{"./handlebars/base":39,"./handlebars/exception":52,"./handlebars/no-conflict":62,"./handlebars/runtime":63,"./handlebars/safe-string":64,"./handlebars/utils":65}],39:[function(require,module,exports){
+},{"./handlebars/base":38,"./handlebars/exception":51,"./handlebars/no-conflict":61,"./handlebars/runtime":62,"./handlebars/safe-string":63,"./handlebars/utils":64}],38:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -26829,7 +26801,7 @@ exports.createFrame = _utils.createFrame;
 exports.logger = _logger2['default'];
 
 
-},{"./decorators":50,"./exception":52,"./helpers":53,"./logger":61,"./utils":65}],40:[function(require,module,exports){
+},{"./decorators":49,"./exception":51,"./helpers":52,"./logger":60,"./utils":64}],39:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -26862,7 +26834,7 @@ exports['default'] = AST;
 module.exports = exports['default'];
 
 
-},{}],41:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -26912,7 +26884,7 @@ function parse(input, options) {
 }
 
 
-},{"../utils":65,"./helpers":44,"./parser":46,"./whitespace-control":49}],42:[function(require,module,exports){
+},{"../utils":64,"./helpers":43,"./parser":45,"./whitespace-control":48}],41:[function(require,module,exports){
 /* global define */
 'use strict';
 
@@ -27080,7 +27052,7 @@ exports['default'] = CodeGen;
 module.exports = exports['default'];
 
 
-},{"../utils":65,"source-map":67}],43:[function(require,module,exports){
+},{"../utils":64,"source-map":66}],42:[function(require,module,exports){
 /* eslint-disable new-cap */
 
 'use strict';
@@ -27654,7 +27626,7 @@ function transformLiteralToPath(sexpr) {
 }
 
 
-},{"../exception":52,"../utils":65,"./ast":40}],44:[function(require,module,exports){
+},{"../exception":51,"../utils":64,"./ast":39}],43:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -27886,7 +27858,7 @@ function preparePartialBlock(open, program, close, locInfo) {
 }
 
 
-},{"../exception":52}],45:[function(require,module,exports){
+},{"../exception":51}],44:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -28673,11 +28645,11 @@ JavaScriptCompiler.prototype = {
       child = children[i];
       compiler = new this.compiler(); // eslint-disable-line new-cap
 
-      var index = this.matchExistingProgram(child);
+      var existing = this.matchExistingProgram(child);
 
-      if (index == null) {
+      if (existing == null) {
         this.context.programs.push(''); // Placeholder to prevent name conflicts for nested children
-        index = this.context.programs.length;
+        var index = this.context.programs.length;
         child.index = index;
         child.name = 'program' + index;
         this.context.programs[index] = compiler.compile(child, options, this.context, !this.precompile);
@@ -28686,12 +28658,14 @@ JavaScriptCompiler.prototype = {
 
         this.useDepths = this.useDepths || compiler.useDepths;
         this.useBlockParams = this.useBlockParams || compiler.useBlockParams;
+        child.useDepths = this.useDepths;
+        child.useBlockParams = this.useBlockParams;
       } else {
-        child.index = index;
-        child.name = 'program' + index;
+        child.index = existing.index;
+        child.name = 'program' + existing.index;
 
-        this.useDepths = this.useDepths || child.useDepths;
-        this.useBlockParams = this.useBlockParams || child.useBlockParams;
+        this.useDepths = this.useDepths || existing.useDepths;
+        this.useBlockParams = this.useBlockParams || existing.useBlockParams;
       }
     }
   },
@@ -28699,7 +28673,7 @@ JavaScriptCompiler.prototype = {
     for (var i = 0, len = this.context.environments.length; i < len; i++) {
       var environment = this.context.environments[i];
       if (environment && environment.equals(child)) {
-        return i;
+        return environment;
       }
     }
   },
@@ -29014,7 +28988,7 @@ exports['default'] = JavaScriptCompiler;
 module.exports = exports['default'];
 
 
-},{"../base":39,"../exception":52,"../utils":65,"./code-gen":42}],46:[function(require,module,exports){
+},{"../base":38,"../exception":51,"../utils":64,"./code-gen":41}],45:[function(require,module,exports){
 /* istanbul ignore next */
 /* Jison generated parser */
 "use strict";
@@ -29754,7 +29728,7 @@ var handlebars = (function () {
 exports['default'] = handlebars;
 
 
-},{}],47:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 /* eslint-disable new-cap */
 'use strict';
 
@@ -29942,7 +29916,7 @@ PrintVisitor.prototype.HashPair = function (pair) {
 /* eslint-enable new-cap */
 
 
-},{"./visitor":48}],48:[function(require,module,exports){
+},{"./visitor":47}],47:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -30084,7 +30058,7 @@ exports['default'] = Visitor;
 module.exports = exports['default'];
 
 
-},{"../exception":52}],49:[function(require,module,exports){
+},{"../exception":51}],48:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -30307,7 +30281,7 @@ exports['default'] = WhitespaceControl;
 module.exports = exports['default'];
 
 
-},{"./visitor":48}],50:[function(require,module,exports){
+},{"./visitor":47}],49:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -30325,7 +30299,7 @@ function registerDefaultDecorators(instance) {
 }
 
 
-},{"./decorators/inline":51}],51:[function(require,module,exports){
+},{"./decorators/inline":50}],50:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -30356,7 +30330,7 @@ exports['default'] = function (instance) {
 module.exports = exports['default'];
 
 
-},{"../utils":65}],52:[function(require,module,exports){
+},{"../utils":64}],51:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -30386,9 +30360,20 @@ function Exception(message, node) {
     Error.captureStackTrace(this, Exception);
   }
 
-  if (loc) {
-    this.lineNumber = line;
-    this.column = column;
+  try {
+    if (loc) {
+      this.lineNumber = line;
+
+      // Work around issue under safari where we can't directly set the column value
+      /* istanbul ignore next */
+      if (Object.defineProperty) {
+        Object.defineProperty(this, 'column', { value: column });
+      } else {
+        this.column = column;
+      }
+    }
+  } catch (nop) {
+    /* Ignore if the browser is very particular */
   }
 }
 
@@ -30398,7 +30383,7 @@ exports['default'] = Exception;
 module.exports = exports['default'];
 
 
-},{}],53:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -30446,7 +30431,7 @@ function registerDefaultHelpers(instance) {
 }
 
 
-},{"./helpers/block-helper-missing":54,"./helpers/each":55,"./helpers/helper-missing":56,"./helpers/if":57,"./helpers/log":58,"./helpers/lookup":59,"./helpers/with":60}],54:[function(require,module,exports){
+},{"./helpers/block-helper-missing":53,"./helpers/each":54,"./helpers/helper-missing":55,"./helpers/if":56,"./helpers/log":57,"./helpers/lookup":58,"./helpers/with":59}],53:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -30487,7 +30472,7 @@ exports['default'] = function (instance) {
 module.exports = exports['default'];
 
 
-},{"../utils":65}],55:[function(require,module,exports){
+},{"../utils":64}],54:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -30583,7 +30568,7 @@ exports['default'] = function (instance) {
 module.exports = exports['default'];
 
 
-},{"../exception":52,"../utils":65}],56:[function(require,module,exports){
+},{"../exception":51,"../utils":64}],55:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -30610,7 +30595,7 @@ exports['default'] = function (instance) {
 module.exports = exports['default'];
 
 
-},{"../exception":52}],57:[function(require,module,exports){
+},{"../exception":51}],56:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -30641,7 +30626,7 @@ exports['default'] = function (instance) {
 module.exports = exports['default'];
 
 
-},{"../utils":65}],58:[function(require,module,exports){
+},{"../utils":64}],57:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -30669,7 +30654,7 @@ exports['default'] = function (instance) {
 module.exports = exports['default'];
 
 
-},{}],59:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -30683,7 +30668,7 @@ exports['default'] = function (instance) {
 module.exports = exports['default'];
 
 
-},{}],60:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -30718,7 +30703,7 @@ exports['default'] = function (instance) {
 module.exports = exports['default'];
 
 
-},{"../utils":65}],61:[function(require,module,exports){
+},{"../utils":64}],60:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -30767,7 +30752,7 @@ exports['default'] = logger;
 module.exports = exports['default'];
 
 
-},{"./utils":65}],62:[function(require,module,exports){
+},{"./utils":64}],61:[function(require,module,exports){
 (function (global){
 /* global window */
 'use strict';
@@ -30791,7 +30776,7 @@ module.exports = exports['default'];
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],63:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -30957,7 +30942,7 @@ function template(templateSpec, env) {
         blockParams = templateSpec.useBlockParams ? [] : undefined;
     if (templateSpec.useDepths) {
       if (options.depths) {
-        depths = context !== options.depths[0] ? [context].concat(options.depths) : options.depths;
+        depths = context != options.depths[0] ? [context].concat(options.depths) : options.depths;
       } else {
         depths = [context];
       }
@@ -31006,7 +30991,7 @@ function wrapProgram(container, i, fn, data, declaredBlockParams, blockParams, d
     var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
     var currentDepths = depths;
-    if (depths && context !== depths[0]) {
+    if (depths && context != depths[0]) {
       currentDepths = [context].concat(depths);
     }
 
@@ -31024,7 +31009,12 @@ function wrapProgram(container, i, fn, data, declaredBlockParams, blockParams, d
 function resolvePartial(partial, context, options) {
   if (!partial) {
     if (options.name === '@partial-block') {
-      partial = options.data['partial-block'];
+      var data = options.data;
+      while (data['partial-block'] === noop) {
+        data = data._parent;
+      }
+      partial = data['partial-block'];
+      data['partial-block'] = noop;
     } else {
       partial = options.partials[options.name];
     }
@@ -31085,7 +31075,7 @@ function executeDecorators(fn, prog, container, depths, data, blockParams) {
 }
 
 
-},{"./base":39,"./exception":52,"./utils":65}],64:[function(require,module,exports){
+},{"./base":38,"./exception":51,"./utils":64}],63:[function(require,module,exports){
 // Build out our basic SafeString type
 'use strict';
 
@@ -31102,7 +31092,7 @@ exports['default'] = SafeString;
 module.exports = exports['default'];
 
 
-},{}],65:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -31228,7 +31218,7 @@ function appendContextPath(contextPath, id) {
 }
 
 
-},{}],66:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 // USAGE:
 // var handlebars = require('handlebars');
 /* eslint-disable no-var */
@@ -31255,7 +31245,7 @@ if (typeof require !== 'undefined' && require.extensions) {
   require.extensions['.hbs'] = extension;
 }
 
-},{"../dist/cjs/handlebars":37,"../dist/cjs/handlebars/compiler/printer":47,"fs":31}],67:[function(require,module,exports){
+},{"../dist/cjs/handlebars":36,"../dist/cjs/handlebars/compiler/printer":46,"fs":30}],66:[function(require,module,exports){
 /*
  * Copyright 2009-2011 Mozilla Foundation and contributors
  * Licensed under the New BSD license. See LICENSE.txt or:
@@ -31265,7 +31255,7 @@ exports.SourceMapGenerator = require('./source-map/source-map-generator').Source
 exports.SourceMapConsumer = require('./source-map/source-map-consumer').SourceMapConsumer;
 exports.SourceNode = require('./source-map/source-node').SourceNode;
 
-},{"./source-map/source-map-consumer":74,"./source-map/source-map-generator":75,"./source-map/source-node":76}],68:[function(require,module,exports){
+},{"./source-map/source-map-consumer":73,"./source-map/source-map-generator":74,"./source-map/source-node":75}],67:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -31374,7 +31364,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./util":77,"amdefine":13}],69:[function(require,module,exports){
+},{"./util":76,"amdefine":12}],68:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -31522,7 +31512,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./base64":70,"amdefine":13}],70:[function(require,module,exports){
+},{"./base64":69,"amdefine":12}],69:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -31597,7 +31587,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"amdefine":13}],71:[function(require,module,exports){
+},{"amdefine":12}],70:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -31716,7 +31706,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"amdefine":13}],72:[function(require,module,exports){
+},{"amdefine":12}],71:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2014 Mozilla Foundation and contributors
@@ -31804,7 +31794,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./util":77,"amdefine":13}],73:[function(require,module,exports){
+},{"./util":76,"amdefine":12}],72:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -31926,7 +31916,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"amdefine":13}],74:[function(require,module,exports){
+},{"amdefine":12}],73:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -33005,7 +32995,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./array-set":68,"./base64-vlq":69,"./binary-search":71,"./quick-sort":73,"./util":77,"amdefine":13}],75:[function(require,module,exports){
+},{"./array-set":67,"./base64-vlq":68,"./binary-search":70,"./quick-sort":72,"./util":76,"amdefine":12}],74:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -33406,7 +33396,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./array-set":68,"./base64-vlq":69,"./mapping-list":72,"./util":77,"amdefine":13}],76:[function(require,module,exports){
+},{"./array-set":67,"./base64-vlq":68,"./mapping-list":71,"./util":76,"amdefine":12}],75:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -33822,7 +33812,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"./source-map-generator":75,"./util":77,"amdefine":13}],77:[function(require,module,exports){
+},{"./source-map-generator":74,"./util":76,"amdefine":12}],76:[function(require,module,exports){
 /* -*- Mode: js; js-indent-level: 2; -*- */
 /*
  * Copyright 2011 Mozilla Foundation and contributors
@@ -34194,7 +34184,7 @@ define(function (require, exports, module) {
 
 });
 
-},{"amdefine":13}],78:[function(require,module,exports){
+},{"amdefine":12}],77:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.2.4
  * http://jquery.com/
@@ -44010,7 +44000,7 @@ if ( !noGlobal ) {
 return jQuery;
 }));
 
-},{}],79:[function(require,module,exports){
+},{}],78:[function(require,module,exports){
 /**
  * A neXtProt js client
  */
@@ -44274,7 +44264,7 @@ return jQuery;
 
 }(this));
 
-},{}],80:[function(require,module,exports){
+},{}],79:[function(require,module,exports){
 //Utility methods
 var NXUtils = {
 
@@ -44730,7 +44720,7 @@ if ( typeof module === "object" && typeof module.exports === "object" ) {
         NXViewerUtils : NXViewerUtils
     }
 }
-},{}],81:[function(require,module,exports){
+},{}],80:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -44958,7 +44948,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require('_process'))
-},{"_process":82}],82:[function(require,module,exports){
+},{"_process":81}],81:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -45140,7 +45130,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],83:[function(require,module,exports){
+},{}],82:[function(require,module,exports){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
 //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors

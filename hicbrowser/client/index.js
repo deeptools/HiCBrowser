@@ -10,7 +10,6 @@ var Search = require('./js/views/search');
 var Index = require('./js/views/index');
 var GeneView = require('./js/views/gene');
 var BrowserView = require('./js/views/browser');
-var Intro = require('./js/views/intro-header');
 
 App = {};
 
@@ -21,7 +20,6 @@ App.views.search = new Search({el:'#search'});
 App.views.index = new Index({el:'#content'});
 App.views.gene = new GeneView({el:'#content'});
 App.views.browser = new BrowserView({el:'#content'});
-App.views.intro = new Intro({el:'.intro-header'});
 
 // Models
 App.models = {};
@@ -52,6 +50,5 @@ App.init = function(config){
     $('[data-toggle="tooltip"]').tooltip();
 
     // Render initial views
-    App.views.intro.render(App.config);
     App.views.search.render(App.config);
 };
