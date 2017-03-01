@@ -53,12 +53,12 @@ bash run_server.sh
 
 HiCBrowser needs three config files.
 
-+ **region tracks** : To visualize all genomic tracks for given regions. (eg. [gene_tracks.ini](./gene_tracks.ini))
-+ **gene tracks** : To visualize TADs near given gene. (eg. [region_tracks.ini](./region_tracks.ini))
++ **region tracks** : To visualize all genomic tracks for given regions. (eg. [region_tracks.ini](./region_tracks.ini))
++ **gene tracks** : To visualize TADs near given gene. (eg. [gene_tracks.ini](./gene_tracks.ini))
 + **browser config file** : To providing information about directories to save images and the two tracks above. (eg. [browserConfig.ini](./browserConfig.ini))
 
-We have provided example for each of these files with the package, as shown above. For a full documentation of what types of data can be plotted in the region tracks 
-and for extended examples please look at the [documentation of the plotTADs](http://hicexplorer.readthedocs.io/en/latest/content/tools/hicPlotTADs.html) 
+We have provided example for each of these files with the package, as shown above. For a full documentation of what types of data can be plotted in the region tracks
+and for extended examples please look at the [documentation of the plotTADs](http://hicexplorer.readthedocs.io/en/latest/content/tools/hicPlotTADs.html)
 function of [HiCExplorer](http://hicexplorer.readthedocs.io/en/latest/)  
 
 
@@ -66,13 +66,13 @@ function of [HiCExplorer](http://hicexplorer.readthedocs.io/en/latest/)
 
 To run the browser, simply run **runBrowser** command, as shown below.
 
-        
+
 
 ```r
 # --config = browser config file
 # --port = localhost port to run the server
 
-runBrowser --config browserConfig.ini --port 8888 --numProcessors 10 
+runBrowser --config browserConfig.ini --port 8888 --numProcessors 10
 ```
 
 ## Help
