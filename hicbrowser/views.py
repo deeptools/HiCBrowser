@@ -1,11 +1,7 @@
 import sys
 import os
-import numpy as np
-from flask import Flask, render_template, request, send_file
-
-import os
 from os.path import basename, exists
-
+import numpy as np
 import json
 
 import hicexplorer.trackPlot
@@ -13,6 +9,7 @@ import hicbrowser.utilities
 import hicbrowser.tracks2json
 
 
+from flask import Flask, render_template, request, send_file, Blueprint
 from ConfigParser import SafeConfigParser
 
 hicexplorer.trackPlot.DEFAULT_WIDTH_RATIOS = (0.89, 0.11)
@@ -135,14 +132,14 @@ def main(config_file, port, numProc, template_folder=None,  debug=False):
     config = SafeConfigParser()
     config.readfp(open(config_file, 'r'))
 
-    kwargs = {}
+    kwargs = {} # an empty dict to pass vars to Flask app
     if template_folder is not None:
         sys.stderr.write("setting template folder to\n {}\n".format(template_folder))
         kwargs['template_folder'] = template_folder
 
+    # create FLASK app
     app = Flask(__name__, **kwargs)
-
-    from flask import Blueprint
+    # create gene and browser image dirs
     img_path = check_static_img_folders()
 
     # register an static path for images using Blueprint
@@ -178,17 +175,15 @@ def main(config_file, port, numProc, template_folder=None,  debug=False):
     global tads_intval_tree
     tads_intval_tree, __, __ = hicexplorer.trackPlot.file_to_intervaltree(tads_file)
 
+    # initialize tads tracks
+    track_file = config.get('general', 'tracks')
+    tads = hicbrowser.tracks2json.SetTracks(track_file, fig_width=40)
+
     # initialize gene name to position mapping
     genes = config.get('general', 'genes')
 
     global gene2pos
     gene2pos = {}
-
-    # initialize tads tracks
-    track_file = config.get('general', 'tracks')
-    tads = hicbrowser.tracks2json.SetTracks(track_file, fig_width=40)
-
-    #tads = hicexplorer.trackPlot.PlotTracks(track_file, fig_width=40, dpi=70)
 
     from hicexplorer.trackPlot import opener
     with opener(genes) as fh:
@@ -204,10 +199,12 @@ def main(config_file, port, numProc, template_folder=None,  debug=False):
                 pass
             gene2pos[gene_name.lower()] = (gene_chrom, gene_start, gene_end)
 
+# Inititate FLASK app
     @app.route('/', methods=['GET'])
     def index():
         return render_template("index.html")
 
+# decorator to get TAD position for a given Gene ID, dump 'em into a JSON file
     @app.route('/gene/<gene_name>', methods=['GET'])
     def get_tad(gene_name):
         res = "unknown gene"
@@ -219,25 +216,27 @@ def main(config_file, port, numProc, template_folder=None,  debug=False):
                 start -= 50000
                 end += 50000
 
-                # plot
+                # write the gene position etc in a JSON file
                 outfile = "{}/{}_{}_{}.json".format(tad_img_root,
                                                    chromosome,
                                                    start,
                                                    end)
+                # if file doesn't exist , create it and write track height info (interval values)
+                # into it
                 if not exists(outfile):
                     with open(outfile, 'w') as fh:
                         sys.stderr.write("Saving json file: {}\n".format(outfile))
                         fh.write(tads.get_json_interval_values(chromosome, start, end))
-
+                # gene data 'dict'
                 data = {'name': gene_name,
                         'img': outfile,
                         'chromosome': chromosome,
                         'start': start,
                         'end': end}
-
+                # open the file and load the track info
                 with open(outfile) as tracks:
                         d = json.load(tracks)
-
+                # append infor with the gene data dict
                 data['tracks'] = d
                 res = json.dumps(data)
 
