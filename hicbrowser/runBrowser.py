@@ -21,9 +21,8 @@ def parse_arguments(args=None):
                         default=8000)
 
     parser.add_argument('--htmlFolder',
-                        help='File where the template index.html file is located. The default is'
-                             'fine unless the contents wants to be personalized. The full path '
-                             'has to be given.',
+                        help='In case you want to personalize the content of the landing page, '
+                        'provide the full path of the folder where the template index.html file is located.',
                         default=None)
 
     parser.add_argument('--numProcessors', '-np',

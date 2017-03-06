@@ -156,9 +156,9 @@ def main(config_file, port, numProc, template_folder=None,  debug=False):
     # that are saved on a temporary file.
     # then, hicexplorer.trackPlot object is initialized with this track and
     # store on a list (trp_list). If the tracks were not to be splited in
-    # individual files, trackPlot will plot everything togeher. By splitting
+    # individual files, trackPlot will plot everything togather. By splitting
     # them we take advantage of multiprocessing to generate each image on
-    # a different core. Naturally, if using only one core then nothing is gained.
+    # a different core. Naturally, if using only one core nothing is gained.
     track_file = config.get("browser", "tracks")
     trp_list = []
     for track in track_file.split(" "):
