@@ -73,7 +73,8 @@ setup(
     long_description=open('README.md').read(),
     install_requires=[
         "Flask==0.10.1",
-        "hicbrowser"
+        "hicbrowser",
+        "bx-python"
     ],
     cmdclass={'sdist': sdist}
 )
