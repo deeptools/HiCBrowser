@@ -1,10 +1,9 @@
 import sys
-import os
 import numpy as np
 from flask import Flask, render_template, request, send_file
 
 import os
-from os.path import basename, exists
+from os.path import exists
 
 import json
 
@@ -17,6 +16,7 @@ from ConfigParser import SafeConfigParser
 
 hicexplorer.trackPlot.DEFAULT_WIDTH_RATIOS = (0.89, 0.11)
 hicexplorer.trackPlot.DEFAULT_MARGINS = {'left': 0.02, 'right': 0.98, 'bottom': 0, 'top': 1}
+
 
 def get_TAD_for_gene(gene_name):
     """
@@ -34,8 +34,7 @@ def get_TAD_for_gene(gene_name):
                 chrom_ = chrom_[3:]
             else:
                 chrom_ = 'chr' + chrom_
-        tad_pos = tads_intval_tree[chrom_].find(start_, end_)[0]
-
+        tad_pos = sorted(tads_intval_tree[chrom_][start_, end_])[0]
         return chrom_, tad_pos.start, tad_pos.end
     else:
         return None
@@ -147,8 +146,8 @@ def main(config_file, port, numProc, template_folder=None,  debug=False):
 
     # register an static path for images using Blueprint
     images_static = Blueprint('site', __name__,
-                            static_url_path='/images',
-                            static_folder=img_path)
+                              static_url_path='/images',
+                              static_folder=img_path)
     app.register_blueprint(images_static)
 
     # setup up the tracks. It works as follows
@@ -188,8 +187,6 @@ def main(config_file, port, numProc, template_folder=None,  debug=False):
     track_file = config.get('general', 'tracks')
     tads = hicbrowser.tracks2json.SetTracks(track_file, fig_width=40)
 
-    #tads = hicexplorer.trackPlot.PlotTracks(track_file, fig_width=40, dpi=70)
-
     from hicexplorer.trackPlot import opener
     with opener(genes) as fh:
         for line in fh.readlines():
@@ -221,9 +218,9 @@ def main(config_file, port, numProc, template_folder=None,  debug=False):
 
                 # plot
                 outfile = "{}/{}_{}_{}.json".format(tad_img_root,
-                                                   chromosome,
-                                                   start,
-                                                   end)
+                                                    chromosome,
+                                                    start,
+                                                    end)
                 if not exists(outfile):
                     with open(outfile, 'w') as fh:
                         sys.stderr.write("Saving json file: {}\n".format(outfile))
