@@ -279,10 +279,10 @@ def main(config_file, port, numProc, template_folder=None,  debug=False):
                 img_code = []
                 img_content = []
                 for trp_idx in range(len(trp_list)):
-                    figure_path = "/get_image?region={}:{}-{}&id={}".format(chromosome, _range[0], _range[1], trp_idx)
+                    figure_path = "get_image?region={}:{}-{}&id={}".format(chromosome, _range[0], _range[1], trp_idx)
                     img_code.append(figure_path)
 
-                    figure_content_path = "/get_image?region={}:|+start+|-|+end+|&id={}".format(chromosome, trp_idx)
+                    figure_content_path = "get_image?region={}:|+start+|-|+end+|&id={}".format(chromosome, trp_idx)
                     img_content.append(figure_content_path)
 
                 tracks.append(img_code)
@@ -293,10 +293,10 @@ def main(config_file, port, numProc, template_folder=None,  debug=False):
             img_code = []
             img_content = []
             for trp_idx in range(len(trp_list)):
-                figure_path = "/get_image?region={}:{}-{}&id={}".format(chromosome, start, end, trp_idx)
+                figure_path = "get_image?region={}:{}-{}&id={}".format(chromosome, start, end, trp_idx)
                 img_code.append(figure_path)
 
-                figure_content_path = "/get_image?region={}:|+start+|-|+end+|&id={}".format(chromosome, trp_idx)
+                figure_content_path = "get_image?region={}:|+start+|-|+end+|&id={}".format(chromosome, trp_idx)
                 img_content.append(figure_content_path)
 
             tracks.append(img_code)

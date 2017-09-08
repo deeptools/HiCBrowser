@@ -1,3 +1,3 @@
 module.exports = Backbone.Model.extend({
-    urlRoot: '/gene'
+    urlRoot: 'gene'
 });

@@ -58,22 +58,24 @@ App.init = function(config){
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./js/models/browser":2,"./js/models/config":3,"./js/models/gene":4,"./js/router":5,"./js/views/browser":7,"./js/views/gene":8,"./js/views/index":9,"./js/views/loading":10,"./js/views/search":11,"backbone":15,"bootstrap":17,"jquery":77}],2:[function(require,module,exports){
 module.exports = Backbone.Model.extend({
-    urlRoot: '/browser'
+    urlRoot: 'browser'
 });
+
 },{}],3:[function(require,module,exports){
 module.exports = Backbone.Model.extend({
     defaults: {
         browser_example: '',
         gene_example: '',
-        icon: '/static/img/circose.png'
+        icon: 'static/img/circose.png'
     },
-    urlRoot: '/static/json/config.json'
+    urlRoot: 'static/json/config.json'
 });
 
 },{}],4:[function(require,module,exports){
 module.exports = Backbone.Model.extend({
-    urlRoot: '/gene'
+    urlRoot: 'gene'
 });
+
 },{}],5:[function(require,module,exports){
 var _ = require('underscore');
 
@@ -234,12 +236,12 @@ this["Templates"]["browser"] = Handlebars.template({"1":function(container,depth
     var stack1;
 
   return "<div class=\"container-fixed\">\n    <div class=\"row\">\n"
-    + ((stack1 = helpers.each.call(depth0 != null ? depth0 : {},(depth0 != null ? depth0.tracks : depth0),{"name":"each","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
+    + ((stack1 = helpers.each.call(depth0 != null ? depth0 : (container.nullContext || {}),(depth0 != null ? depth0.tracks : depth0),{"name":"each","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
     + "    </div>\n</div>\n";
 },"useData":true});
 
 this["Templates"]["gene"] = Handlebars.template({"1":function(container,depth0,helpers,partials,data) {
-    var helper, alias1=depth0 != null ? depth0 : {}, alias2=helpers.helperMissing, alias3="function", alias4=container.escapeExpression;
+    var helper, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=helpers.helperMissing, alias3="function", alias4=container.escapeExpression;
 
   return "        <h1 class=\"page-header\">\n            "
     + alias4(((helper = (helper = helpers.name || (depth0 != null ? depth0.name : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"name","hash":{},"data":data}) : helper)))
@@ -251,7 +253,7 @@ this["Templates"]["gene"] = Handlebars.template({"1":function(container,depth0,h
     + alias4(((helper = (helper = helpers.end || (depth0 != null ? depth0.end : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"end","hash":{},"data":data}) : helper)))
     + ")\n            </small>\n        </h1>\n        <div style=\"width: 900px;\" id=\""
     + alias4(((helper = (helper = helpers.feature_viewer || (depth0 != null ? depth0.feature_viewer : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"feature_viewer","hash":{},"data":data}) : helper)))
-    + "\"></div>\n\n        <ul class=\"nav nav-pills\">\n          <li class=\"active\">\n            <a href=\"/#/browser/"
+    + "\"></div>\n\n        <ul class=\"nav nav-pills\">\n          <li class=\"active\">\n            <a href=\"#/browser/"
     + alias4(((helper = (helper = helpers.chromosome || (depth0 != null ? depth0.chromosome : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"chromosome","hash":{},"data":data}) : helper)))
     + ":"
     + alias4(((helper = (helper = helpers.start || (depth0 != null ? depth0.start : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"start","hash":{},"data":data}) : helper)))
@@ -262,10 +264,10 @@ this["Templates"]["gene"] = Handlebars.template({"1":function(container,depth0,h
     var helper;
 
   return "        <div style=\"height:55%\">\n            <div class=\"alert alert-danger\" role=\"alert\">\n                <span class=\"glyphicon glyphicon-exclamation-sign\" aria-hidden=\"true\"></span>\n                <span class=\"sr-only\">Error:</span>\n                "
-    + container.escapeExpression(((helper = (helper = helpers.error || (depth0 != null ? depth0.error : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0 != null ? depth0 : {},{"name":"error","hash":{},"data":data}) : helper)))
+    + container.escapeExpression(((helper = (helper = helpers.error || (depth0 != null ? depth0.error : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0 != null ? depth0 : (container.nullContext || {}),{"name":"error","hash":{},"data":data}) : helper)))
     + "\n            </div>\n        </div>\n";
 },"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
-    var stack1, alias1=depth0 != null ? depth0 : {};
+    var stack1, alias1=depth0 != null ? depth0 : (container.nullContext || {});
 
   return "<div class=\"col-lg-12\">\n\n"
     + ((stack1 = helpers["if"].call(alias1,(depth0 != null ? depth0.name : depth0),{"name":"if","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
@@ -275,31 +277,31 @@ this["Templates"]["gene"] = Handlebars.template({"1":function(container,depth0,h
 },"useData":true});
 
 this["Templates"]["index"] = Handlebars.template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
-    return "<hr>\n<div class=\"row\">\n    <div class=\"col-md-6\">\n        <p>HiCBrowser is a simple web browser to visualize <strong>Hi-C</strong> and other genomic tracks. \n        <p>It is based on <strong>HiCExplorer</strong>, a set of programs that enable you to process, normalize, analyze and visualize Hi-C data.</p>\n    </div>\n    <div class=\"col-md-6\">\n        <!-- build:src /static/img/vis.png -->\n        <img class=\"img-responsive\" src=\"../static/img/vis.png\" alt=\"\">\n        <!-- /build -->\n    </div>\n</div>\n<br>\n<br>\n";
+    return "<hr>\n<div class=\"row\">\n    <div class=\"col-md-6\">\n        <p>HiCBrowser is a simple web browser to visualize <strong>Hi-C</strong> and other genomic tracks. \n        <p>It is based on <strong>HiCExplorer</strong>, a set of programs that enable you to process, normalize, analyze and visualize Hi-C data.</p>\n    </div>\n    <div class=\"col-md-6\">\n        <!-- build:src static/img/vis.png -->\n        <img class=\"img-responsive\" src=\"static/img/vis.png\" alt=\"\">\n        <!-- /build -->\n    </div>\n</div>\n<br>\n<br>\n";
 },"useData":true});
 
 this["Templates"]["loading"] = Handlebars.template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
     var helper;
 
   return "<div id=\""
-    + container.escapeExpression(((helper = (helper = helpers.id || (depth0 != null ? depth0.id : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0 != null ? depth0 : {},{"name":"id","hash":{},"data":data}) : helper)))
-    + "\" class=\"modal fade bs-example-modal-sm\" style=\"color: #fff\" tabindex=\"-1\" role=\"dialog\">\n    <div class=\"modal-dialog modal-sm\">\n        <div class=\"modal-content\">\n            <div class=\"search-box\" style=\"width:100%\">\n                <!-- build:src /static/img/loading.gif -->\n                    <img src=\"../static/img/loading.gif\">\n                <!-- /build -->\n                <h1>Loading ...</h1>\n            </div>\n        </div>\n    </div>\n</div>";
+    + container.escapeExpression(((helper = (helper = helpers.id || (depth0 != null ? depth0.id : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0 != null ? depth0 : (container.nullContext || {}),{"name":"id","hash":{},"data":data}) : helper)))
+    + "\" class=\"modal fade bs-example-modal-sm\" style=\"color: #fff\" tabindex=\"-1\" role=\"dialog\">\n    <div class=\"modal-dialog modal-sm\">\n        <div class=\"modal-content\">\n            <div class=\"search-box\" style=\"width:100%\">\n                <!-- build:src static/img/loading.gif -->\n                    <img src=\"static/img/loading.gif\">\n                <!-- /build -->\n                <h1>Loading ...</h1>\n            </div>\n        </div>\n    </div>\n</div>\n";
 },"useData":true});
 
 this["Templates"]["search"] = Handlebars.template({"1":function(container,depth0,helpers,partials,data) {
     var helper;
 
   return "        <small><a data-id=\""
-    + container.escapeExpression(((helper = (helper = helpers.gene_example_id || (depth0 != null ? depth0.gene_example_id : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0 != null ? depth0 : {},{"name":"gene_example_id","hash":{},"data":data}) : helper)))
+    + container.escapeExpression(((helper = (helper = helpers.gene_example_id || (depth0 != null ? depth0.gene_example_id : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0 != null ? depth0 : (container.nullContext || {}),{"name":"gene_example_id","hash":{},"data":data}) : helper)))
     + "\" href=\"#\"> <span class=\"glyphicon glyphicon-star\" aria-hidden=\"true\"></span> example</a></small>\n";
 },"3":function(container,depth0,helpers,partials,data) {
     var helper;
 
   return "        <small><a data-id=\""
-    + container.escapeExpression(((helper = (helper = helpers.browser_example_id || (depth0 != null ? depth0.browser_example_id : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0 != null ? depth0 : {},{"name":"browser_example_id","hash":{},"data":data}) : helper)))
+    + container.escapeExpression(((helper = (helper = helpers.browser_example_id || (depth0 != null ? depth0.browser_example_id : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0 != null ? depth0 : (container.nullContext || {}),{"name":"browser_example_id","hash":{},"data":data}) : helper)))
     + "\" href=\"#\"> <span class=\"glyphicon glyphicon-star\" aria-hidden=\"true\"></span> example</a></small>\n";
 },"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
-    var stack1, helper, alias1=depth0 != null ? depth0 : {}, alias2=helpers.helperMissing, alias3="function", alias4=container.escapeExpression;
+    var stack1, helper, alias1=depth0 != null ? depth0 : (container.nullContext || {}), alias2=helpers.helperMissing, alias3="function", alias4=container.escapeExpression;
 
   return "<ul class=\"nav nav-pills\">\n    <li id=\""
     + alias4(((helper = (helper = helpers.gene_btn || (depth0 != null ? depth0.gene_btn : depth0)) != null ? helper : alias2),(typeof helper === alias3 ? helper.call(alias1,{"name":"gene_btn","hash":{},"data":data}) : helper)))
@@ -352,27 +354,27 @@ function _getParameterByName(name, url) {
 }
 
 function _onload(e){
-    
+
     var img = e.target;
-    
+
     var imgWrapper = img.parentNode;
     imgWrapper.className += imgWrapper.className ? ' loaded' : 'loaded';
 }
 
 function _onerror(e){
     var img = e.target;
-    img.src = '/static/img/not_found.png';
-    
+    img.src = 'static/img/not_found.png';
+
     var imgWrapper = img.parentNode;
     imgWrapper.className += imgWrapper.className ? ' loaded' : 'loaded';
 }
 
 function _load_images(imgDefer, n, index){
-    
+
     var i = index || 0, j = 0;
     while( i < imgDefer.length && j < n){
         if(imgDefer[i].getAttribute('data-original')) {
-            
+
             imgDefer[i].onload = _onload;
             imgDefer[i].onerror = _onerror;
             imgDefer[i].setAttribute('src', imgDefer[i].getAttribute('data-original'));
@@ -380,7 +382,7 @@ function _load_images(imgDefer, n, index){
         }
         i++;
     }
-    
+
     if(i < imgDefer.length -1 ){
         setTimeout(_load_images, 600, imgDefer, n, i);
     }
@@ -388,42 +390,43 @@ function _load_images(imgDefer, n, index){
 
 
 module.exports = Backbone.View.extend({
-    
+
     initialize: function(options){
         this.options = options;
     },
-    
+
     render: function(render){
-        
+
         if(render.region === _browser.region){
             return;
         }
-        
+
         render.tracks = _.sortBy(_.flatten(render.tracks), function(url){
             return + _getParameterByName('id', url);
         });
-        
+
         $(this.options.el).css({opacity: 0.0, visibility: 'hidden'});
-        
-        
+
+
         var tpl = templates.browser(render);
-        
+
         if( ! _.isUndefined($div) ) $div.remove();
-        
+
         $div = $('<div></div>')
             .hide()
             .append(tpl);
-        
+
         $(this.el).append($div);
-        
+
         _load_images(document.getElementsByTagName('img'), 6);
     },
-    
+
     setVisible: function(){
         $div.show().siblings().hide();
         $(this.el).css({opacity: 0.0, visibility: 'visible'}).animate({opacity: 1.0}, 800);
     }
 });
+
 },{"../templates":6,"underscore":82}],8:[function(require,module,exports){
 var _ = require('underscore');
 var d3 = require('d3');
@@ -26718,7 +26721,7 @@ var _logger = require('./logger');
 
 var _logger2 = _interopRequireDefault(_logger);
 
-var VERSION = '4.0.5';
+var VERSION = '4.0.10';
 exports.VERSION = VERSION;
 var COMPILER_REVISION = 7;
 
@@ -27141,7 +27144,7 @@ Compiler.prototype = {
       for (var _name in knownHelpers) {
         /* istanbul ignore else */
         if (_name in knownHelpers) {
-          options.knownHelpers[_name] = knownHelpers[_name];
+          this.options.knownHelpers[_name] = knownHelpers[_name];
         }
       }
     }
@@ -27556,6 +27559,7 @@ function compile(input, options, env) {
     throw new _exception2['default']('You must pass a string or Handlebars AST to Handlebars.compile. You passed ' + input);
   }
 
+  options = _utils.extend({}, options);
   if (!('data' in options)) {
     options.data = true;
   }
@@ -28855,7 +28859,7 @@ JavaScriptCompiler.prototype = {
     var params = [],
         paramsInit = this.setupHelperArgs(name, paramSize, params, blockHelper);
     var foundHelper = this.nameLookup('helpers', name, 'helper'),
-        callContext = this.aliasable(this.contextName(0) + ' != null ? ' + this.contextName(0) + ' : {}');
+        callContext = this.aliasable(this.contextName(0) + ' != null ? ' + this.contextName(0) + ' : (container.nullContext || {})');
 
     return {
       params: params,
@@ -28989,10 +28993,11 @@ module.exports = exports['default'];
 
 
 },{"../base":38,"../exception":51,"../utils":64,"./code-gen":41}],45:[function(require,module,exports){
-/* istanbul ignore next */
+// File ignored in coverage tests via setting in .istanbul.yml
 /* Jison generated parser */
 "use strict";
 
+exports.__esModule = true;
 var handlebars = (function () {
     var parser = { trace: function trace() {},
         yy: {},
@@ -29724,8 +29729,8 @@ var handlebars = (function () {
         this.yy = {};
     }Parser.prototype = parser;parser.Parser = Parser;
     return new Parser();
-})();exports.__esModule = true;
-exports['default'] = handlebars;
+})();exports["default"] = handlebars;
+module.exports = exports["default"];
 
 
 },{}],46:[function(require,module,exports){
@@ -30367,7 +30372,10 @@ function Exception(message, node) {
       // Work around issue under safari where we can't directly set the column value
       /* istanbul ignore next */
       if (Object.defineProperty) {
-        Object.defineProperty(this, 'column', { value: column });
+        Object.defineProperty(this, 'column', {
+          value: column,
+          enumerable: true
+        });
       } else {
         this.column = column;
       }
@@ -30924,6 +30932,8 @@ function template(templateSpec, env) {
 
       return obj;
     },
+    // An empty object to use as replacement for null-contexts
+    nullContext: Object.seal({}),
 
     noop: env.VM.noop,
     compilerInfo: templateSpec.compiler
@@ -30991,7 +31001,7 @@ function wrapProgram(container, i, fn, data, declaredBlockParams, blockParams, d
     var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
     var currentDepths = depths;
-    if (depths && context != depths[0]) {
+    if (depths && context != depths[0] && !(context === container.nullContext && depths[0] === null)) {
       currentDepths = [context].concat(depths);
     }
 
@@ -31009,12 +31019,7 @@ function wrapProgram(container, i, fn, data, declaredBlockParams, blockParams, d
 function resolvePartial(partial, context, options) {
   if (!partial) {
     if (options.name === '@partial-block') {
-      var data = options.data;
-      while (data['partial-block'] === noop) {
-        data = data._parent;
-      }
-      partial = data['partial-block'];
-      data['partial-block'] = noop;
+      partial = options.data['partial-block'];
     } else {
       partial = options.partials[options.name];
     }
@@ -31027,6 +31032,8 @@ function resolvePartial(partial, context, options) {
 }
 
 function invokePartial(partial, context, options) {
+  // Use the current closure context to save the partial-block if this partial
+  var currentPartialBlock = options.data && options.data['partial-block'];
   options.partial = true;
   if (options.ids) {
     options.data.contextPath = options.ids[0] || options.data.contextPath;
@@ -31034,12 +31041,23 @@ function invokePartial(partial, context, options) {
 
   var partialBlock = undefined;
   if (options.fn && options.fn !== noop) {
-    options.data = _base.createFrame(options.data);
-    partialBlock = options.data['partial-block'] = options.fn;
+    (function () {
+      options.data = _base.createFrame(options.data);
+      // Wrapper function to get access to currentPartialBlock from the closure
+      var fn = options.fn;
+      partialBlock = options.data['partial-block'] = function partialBlockWrapper(context) {
+        var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
-    if (partialBlock.partials) {
-      options.partials = Utils.extend({}, options.partials, partialBlock.partials);
-    }
+        // Restore the partial-block from the closure for the execution of the block
+        // i.e. the part inside the block of the partial call.
+        options.data = _base.createFrame(options.data);
+        options.data['partial-block'] = currentPartialBlock;
+        return fn(context, options);
+      };
+      if (fn.partials) {
+        options.partials = Utils.extend({}, options.partials, fn.partials);
+      }
+    })();
   }
 
   if (partial === undefined && partialBlock) {
@@ -45119,6 +45137,10 @@ process.off = noop;
 process.removeListener = noop;
 process.removeAllListeners = noop;
 process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+
+process.listeners = function (name) { return [] }
 
 process.binding = function (name) {
     throw new Error('process.binding is not supported');
