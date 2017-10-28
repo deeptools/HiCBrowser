@@ -72,8 +72,8 @@ setup(
     description='Simple web browser to visualize Hi-C and other genomic data.',
     long_description=open('README.md').read(),
     install_requires=[
-        "Flask==0.10.1",
-        "hicbrowser",
+        "flask",
+        "hicexplorer",
         "bx-python"
     ],
     cmdclass={'sdist': sdist}
