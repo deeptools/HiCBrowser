@@ -47,18 +47,19 @@ def get_region(region_string):
     The region_string format is chr:start-end
     """
     if region_string:
+        # separate the chromosome name and the location using the ':' character
+        chrom, position = region_string.strip().split(":")
+
+        # clean up the position
         for char in ",.;|!{}()":
-            region_string = region_string.replace(char, '')
-        for char in "-\t ":
-            region_string = region_string.replace(char, ':')
-        region = region_string.split(":")
-        chrom = region[0]
+            position = position.replace(char, '')
+        position_list = position.split("-")
         try:
-            region_start = int(region[1])
+            region_start = int(position_list[0])
         except IndexError:
             region_start = 0
         try:
-            region_end = int(region[2])
+            region_end = int(position_list[1])
         except IndexError:
             region_end = 1e15  # a huge number
         if region_start < 0:
