@@ -77,4 +77,4 @@ runBrowser --config browserConfig.ini --port 8888 --numProcessors 10
 
 ## Help
 
-Contact our googleGroup **hicexplorer@googlegroup.com** for further help with HiCBrowser or HiCExplorer.
+Contact our [google Group](https://groups.google.com/forum/#!forum/deeptools) **deeptools@googlegroups.com** for further help with HiCBrowser or HiCExplorer.
