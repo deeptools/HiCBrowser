@@ -7,7 +7,7 @@ Fidel Ramirez, José Villaveces, Vivek Bhardwaj
 You can install HiCBrowser using pip :
 
 ```
-pip install git+git//github.com/maxplanck-ie/HiCBrowse@master
+pip install git+git//github.com/deeptools/HiCBrowse@master
 ```
 
 You can also download/clone this GitHub repository and run the setup.py script inside :
