@@ -174,7 +174,7 @@ def main(config_file, port, numProc, template_folder=None,  debug=False):
                 sys.stderr.write("Problem with line {}".format(line))
                 pass
             gene2pos[gene_name.lower()] = (gene_chrom, gene_start, gene_end)
-
+    
     @app.route('/', methods=['GET'])
     def index():
         return render_template("index.html")
@@ -211,7 +211,6 @@ def main(config_file, port, numProc, template_folder=None,  debug=False):
 
                 data['tracks'] = d
                 res = json.dumps(data)
-                res = None
         return res
 
     @app.route('/browser/<query>', methods=['GET'])
