@@ -1,22 +1,33 @@
 import sys
 import numpy as np
-from flask import Flask, render_template, request, send_file
+from flask import Flask, render_template, request, send_file, Blueprint
 
 import os
 from os.path import exists
 
 import json
 
-import hicexplorer.trackPlot
-import hicbrowser.utilities
+import pygenometracks.plotTracks
+from pygenometracks.tracks.GenomeTrack import GenomeTrack
+import pygenometracks.tracksClass as pgttc
+from pygenometracks.utilities import file_to_intervaltree, opener, to_string
 import hicbrowser.tracks2json
 
 
-from ConfigParser import SafeConfigParser
+from configparser import ConfigParser
 
-hicexplorer.trackPlot.DEFAULT_WIDTH_RATIOS = (0.89, 0.11)
-hicexplorer.trackPlot.DEFAULT_MARGINS = {'left': 0.02, 'right': 0.98, 'bottom': 0, 'top': 1}
+pgttc.DEFAULT_WIDTH_RATIOS = (0.01, 0.89, 0.11)
+pgttc.DEFAULT_MARGINS = {'left': 0.02, 'right': 0.98, 'bottom': 0, 'top': 1}
 
+def default(o):
+    """
+        Transform np.integers to integers as np.integers are
+        not compatible with json dump
+    """
+    if isinstance(o, np.integer):
+        return int(o)
+    else:
+        return o
 
 def get_TAD_for_gene(gene_name):
     """
@@ -29,46 +40,12 @@ def get_TAD_for_gene(gene_name):
     if gene_name in gene2pos:
         # get gene position
         chrom_, start_, end_ = gene2pos[gene_name]
-        if chrom_ not in tads_intval_tree.keys():
-            if chrom_.startswith('chr'):
-                chrom_ = chrom_[3:]
-            else:
-                chrom_ = 'chr' + chrom_
-        tad_pos = sorted( tads_intval_tree[chrom_].search(start_, end_) )[0]
+        if chrom_ not in tads_intval_tree:
+            chrom_ = GenomeTrack.change_chrom_names(chrom_)
+        tad_pos = sorted(tads_intval_tree[chrom_][start_:end_])[0]
         return chrom_, tad_pos.begin, tad_pos.end
     else:
         return None
-
-
-def get_region(region_string):
-    """
-    splits a region string into
-    a chrom, start_region, end_region tuple
-    The region_string format is chr:start-end
-    """
-    if region_string:
-        # separate the chromosome name and the location using the ':' character
-        chrom, position = region_string.strip().split(":")
-
-        # clean up the position
-        for char in ",.;|!{}()":
-            position = position.replace(char, '')
-        position_list = position.split("-")
-        try:
-            region_start = int(position_list[0])
-        except IndexError:
-            region_start = 0
-        try:
-            region_end = int(position_list[1])
-        except IndexError:
-            region_end = 1e15  # a huge number
-        if region_start < 0:
-            region_start = 0
-        if region_end <= region_start:
-            exit("Please check that the region end is larger than the region start.\n"
-                 "Values given:\nstart: {}\nend: {}\n".format(region_start, region_end))
-
-        return chrom, region_start, region_end
 
 
 def snap_to_resolution(start, end):
@@ -115,10 +92,10 @@ def check_static_img_folders():
         try:
             os.makedirs(dir_path + '/images')
         except:
-            sys.exit("Images folder does not exists and can not be created.\n"
-                     "Check that the user has permission to create the folder under\n"
-                     "the current directory. The path for the folder is:\n"
-                     "{}".format(dir_path + '/images/'))
+            raise Exception("Images folder does not exists and can not be created.\n"
+                            "Check that the user has permission to create the folder under\n"
+                            "the current directory. The path for the folder is:\n"
+                            "{}".format(dir_path + '/images/'))
 
     if not os.path.isdir(dir_path + '/images/genes'):
         os.makedirs(dir_path + '/images/genes')
@@ -132,7 +109,7 @@ def check_static_img_folders():
 
 def main(config_file, port, numProc, template_folder=None,  debug=False):
 
-    config = SafeConfigParser()
+    config = ConfigParser()
     config.readfp(open(config_file, 'r'))
 
     kwargs = {}
@@ -142,7 +119,6 @@ def main(config_file, port, numProc, template_folder=None,  debug=False):
 
     app = Flask(__name__, **kwargs)
 
-    from flask import Blueprint
     img_path = check_static_img_folders()
 
     # register an static path for images using Blueprint
@@ -154,19 +130,16 @@ def main(config_file, port, numProc, template_folder=None,  debug=False):
     # setup up the tracks. It works as follows
     # the config.ini file is read and split into individual tracks
     # that are saved on a temporary file.
-    # then, hicexplorer.trackPlot object is initialized with this track and
+    # then, pygenometracks.tracksClass.PlotTracks object is initialized with this track and
     # store on a list (trp_list). If the tracks were not to be splited in
-    # individual files, trackPlot will plot everything togeher. By splitting
+    # individual files, plotTracks will plot everything togeher. By splitting
     # them we take advantage of multiprocessing to generate each image on
     # a different core. Naturally, if using only one core then nothing is gained.
     track_file = config.get("browser", "tracks")
     trp_list = []
     for track in track_file.split(" "):
-        track_list = hicbrowser.utilities.parse_tracks(track)
-        for temp_file_name, section_name in track_list:
-            print "\n{}".format(section_name)
-            trp_list.append(hicexplorer.trackPlot.PlotTracks(temp_file_name, fig_width=40, dpi=70))
-            os.unlink(temp_file_name)
+        trp_list.append(pgttc.PlotTracks(track))
+
 
     tad_img_root = img_path + '/genes'
     img_root = img_path + '/browser'
@@ -176,7 +149,7 @@ def main(config_file, port, numProc, template_folder=None,  debug=False):
 
     tads_file = config.get('general', 'TAD intervals')
     global tads_intval_tree
-    tads_intval_tree, __, __ = hicexplorer.trackPlot.file_to_intervaltree(tads_file)
+    tads_intval_tree, __, __ = file_to_intervaltree(tads_file)
 
     # initialize gene name to position mapping
     genes = config.get('general', 'genes')
@@ -188,9 +161,9 @@ def main(config_file, port, numProc, template_folder=None,  debug=False):
     track_file = config.get('general', 'tracks')
     tads = hicbrowser.tracks2json.SetTracks(track_file, fig_width=40)
 
-    from hicexplorer.trackPlot import opener
     with opener(genes) as fh:
         for line in fh.readlines():
+            line = to_string(line)
             if line.startswith('browser') or line.startswith('track') or line.startswith('#'):
                 continue
             gene_chrom, gene_start, gene_end, gene_name = line.strip().split("\t")[0:4]
@@ -201,7 +174,7 @@ def main(config_file, port, numProc, template_folder=None,  debug=False):
                 sys.stderr.write("Problem with line {}".format(line))
                 pass
             gene2pos[gene_name.lower()] = (gene_chrom, gene_start, gene_end)
-
+    
     @app.route('/', methods=['GET'])
     def index():
         return render_template("index.html")
@@ -238,7 +211,6 @@ def main(config_file, port, numProc, template_folder=None,  debug=False):
 
                 data['tracks'] = d
                 res = json.dumps(data)
-
         return res
 
     @app.route('/browser/<query>', methods=['GET'])
@@ -248,10 +220,11 @@ def main(config_file, port, numProc, template_folder=None,  debug=False):
             # check if the query is a valid gene name
             if gene_name in gene2pos:
                 chromosome, start, end = gene2pos[gene_name]
-                start -= 50000
+                start -= 50000 if start > 50000 else 0
                 end += 50000
             else:
-                chromosome, start, end = get_region(query.strip())
+                chromosome, start, end = pygenometracks.plotTracks.get_region(query.strip())
+                print("chr:{}".format(chromosome))
                 if end - start < 10000:
                     sys.stderr.write("region to small ({}bp), enlarging it.".format(end - start))
                     start -= 5000
@@ -340,7 +313,7 @@ def main(config_file, port, numProc, template_folder=None,  debug=False):
                 'content': content,
                 'start': start,
                 'end': end}
-        json_data = json.dumps(data)
+        json_data = json.dumps(data, default=default)
 
         return json_data
 
@@ -355,7 +328,7 @@ def main(config_file, port, numProc, template_folder=None,  debug=False):
             return None
         if query:
             query = query.strip()
-            chromosome, start, end = get_region(query)
+            chromosome, start, end = pygenometracks.plotTracks.get_region(query)
 
             outfile = "{}/{}_{}_{}_{}.png".format(img_root,
                                                   chromosome,
@@ -364,7 +337,7 @@ def main(config_file, port, numProc, template_folder=None,  debug=False):
                                                   img_id)
             # if the figure does no exists, then
             # hicexplorer.trackPlot is called (trp_list[img_id] contains
-            # an instance of hicexplorer.trackPlot
+            # an instance of pygenometracks.tracksClass.PlotTracks)
             if not exists(outfile):
                 trp_list[img_id].plot(outfile, chromosome, start, end)
 

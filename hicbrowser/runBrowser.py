@@ -22,7 +22,7 @@ def parse_arguments(args=None):
 
     parser.add_argument('--htmlFolder',
                         help='File where the template index.html file is located. The default is'
-                             'fine unless the contents wants to be personalized. The full path '
+                             ' fine unless the contents wants to be personalized. The full path '
                              'has to be given.',
                         default=None)
 

@@ -4,8 +4,9 @@ import json
 from collections import OrderedDict
 
 from bx.intervals.intersection import IntervalTree, Interval
-import hicexplorer.readBed
-from hicexplorer.trackPlot import file_to_intervaltree, opener, change_chrom_names
+import pygenometracks.readBed
+from pygenometracks.tracks.GenomeTrack import GenomeTrack
+from pygenometracks.utilities import file_to_intervaltree, opener
 
 
 DEFAULT_TRACK_HEIGHT = 3  # in centimeters
@@ -44,7 +45,7 @@ class SetTracks(object):
         # initialize each track
         self.track_obj_list = []
         for idx, properties in enumerate(self.track_list):
-            print properties
+            print(properties)
             if 'spacer' in properties:
                 self.track_obj_list.append(PlotSpacer(properties))
                 continue
@@ -139,7 +140,7 @@ class SetTracks(object):
         vlines_list = []
 
         if chrom_region not in self.vlines_intval_tree.keys():
-            chrom_region = change_chrom_names(chrom_region)
+            chrom_region = GenomeTrack.change_chrom_names(chrom_region)
         for region in self.vlines_intval_tree[chrom_region].find(start_region - 10000,
                                                                  end_region + 10000):
             vlines_list.append(region.start)
@@ -153,9 +154,9 @@ class SetTracks(object):
         :param tracks_file: file path containing the track configuration
         :return: array of dictionaries and vlines_file. One dictionary per track
         """
-        from ConfigParser import SafeConfigParser
+        from configparser import ConfigParser
         from ast import literal_eval
-        parser = SafeConfigParser(None, MultiDict)
+        parser = ConfigParser(None, MultiDict)
         parser.readfp(open(tracks_file, 'r'))
 
         track_list = []
@@ -296,7 +297,7 @@ class PlotBigWig(TrackPlot):
                                             self.properties['file']))
 
         if chrom_region not in self.bw.chroms().keys():
-            chrom_region = change_chrom_names(chrom_region)
+            chrom_region = GenomeTrack.change_chrom_names(chrom_region)
 
         if chrom_region not in self.bw.chroms().keys():
             sys.exit("Can not read region {} from bigwig file:\n\n"
@@ -469,7 +470,7 @@ class PlotBed(TrackPlot):
             bp_per_inch = region_len / self.fig_width
             font_in_bp = font_in_inches * bp_per_inch
             self.len_w = font_in_bp
-            print "len of w set to: {} bp".format(self.len_w)
+            print("len of w set to: {} bp".format(self.len_w))
         else:
             self.len_w = 1
 
@@ -542,7 +543,7 @@ class PlotBed(TrackPlot):
             if free_row > self.max_num_row[bed.chromosome]:
                 self.max_num_row[bed.chromosome] = free_row
 
-        print self.max_num_row
+        print(self.max_num_row)
 
         if valid_intervals == 0:
             sys.stderr.write("No valid intervals were found in file {}".format(self.properties['file_name']))
@@ -552,7 +553,7 @@ class PlotBed(TrackPlot):
         self.process_bed(start_region, end_region)
 
         if chrom_region not in self.interval_tree.keys():
-            chrom_region = change_chrom_names(chrom_region)
+            chrom_region = GenomeTrack.change_chrom_names(chrom_region)
 
         genes_overlap = self.interval_tree[chrom_region].find(start_region, end_region)
 
