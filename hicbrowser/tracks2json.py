@@ -4,8 +4,9 @@ import json
 from collections import OrderedDict
 
 from bx.intervals.intersection import IntervalTree, Interval
-import hicexplorer.readBed
-from hicexplorer.trackPlot import file_to_intervaltree, opener, change_chrom_names
+import pygenometracks.readBed
+from pygenometracks.tracks.GenomeTrack import GenomeTrack
+from pygenometracks.utilities import file_to_intervaltree, opener
 
 
 DEFAULT_TRACK_HEIGHT = 3  # in centimeters
@@ -139,7 +140,7 @@ class SetTracks(object):
         vlines_list = []
 
         if chrom_region not in self.vlines_intval_tree.keys():
-            chrom_region = change_chrom_names(chrom_region)
+            chrom_region = GenomeTrack.change_chrom_names(chrom_region)
         for region in self.vlines_intval_tree[chrom_region].find(start_region - 10000,
                                                                  end_region + 10000):
             vlines_list.append(region.start)
@@ -296,7 +297,7 @@ class PlotBigWig(TrackPlot):
                                             self.properties['file']))
 
         if chrom_region not in self.bw.chroms().keys():
-            chrom_region = change_chrom_names(chrom_region)
+            chrom_region = GenomeTrack.change_chrom_names(chrom_region)
 
         if chrom_region not in self.bw.chroms().keys():
             sys.exit("Can not read region {} from bigwig file:\n\n"
@@ -552,7 +553,7 @@ class PlotBed(TrackPlot):
         self.process_bed(start_region, end_region)
 
         if chrom_region not in self.interval_tree.keys():
-            chrom_region = change_chrom_names(chrom_region)
+            chrom_region = GenomeTrack.change_chrom_names(chrom_region)
 
         genes_overlap = self.interval_tree[chrom_region].find(start_region, end_region)
 

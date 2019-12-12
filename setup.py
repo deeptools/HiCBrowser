@@ -73,7 +73,7 @@ setup(
     long_description=open('README.md').read(),
     install_requires=[
         "flask",
-        "hicexplorer",
+        "pygenometracks>=3",
         "bx-python"
     ],
     cmdclass={'sdist': sdist}
