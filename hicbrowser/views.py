@@ -42,7 +42,7 @@ def get_TAD_for_gene(gene_name):
         chrom_, start_, end_ = gene2pos[gene_name]
         if chrom_ not in tads_intval_tree:
             chrom_ = GenomeTrack.change_chrom_names(chrom_)
-        tad_pos = sorted(tads_intval_tree[chrom_].search(start_, end_))[0]
+        tad_pos = sorted(tads_intval_tree[chrom_][start_:end_])[0]
         return chrom_, tad_pos.begin, tad_pos.end
     else:
         return None
