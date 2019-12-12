@@ -45,7 +45,7 @@ class SetTracks(object):
         # initialize each track
         self.track_obj_list = []
         for idx, properties in enumerate(self.track_list):
-            print properties
+            print(properties)
             if 'spacer' in properties:
                 self.track_obj_list.append(PlotSpacer(properties))
                 continue
@@ -470,7 +470,7 @@ class PlotBed(TrackPlot):
             bp_per_inch = region_len / self.fig_width
             font_in_bp = font_in_inches * bp_per_inch
             self.len_w = font_in_bp
-            print "len of w set to: {} bp".format(self.len_w)
+            print("len of w set to: {} bp".format(self.len_w))
         else:
             self.len_w = 1
 
@@ -543,7 +543,7 @@ class PlotBed(TrackPlot):
             if free_row > self.max_num_row[bed.chromosome]:
                 self.max_num_row[bed.chromosome] = free_row
 
-        print self.max_num_row
+        print(self.max_num_row)
 
         if valid_intervals == 0:
             sys.stderr.write("No valid intervals were found in file {}".format(self.properties['file_name']))
