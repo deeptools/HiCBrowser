@@ -154,9 +154,9 @@ class SetTracks(object):
         :param tracks_file: file path containing the track configuration
         :return: array of dictionaries and vlines_file. One dictionary per track
         """
-        from ConfigParser import SafeConfigParser
+        from configparser import ConfigParser
         from ast import literal_eval
-        parser = SafeConfigParser(None, MultiDict)
+        parser = ConfigParser(None, MultiDict)
         parser.readfp(open(tracks_file, 'r'))
 
         track_list = []
