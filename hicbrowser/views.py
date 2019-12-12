@@ -10,16 +10,24 @@ import json
 import pygenometracks.plotTracks
 from pygenometracks.tracks.GenomeTrack import GenomeTrack
 import pygenometracks.tracksClass as pgttc
-from pygenometracks.utilities import file_to_intervaltree, opener
-import hicbrowser.utilities
+from pygenometracks.utilities import file_to_intervaltree, opener, to_string
 import hicbrowser.tracks2json
 
 
-from ConfigParser import SafeConfigParser
+from configparser import ConfigParser
 
 pgttc.DEFAULT_WIDTH_RATIOS = (0.01, 0.89, 0.11)
 pgttc.DEFAULT_MARGINS = {'left': 0.02, 'right': 0.98, 'bottom': 0, 'top': 1}
 
+def default(o):
+    """
+        Transform np.integers to integers as np.integers are
+        not compatible with json dump
+    """
+    if isinstance(o, np.integer):
+        return int(o)
+    else:
+        return o
 
 def get_TAD_for_gene(gene_name):
     """
@@ -101,7 +109,7 @@ def check_static_img_folders():
 
 def main(config_file, port, numProc, template_folder=None,  debug=False):
 
-    config = SafeConfigParser()
+    config = ConfigParser()
     config.readfp(open(config_file, 'r'))
 
     kwargs = {}
@@ -155,6 +163,7 @@ def main(config_file, port, numProc, template_folder=None,  debug=False):
 
     with opener(genes) as fh:
         for line in fh.readlines():
+            line = to_string(line)
             if line.startswith('browser') or line.startswith('track') or line.startswith('#'):
                 continue
             gene_chrom, gene_start, gene_end, gene_name = line.strip().split("\t")[0:4]
@@ -202,7 +211,7 @@ def main(config_file, port, numProc, template_folder=None,  debug=False):
 
                 data['tracks'] = d
                 res = json.dumps(data)
-
+                res = None
         return res
 
     @app.route('/browser/<query>', methods=['GET'])
@@ -212,10 +221,11 @@ def main(config_file, port, numProc, template_folder=None,  debug=False):
             # check if the query is a valid gene name
             if gene_name in gene2pos:
                 chromosome, start, end = gene2pos[gene_name]
-                start -= 50000
+                start -= 50000 if start > 50000 else 0
                 end += 50000
             else:
                 chromosome, start, end = pygenometracks.plotTracks.get_region(query.strip())
+                print("chr:{}".format(chromosome))
                 if end - start < 10000:
                     sys.stderr.write("region to small ({}bp), enlarging it.".format(end - start))
                     start -= 5000
@@ -304,7 +314,7 @@ def main(config_file, port, numProc, template_folder=None,  debug=False):
                 'content': content,
                 'start': start,
                 'end': end}
-        json_data = json.dumps(data)
+        json_data = json.dumps(data, default=default)
 
         return json_data
 
